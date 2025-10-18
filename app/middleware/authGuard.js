@@ -11,7 +11,16 @@ function requireAuth(req, res, next) {
     return next();
   }
   
-  if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+  // Check if request expects JSON response
+  const isAjaxRequest = req.xhr === true;
+  const acceptHeader = req.headers.accept || '';
+  const acceptsJson = acceptHeader.includes('application/json') || 
+                      acceptHeader.includes('application/*') ||
+                      acceptHeader.includes('*/*');
+  const isApiRoute = req.path.startsWith('/api/');
+  
+  // Return JSON for AJAX, API routes, or explicit JSON accept header
+  if (isAjaxRequest || acceptsJson || isApiRoute) {
     return res.status(401).json({ 
       success: false, 
       message: 'Authentication required' 
@@ -29,7 +38,16 @@ function requireAdmin(req, res, next) {
     return next();
   }
   
-  if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+  // Check if request expects JSON response
+  const isAjaxRequest = req.xhr === true;
+  const acceptHeader = req.headers.accept || '';
+  const acceptsJson = acceptHeader.includes('application/json') || 
+                      acceptHeader.includes('application/*') ||
+                      acceptHeader.includes('*/*');
+  const isApiRoute = req.path.startsWith('/api/');
+  
+  // Return JSON for AJAX, API routes, or explicit JSON accept header
+  if (isAjaxRequest || acceptsJson || isApiRoute) {
     return res.status(403).json({ 
       success: false, 
       message: 'Administrator access required' 

@@ -711,7 +711,40 @@ function updateLiveTimers() {
 // Update system stats
 async function updateSystemStats() {
   try {
-    const response = await fetch('/api/system/stats');
+    const response = await fetch('/api/system/stats', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include' // Ensure cookies are sent
+    });
+    
+    // Check if response is OK
+    if (!response.ok) {
+      // If 401 (Unauthorized), session expired - redirect to login
+      if (response.status === 401) {
+        console.warn('Session expired or unauthorized');
+        // Redirect to login after a brief delay
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 500);
+        return;
+      }
+      throw new Error(`HTTP Error: ${response.status}`);
+    }
+    
+    // Verify response is JSON before parsing
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('Invalid response type:', contentType);
+      // If not JSON, might be HTML error page - redirect to login
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 500);
+      return;
+    }
+    
     const result = await response.json();
     
     if (result.success) {

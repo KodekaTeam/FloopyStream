@@ -71,17 +71,33 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/storage', express.static(path.join(__dirname, 'storage')));
 
 // Session configuration
+// Determine cookie security based on actual environment
+const isProduction = process.env.NODE_ENV === 'production';
+const isSecureEnv = process.env.APP_URL && process.env.APP_URL.startsWith('https://');
+const dbDir = process.env.DB_PATH ? path.dirname(process.env.DB_PATH) : './storage/database';
+const sessionDbPath = path.join(dbDir, 'sessions.db');
+
+// Ensure session directory exists
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+  console.log('✓ Created session directory:', dbDir);
+}
+
 app.use(session({
   store: new SQLiteStore({
-    db: 'sessions.db',
-    dir: process.env.DB_PATH ? path.dirname(process.env.DB_PATH) : './storage/database'
+    db: sessionDbPath,
+    dir: dbDir
   }),
   secret: process.env.SESSION_SECRET || 'change-this-secret-key',
   resave: false,
   saveUninitialized: false,
+  name: 'floopystream.sid',
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    // In Docker, allow both HTTP and HTTPS by checking actual URL config
+    // Only force secure if we have an HTTPS URL configured
+    secure: isSecureEnv ? true : false,
     httpOnly: true,
+    sameSite: 'lax', // Prevent CSRF
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
