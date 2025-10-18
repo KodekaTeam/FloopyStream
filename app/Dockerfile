@@ -23,15 +23,20 @@ RUN npm ci --only=production && \
 # Copy application code
 COPY . .
 
-# Create required directories
-RUN mkdir -p storage/database storage/uploads storage/media storage/thumbnails storage/temp storage/logs
+# Create required directories with proper permissions
+RUN mkdir -p storage/database storage/uploads storage/media storage/thumbnails storage/temp storage/logs && \
+    chmod -R 777 storage
 
 # Expose port
-EXPOSE 8080
+EXPOSE 6060
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=6060
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:8080 || exit 1
+    CMD curl -f http://localhost:6060 || exit 1
 
 # Start application
 CMD ["npm", "start"]
