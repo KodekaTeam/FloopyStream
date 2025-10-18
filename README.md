@@ -1459,4 +1459,3 @@ For issues or questions:
 <p align="center" style="font-size:2.5em; padding-top: -10px;">
     <strong>Terima kasih telah menggunakan FloopyStream! 🚀</strong>
 </p>
->>>>>>> d8fe908 (first commit)
