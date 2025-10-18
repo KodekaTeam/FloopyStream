@@ -1,6 +1,7 @@
-<<<<<<< HEAD
 # FloopyStream
+
 =======
+
 # FLoopyStream 🎥
 
 FLoopyStream is a professional live broadcasting platform that lets you stream directly to multiple platforms such as YouTube, Facebook, Twitch, and more using the RTMP protocol. The application can run on a VPS (Virtual Private Server) and supports simultaneous broadcasting to many platforms, featuring advanced scheduling and monitoring capabilities.
