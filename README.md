@@ -46,7 +46,7 @@ FLoopyStream is a professional live broadcasting platform that lets you stream d
 - **FFmpeg Streaming Port**: Depends on broadcast platform
 - **Redis Port**: 6379 (if using Docker)
 
-## Tech Stack
+<!-- ## Tech Stack
 
 - **Runtime**: Node.js (v18.19.0+)
 - **Framework**: Express.js 4.x
@@ -58,7 +58,7 @@ FLoopyStream is a professional live broadcasting platform that lets you stream d
 - **Validation**: express-validator
 - **Rate Limiting**: express-rate-limit
 - **Process Manager**: PM2 (for production)
-- **Containerization**: Docker & Docker Compose
+- **Containerization**: Docker & Docker Compose -->
 
 ## Installation
 
@@ -74,7 +74,7 @@ FLoopyStream is a professional live broadcasting platform that lets you stream d
 
 ```powershell
 # Clone repository
-git clone https://github.com/KodekaTeamOfficial/floopystream.git
+git clone https://github.com/KodekaTeam/floopystream.git
 cd floopystream/app
 
 # Install dependencies
@@ -91,7 +91,7 @@ npm run dev
 
 ```bash
 # Clone repository
-git clone https://github.com/KodekaTeamOfficial/floopystream.git
+git clone https://github.com/KodekaTeam/floopystream.git
 cd floopystream/app
 
 # Install dependencies
@@ -307,7 +307,7 @@ sudo timedatectl set-timezone Asia/Jakarta
 Set-TimeZone -Id "SE Asia Standard Time"
 ```
 
-### Platform-Specific Setup
+<!-- ### Platform-Specific Setup
 
 #### YouTube Live Streaming
 
@@ -331,7 +331,7 @@ Set-TimeZone -Id "SE Asia Standard Time"
 2. Navigate to Settings → Stream
 3. Copy your **Ingest Server**: `rtmp://live.twitch.tv/app/`
 4. Copy your **Stream Key**
-5. Use in broadcast configuration
+5. Use in broadcast configuration -->
 
 ---
 
@@ -377,7 +377,7 @@ ffmpeg -version
 
 ```bash
 # Clone repository
-git clone https://github.com/KodekaTeamOfficial/floopystream.git
+git clone https://github.com/KodekaTeam/floopystream.git
 cd floopystream/app
 
 # Install dependencies
@@ -467,7 +467,7 @@ Follow the interactive prompts to reset the password.
 
 ---
 
-## Project Structure
+<!-- ## Project Structure
 
 ```
 FloopyStream/
@@ -512,7 +512,7 @@ FloopyStream/
 ├── .gitignore        # Git ignore rules
 ├── package.json      # Dependencies
 └── server.js         # Main application file
-```
+``` -->
 
 ## 📖 Usage Guide
 
@@ -608,7 +608,7 @@ Once logged in, you can:
 
 ---
 
-## 🔌 API Endpoints
+<!-- ## 🔌 API Endpoints
 
 ### Authentication Endpoints
 
@@ -663,7 +663,7 @@ Once logged in, you can:
 | GET    | `/api/logs`           | Get activity logs   |
 | GET    | `/api/logs/errors`    | Get error logs      |
 
----
+--- -->
 
 ## 🤝 Contributing
 
@@ -679,7 +679,7 @@ We welcome contributions! To contribute:
 
 Found a bug? Please report it:
 
-1. Go to [GitHub Issues](https://github.com/KodekaTeamOfficial/floopystream/issues)
+1. Go to [GitHub Issues](https://github.com/KodekaTeam/floopystream/issues)
 2. Click "New Issue"
 3. Describe the problem in detail
 4. Include steps to reproduce
@@ -690,7 +690,7 @@ Found a bug? Please report it:
 
 Have a feature idea?
 
-1. Go to [GitHub Issues](https://github.com/KodekaTeamOfficial/floopystream/issues)
+1. Go to [GitHub Issues](https://github.com/KodekaTeam/floopystream/issues)
 2. Click "New Issue"
 3. Select "Feature Request" template
 4. Describe the feature
@@ -719,7 +719,7 @@ Have a feature idea?
 
 ### Community
 
-- **GitHub**: [KodekaTeamOfficial/floopystream](https://github.com/KodekaTeamOfficial/floopystream)
+- **GitHub**: [KodekaTeam/floopystream](https://github.com/KodekaTeam/floopystream)
 - **Issues**: Report bugs and request features
 - **Discussions**: Share ideas and ask questions
 
@@ -830,8 +830,8 @@ Special thanks to the streaming community for feedback and feature requests.
 
 ### Get Help
 
-- **Issues**: [GitHub Issues](https://github.com/KodekaTeamOfficial/floopystream/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/KodekaTeamOfficial/floopystream/discussions)
+- **Issues**: [GitHub Issues](https://github.com/KodekaTeam/floopystream/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/KodekaTeam/floopystream/discussions)
 - **Email**: Contact via GitHub
 
 ### Follow Updates
@@ -1267,7 +1267,7 @@ Monitor these metrics regularly:
 
 ### Project Structure
 
-```
+<!-- ```
 floopystream/
 ├── app/                          # Main application
 │   ├── core/                     # Core functionality
@@ -1330,7 +1330,7 @@ floopystream/
 ├── README.md                    # Main documentation
 ├── QUICK_START.md               # Quick start guide
 └── backup/                      # Backup & archived files
-```
+``` -->
 
 ### Running Development Server
 
