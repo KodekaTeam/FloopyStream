@@ -11,16 +11,17 @@ const tokens = new csrf();
 
 // GET - Home page
 router.get('/', (req, res) => {
-  res.render('index', { 
-    title: 'Home',
-    session: req.session 
-  });
+  res.redirect("/login");
+  // res.render('index', { 
+  //   title: 'Home',
+  //   session: req.session 
+  // });
 });
 
 // GET - Login page
 router.get('/login', redirectIfAuth, (req, res) => {
   const csrfToken = tokens.create(tokens.secretSync());
-  res.render('login', { 
+  res.render('dashboard/auth/login', { 
     title: 'Login',
     csrfToken,
     error: null 
@@ -36,7 +37,7 @@ router.post('/login', [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const csrfToken = tokens.create(tokens.secretSync());
-      return res.render('login', {
+      return res.render('dashboard/auth/login', {
         title: 'Login',
         csrfToken,
         error: errors.array()[0].msg
@@ -48,7 +49,7 @@ router.post('/login', [
 
     if (!account) {
       const csrfToken = tokens.create(tokens.secretSync());
-      return res.render('login', {
+      return res.render('dashboard/auth/login', {
         title: 'Login',
         csrfToken,
         error: 'Invalid username or password'
@@ -59,7 +60,7 @@ router.post('/login', [
     
     if (!isValidPassword) {
       const csrfToken = tokens.create(tokens.secretSync());
-      return res.render('login', {
+      return res.render('dashboard/auth/login', {
         title: 'Login',
         csrfToken,
         error: 'Invalid username or password'
@@ -77,7 +78,7 @@ router.post('/login', [
     console.error('Login error:', error);
     await logError('Login failed', { error: error.message });
     const csrfToken = tokens.create(tokens.secretSync());
-    res.render('login', {
+    res.render('dashboard/auth/login', {
       title: 'Login',
       csrfToken,
       error: 'An error occurred. Please try again.'
@@ -89,7 +90,7 @@ router.post('/login', [
 router.get('/register', redirectIfAuth, async (req, res) => {
   const csrfToken = tokens.create(tokens.secretSync());
   
-  res.render('register', {
+  res.render('dashboard/auth/register', {
     title: 'Register',
     csrfToken,
     error: null,
@@ -113,7 +114,7 @@ router.post('/register', [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const csrfToken = tokens.create(tokens.secretSync());
-      return res.render('register', {
+      return res.render('dashboard/auth/register', {
         title: 'Register',
         csrfToken,
         error: errors.array()[0].msg,
@@ -127,7 +128,7 @@ router.post('/register', [
     const existingUser = await Account.findByUsername(username);
     if (existingUser) {
       const csrfToken = tokens.create(tokens.secretSync());
-      return res.render('register', {
+      return res.render('dashboard/auth/register', {
         title: 'Register',
         csrfToken,
         error: 'Username already exists',
@@ -139,7 +140,7 @@ router.post('/register', [
     const existingEmail = await Account.findByEmail(email);
     if (existingEmail) {
       const csrfToken = tokens.create(tokens.secretSync());
-      return res.render('register', {
+      return res.render('dashboard/auth/register', {
         title: 'Register',
         csrfToken,
         error: 'Email already registered',
@@ -156,7 +157,7 @@ router.post('/register', [
     console.error('Registration error:', error);
     await logError('Registration failed', { error: error.message });
     const csrfToken = tokens.create(tokens.secretSync());
-    res.render('register', {
+    res.render('dashboard/auth/register', {
       title: 'Register',
       csrfToken,
       error: 'Registration failed. Please try again.',

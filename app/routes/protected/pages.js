@@ -22,15 +22,15 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     const broadcasts = await Broadcast.getByAccount(req.session.accountId, 50);
     const activeBroadcasts = broadcasts.filter(b => b.broadcast_status === 'active');
 
-    res.render('dashboard', {
-      title: 'Dashboard',
+    res.render("dashboard/dashboard", {
+      title: "Dashboard",
       session: req.session,
       contentList,
       playlists: playlists || [],
       broadcasts,
       activeBroadcasts,
       activeBroadcastCount: getActiveBroadcastCount(),
-      currentPage: 'dashboard'
+      currentPage: "dashboard",
     });
   } catch (error) {
     console.error('Dashboard error:', error);
@@ -46,7 +46,7 @@ router.get('/content', requireAuth, async (req, res) => {
   try {
     const contentList = await Content.getByAccount(req.session.accountId, 50);
 
-    res.render('content', {
+    res.render('dashboard/content', {
       title: 'Video Gallery',
       session: req.session,
       contentList,
@@ -66,7 +66,7 @@ router.get('/history', requireAuth, async (req, res) => {
   try {
     const broadcasts = await Broadcast.getByAccount(req.session.accountId, 100);
 
-    res.render('history', {
+    res.render('dashboard/history', {
       title: 'History',
       session: req.session,
       broadcasts,
@@ -86,11 +86,11 @@ router.get('/playlists', requireAuth, async (req, res) => {
   try {
     const playlists = await Playlist.getByAccount(req.session.accountId);
 
-    res.render('playlists', {
-      title: 'Playlists',
+    res.render("dashboard/playlist/playlists", {
+      title: "Playlists",
       session: req.session,
       playlists,
-      currentPage: 'playlists'
+      currentPage: "playlists",
     });
   } catch (error) {
     console.error('Playlists error:', error);
@@ -125,14 +125,14 @@ router.get('/playlist/:id', requireAuth, async (req, res) => {
     // Get all available videos for adding
     const allVideos = await Content.getByAccount(req.session.accountId, 1000);
 
-    res.render('playlist-detail', {
+    res.render("dashboard/playlist/playlist-detail", {
       title: playlist.playlist_name,
       session: req.session,
       playlist,
       videos,
       allVideos,
       totalDuration,
-      currentPage: 'playlists'
+      currentPage: "playlists",
     });
   } catch (error) {
     console.error('Playlist detail error:', error);
@@ -151,11 +151,11 @@ router.get('/user-management', requireAdmin, async (req, res) => {
       req.session.csrfSecret = tokens.secretSync();
     }
     
-    res.render('user-management', {
-      title: 'User Management',
+    res.render("dashboard/settings/members/user-management", {
+      title: "User Management",
       session: req.session,
-      currentPage: 'user-management',
-      csrfToken: tokens.create(req.session.csrfSecret)
+      currentPage: "user-management",
+      csrfToken: tokens.create(req.session.csrfSecret),
     });
   } catch (error) {
     console.error('User management error:', error);
@@ -176,12 +176,12 @@ router.get('/settings', requireAuth, async (req, res) => {
       req.session.csrfSecret = tokens.secretSync();
     }
     
-    res.render('settings', {
-      title: 'Settings',
+    res.render("dashboard/settings/settings", {
+      title: "Settings",
       session: req.session,
       account: account,
-      currentPage: 'settings',
-      csrfToken: tokens.create(req.session.csrfSecret)
+      currentPage: "settings",
+      csrfToken: tokens.create(req.session.csrfSecret),
     });
   } catch (error) {
     console.error('Settings error:', error);
