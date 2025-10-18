@@ -27,6 +27,10 @@ COPY . .
 RUN mkdir -p storage/database storage/uploads storage/media storage/thumbnails storage/temp storage/logs && \
     chmod -R 777 storage
 
+# NOTE: Running as root in development for simplicity with bind mounts
+# For production, uncomment the line below and ensure proper volume permissions
+# USER node
+
 # Expose port
 EXPOSE 6060
 

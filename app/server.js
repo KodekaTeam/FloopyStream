@@ -1,34 +1,33 @@
-require('dotenv').config();
-require('./services/activityLogger');
+require("dotenv").config();
+require("./services/activityLogger");
 
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
-const engine = require('ejs-mate');
+const express = require("express");
+const path = require("path");
+const fs = require("fs");
+const session = require("express-session");
+const engine = require("ejs-mate");
 
 // Import utilities and services
-const { createRequiredDirectories } = require('./utilities/fileManager');
-const { initializeDriveClient } = require('./utilities/cloudStorage');
-const { startMonitoring } = require('./services/performanceMonitor');
-const { startScheduler } = require('./services/taskScheduler');
-const { logInfo, logError } = require('./services/activityLogger');
-const rateLimit = require('express-rate-limit');
+const { createRequiredDirectories } = require("./utilities/fileManager");
+const { initializeDriveClient } = require("./utilities/cloudStorage");
+const { startMonitoring } = require("./services/performanceMonitor");
+const { startScheduler } = require("./services/taskScheduler");
+const { logInfo, logError } = require("./services/activityLogger");
+const rateLimit = require("express-rate-limit");
 
 // Import utilities
-const { formatDuration } = require('./utilities/mediaProcessor');
-const { formatFileSize } = require('./utilities/fileManager');
+const { formatDuration } = require("./utilities/mediaProcessor");
+const { formatFileSize } = require("./utilities/fileManager");
 
 // Initialize Express app
 const app = express();
 const port = process.env.PORT || 8080;
 
-// Import routes
-const routes = require('./routes');
-
-// Create required directories
+// Create required directories FIRST (before importing routes that use database)
 createRequiredDirectories();
+
+// Import routes (these may require database, so directories must exist first)
+const routes = require("./routes");
 
 // Clean up old mediaflow.db files (if they exist) - migrate to floopystream.db
 // try {
@@ -45,68 +44,114 @@ createRequiredDirectories();
 initializeDriveClient();
 
 // Error handling
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('=== UNHANDLED REJECTION ===');
-  console.error('Promise:', promise);
-  console.error('Reason:', reason);
-  logError('Unhandled rejection', { reason: String(reason) });
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("=== UNHANDLED REJECTION ===");
+  console.error("Promise:", promise);
+  console.error("Reason:", reason);
+  logError("Unhandled rejection", { reason: String(reason) });
 });
 
-process.on('uncaughtException', (error) => {
-  console.error('=== UNCAUGHT EXCEPTION ===');
-  console.error('Error:', error);
-  logError('Uncaught exception', { error: error.message, stack: error.stack });
+process.on("uncaughtException", (error) => {
+  console.error("=== UNCAUGHT EXCEPTION ===");
+  console.error("Error:", error);
+  logError("Uncaught exception", { error: error.message, stack: error.stack });
 });
 
 // Configure view engine
-app.engine('ejs', engine);
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.set('trust proxy', 1);
+app.engine("ejs", engine);
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.set("trust proxy", 1);
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/storage', express.static(path.join(__dirname, 'storage')));
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/storage", express.static(path.join(__dirname, "storage")));
 
 // Session configuration
 // Determine cookie security based on actual environment
-const isProduction = process.env.NODE_ENV === 'production';
-const isSecureEnv = process.env.APP_URL && process.env.APP_URL.startsWith('https://');
-const dbDir = process.env.DB_PATH ? path.dirname(process.env.DB_PATH) : './storage/database';
-const sessionDbPath = path.join(dbDir, 'sessions.db');
+const isProduction = process.env.NODE_ENV === "production";
+const isSecureEnv =
+  process.env.APP_URL && process.env.APP_URL.startsWith("https://");
 
-// Ensure session directory exists
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-  console.log('✓ Created session directory:', dbDir);
+// Database directory - resolve to absolute path
+let dbDir;
+if (process.env.DB_PATH) {
+  dbDir = path.dirname(process.env.DB_PATH);
+} else {
+  dbDir = path.join(__dirname, "storage", "database");
 }
 
-app.use(session({
-  store: new SQLiteStore({
-    db: sessionDbPath,
-    dir: dbDir
-  }),
-  secret: process.env.SESSION_SECRET || 'change-this-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  name: 'floopystream.sid',
-  cookie: {
-    // In Docker, allow both HTTP and HTTPS by checking actual URL config
-    // Only force secure if we have an HTTPS URL configured
-    secure: isSecureEnv ? true : false,
-    httpOnly: true,
-    sameSite: 'lax', // Prevent CSRF
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+// Ensure it's an absolute path
+if (!path.isAbsolute(dbDir)) {
+  dbDir = path.resolve(__dirname, dbDir);
+}
+
+// Ensure session directory exists
+try {
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true, mode: 0o755 });
+    console.log("✓ Created session directory:", dbDir);
+  } else {
+    console.log("✓ Session directory exists:", dbDir);
   }
-}));
+} catch (error) {
+  console.error("✗ Failed to create session directory:", error.message);
+  console.error("  Path:", dbDir);
+}
+
+// Test write permission
+try {
+  const testFile = path.join(dbDir, ".write-test");
+  fs.writeFileSync(testFile, "test");
+  fs.unlinkSync(testFile);
+  console.log("✓ Session directory is writable");
+} catch (error) {
+  console.error("✗ Session directory not writable:", error.message);
+}
+
+// Initialize session store with error handling
+let sessionStore;
+try {
+  // Lazy load SQLiteStore AFTER directories are created
+  const SQLiteStore = require("connect-sqlite3")(session);
+
+  sessionStore = new SQLiteStore({
+    db: "sessions.db",
+    dir: dbDir,
+    table: "sessions",
+  });
+  console.log("✓ SQLite session store initialized");
+} catch (error) {
+  console.error("✗ Failed to create SQLite session store:", error.message);
+  console.log("⚠ Using memory store (sessions will not persist)");
+  sessionStore = new session.MemoryStore();
+}
+
+app.use(
+  session({
+    store: sessionStore,
+    secret: process.env.SESSION_SECRET || "change-this-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    name: "floopystream.sid",
+    cookie: {
+      // In Docker, allow both HTTP and HTTPS by checking actual URL config
+      // Only force secure if we have an HTTPS URL configured
+      secure: isSecureEnv ? true : false,
+      httpOnly: true,
+      sameSite: "lax", // Prevent CSRF
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
 
 // Rate limiting
 const apiLimiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
-  message: 'Too many requests, please try again later'
+  message: "Too many requests, please try again later",
 });
 
 // Make session available to all views
@@ -118,7 +163,7 @@ app.use((req, res, next) => {
 // Helper functions for views
 app.locals.formatFileSize = formatFileSize;
 app.locals.formatDuration = formatDuration;
-app.locals.appName = process.env.APP_NAME || 'FLoopyStream';
+app.locals.appName = process.env.APP_NAME || "FLoopyStream";
 
 // ============================================
 // ROUTES - All modular routes
@@ -131,36 +176,36 @@ app.use(routes);
 // ============================================
 
 app.listen(port, () => {
-  const { getTimezoneInfo } = require('./utils/datetime');
+  const { getTimezoneInfo } = require("./utils/datetime");
   const tzInfo = getTimezoneInfo();
-  
-  console.log('='.repeat(50));
-  console.log(`🚀 ${process.env.APP_NAME || 'FLoopyStream'} is running`);
+
+  console.log("=".repeat(50));
+  console.log(`🚀 ${process.env.APP_NAME || "FLoopyStream"} is running`);
   console.log(`📡 Server: http://localhost:${port}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🕐 Timezone: ${tzInfo.timezone} (${tzInfo.offset})`);
-  console.log('='.repeat(50));
-  
+  console.log("=".repeat(50));
+
   // Start monitoring and scheduler
   startMonitoring(5);
   startScheduler(30);
-  
-  logInfo('Application started', { 
-    port, 
-    env: process.env.NODE_ENV || 'development',
-    timezone: tzInfo.timezone 
+
+  logInfo("Application started", {
+    port,
+    env: process.env.NODE_ENV || "development",
+    timezone: tzInfo.timezone,
   });
 });
 
 // Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('\n👋 Shutting down gracefully...');
-  logInfo('Application shutting down');
+process.on("SIGINT", () => {
+  console.log("\n👋 Shutting down gracefully...");
+  logInfo("Application shutting down");
   process.exit(0);
 });
 
-process.on('SIGTERM', () => {
-  console.log('\n👋 Shutting down gracefully...');
-  logInfo('Application shutting down');
+process.on("SIGTERM", () => {
+  console.log("\n👋 Shutting down gracefully...");
+  logInfo("Application shutting down");
   process.exit(0);
 });

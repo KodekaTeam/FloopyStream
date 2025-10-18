@@ -35,6 +35,25 @@ Memory Reserve:   512MB
 
 ## Quick Start
 
+### Step 0: Prepare Environment (IMPORTANT!)
+
+Before running Docker, prepare the storage directories with proper permissions:
+
+**Windows (PowerShell):**
+
+```powershell
+.\docker-prepare.ps1
+```
+
+**Linux/Mac (Bash):**
+
+```bash
+chmod +x docker-prepare.sh
+./docker-prepare.sh
+```
+
+This step ensures all required directories exist and have proper permissions to avoid `SQLITE_CANTOPEN` errors.
+
 ### Option 1: Using Helper Script (Recommended)
 
 **Windows (PowerShell):**
