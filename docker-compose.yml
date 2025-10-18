@@ -1,0 +1,100 @@
+version: "3.8"
+
+services:
+  # Main application service
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: floopystream-app
+    ports:
+      - "${APP_PORT:-6060}:6060"
+    environment:
+      - NODE_ENV=production
+      - PORT=6060
+      - TIMEZONE=Asia/Jakarta
+      - SESSION_SECRET=${SESSION_SECRET:-your-super-secret-key-here-change-this}
+      - DB_PATH=/app/storage/database/floopystream.db
+      - UPLOAD_DIR=/app/storage/uploads
+      - MEDIA_DIR=/app/storage/media
+      - THUMBNAIL_DIR=/app/storage/thumbnails
+      - TEMP_DIR=/app/storage/temp
+      - LOG_DIR=/app/storage/logs
+      - MAX_FILE_SIZE=5368709120
+      - ALLOWED_FORMATS=mp4,avi,mov,mkv,flv,wmv,webm
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=100
+      - MAX_CONCURRENT_BROADCASTS=5
+      - BROADCAST_TIMEOUT=43200000
+      - APP_NAME=FLoopyStream
+      - APP_URL=http://localhost:6060
+      - GOOGLE_DRIVE_ENABLED=${GOOGLE_DRIVE_ENABLED:-false}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-}
+      - GOOGLE_REFRESH_TOKEN=${GOOGLE_REFRESH_TOKEN:-}
+    volumes:
+      - ./app/storage/database:/app/storage/database
+      - ./app/storage/uploads:/app/storage/uploads
+      - ./app/storage/media:/app/storage/media
+      - ./app/storage/thumbnails:/app/storage/thumbnails
+      - ./app/storage/temp:/app/storage/temp
+      - ./app/storage/logs:/app/storage/logs
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - floopystream-network
+    # Resource limits and reservations
+    deploy:
+      resources:
+        limits:
+          cpus: "${APP_CPU_LIMIT:-2}"
+          memory: "${APP_MEMORY_LIMIT:-2G}"
+        reservations:
+          cpus: "${APP_CPU_RESERVE:-0.5}"
+          memory: "${APP_MEMORY_RESERVE:-512M}"
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6060"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # SQLite database service (via volume)
+  db:
+    image: alpine:latest
+    container_name: floopystream-db
+    volumes:
+      - ./app/storage/database:/data
+    command: sh -c "mkdir -p /data && echo 'Database volume ready'"
+    networks:
+      - floopystream-network
+    restart: unless-stopped
+
+  # Redis for session management (optional but recommended)
+  redis:
+    image: redis:7-alpine
+    container_name: floopystream-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - floopystream-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  floopystream-network:
+    driver: bridge

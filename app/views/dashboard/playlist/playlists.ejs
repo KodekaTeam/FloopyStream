@@ -1,0 +1,235 @@
+<% layout('dashboard/layout') %>
+
+<div class="flex h-screen bg-gray-900 overflow-hidden">
+  <%- include('../partials/navbar') %> <%- include('../partials/sidebar') %>
+
+  <!-- Main Content -->
+  <div class="flex-1 overflow-auto lg:ml-20 pt-16">
+    <div class="p-4 sm:p-6">
+      <!-- Header -->
+      <div class="bg-gray-800 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+        <div
+          class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+        >
+          <div>
+            <h1 class="text-xl sm:text-2xl font-bold mb-2">Playlists</h1>
+            <p class="text-sm sm:text-base text-gray-400">
+              Organize your videos into playlists
+            </p>
+          </div>
+          <button
+            onclick="openCreatePlaylistModal()"
+            class="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm sm:text-base"
+          >
+            <i class="ti ti-plus"></i>
+            <span>New Playlist</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Playlists Grid -->
+      <div
+        id="playlistsContainer"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+      >
+        <% if (playlists.length === 0) { %>
+        <div class="col-span-full">
+          <div class="bg-gray-800 rounded-lg p-12 text-center">
+            <i class="ti ti-playlist-add text-6xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl font-semibold text-white mb-2">
+              No Playlists Yet
+            </h3>
+            <p class="text-gray-400 mb-4">
+              Create your first playlist to organize your videos
+            </p>
+            <button
+              onclick="openCreatePlaylistModal()"
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
+            >
+              <i class="ti ti-plus"></i>
+              <span>Create Playlist</span>
+            </button>
+          </div>
+        </div>
+        <% } else { %> <% playlists.forEach(function(playlist) { %>
+        <div
+          class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-gray-600 transition group"
+        >
+          <!-- Playlist Thumbnail (shows first video or placeholder) -->
+          <div class="aspect-video bg-gray-700 relative overflow-hidden">
+            <% if (playlist.video_count > 0) { %>
+            <div
+              class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-600"
+            >
+              <div class="text-center">
+                <i class="ti ti-playlist text-6xl text-white opacity-50"></i>
+                <p class="text-white text-lg font-bold mt-2">
+                  <%= playlist.video_count %> Videos
+                </p>
+              </div>
+            </div>
+            <% } else { %>
+            <div class="w-full h-full flex items-center justify-center">
+              <i class="ti ti-playlist text-6xl text-gray-600"></i>
+            </div>
+            <% } %>
+
+            <!-- Play Overlay -->
+            <div
+              class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <a
+                href="/playlist/<%= playlist.playlist_id %>"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full transition"
+              >
+                <i class="ti ti-player-play text-2xl"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Playlist Info -->
+          <div class="p-4">
+            <h3 class="text-white font-semibold mb-1 truncate">
+              <%= playlist.playlist_name %>
+            </h3>
+            <p class="text-sm text-gray-400 mb-3 line-clamp-2">
+              <%= playlist.description || 'No description' %>
+            </p>
+
+            <!-- Stats -->
+            <div class="flex items-center gap-4 text-xs text-gray-500 mb-3">
+              <span
+                ><i class="ti ti-video mr-1"></i><%= playlist.video_count %>
+                videos</span
+              >
+              <% if (playlist.total_duration) { %>
+              <span
+                ><i class="ti ti-clock mr-1"></i><%=
+                Math.floor(playlist.total_duration / 60) %> min</span
+              >
+              <% } %>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2">
+              <a
+                href="/playlist/<%= playlist.playlist_id %>"
+                class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm text-center transition"
+              >
+                View
+              </a>
+              <button
+                onclick="editPlaylist('<%= playlist.playlist_id %>', '<%= playlist.playlist_name %>', '<%= playlist.description || null %>', '<%= playlist.playback_mode || null %>')"
+                class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm transition"
+              >
+                <i class="ti ti-edit"></i>
+              </button>
+              <button
+                onclick="deletePlaylist('<%= playlist.playlist_id %>', '<%= playlist.playlist_name %>')"
+                class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm transition"
+              >
+                <i class="ti ti-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <% }); %> <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Playlist Modal -->
+<div
+  id="playlistModal"
+  class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4"
+>
+  <div class="bg-gray-800 rounded-lg w-full max-w-md">
+    <div
+      class="flex items-center justify-between p-4 sm:p-6 border-b border-gray-700"
+    >
+      <h3 id="modalTitle" class="text-lg sm:text-xl font-bold text-white">
+        Create Playlist
+      </h3>
+      <button
+        onclick="closePlaylistModal()"
+        class="text-gray-400 hover:text-white transition"
+      >
+        <i class="ti ti-x text-2xl"></i>
+      </button>
+    </div>
+
+    <form id="playlistForm" class="p-4 sm:p-6">
+      <input type="hidden" id="playlistId" name="playlistId" />
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2"
+            >Playlist Name</label
+          >
+          <input
+            type="text"
+            id="playlistName"
+            name="playlistName"
+            class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="My Awesome Playlist"
+            required
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2"
+            >Description (Optional)</label
+          >
+          <textarea
+            id="playlistDescription"
+            name="playlistDescription"
+            rows="3"
+            class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            placeholder="Describe your playlist..."
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">
+            Playback Mode
+            <i
+              class="ti ti-info-circle text-blue-400 text-xs ml-1"
+              title="Choose how videos will play in this playlist"
+            ></i>
+          </label>
+          <select
+            id="playbackMode"
+            name="playbackMode"
+            class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="sequential">
+              Sequential - Video berurutan sesuai urutan dalam playlist
+            </option>
+            <option value="shuffle">
+              Shuffle - Video diacak secara random
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-6">
+        <button
+          type="button"
+          onclick="closePlaylistModal()"
+          class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+        >
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/playlists.js"></script>

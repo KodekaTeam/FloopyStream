@@ -1,0 +1,287 @@
+<% layout('dashboard/layout') %>
+
+<div class="flex h-screen bg-gray-900 overflow-hidden">
+  <%- include('../partials/navbar') %> <%- include('../partials/sidebar') %>
+
+  <!-- Main Content -->
+  <div class="flex-1 overflow-auto lg:ml-20 pt-16">
+    <div class="p-4 sm:p-6">
+      <!-- Header -->
+      <div class="bg-gray-800 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+        <div class="flex items-center gap-4 mb-4">
+          <a
+            href="/playlists"
+            class="text-gray-400 hover:text-white transition"
+          >
+            <i class="ti ti-arrow-left text-2xl"></i>
+          </a>
+          <div class="flex-1">
+            <h1 class="text-xl sm:text-2xl font-bold">
+              <%= playlist.playlist_name %>
+            </h1>
+            <p class="text-sm sm:text-base text-gray-400 mt-1">
+              <%= playlist.description || 'No description' %>
+            </p>
+          </div>
+        </div>
+
+        <!-- Stats & Actions -->
+        <div
+          class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+        >
+          <div class="flex items-center gap-6 text-sm text-gray-400">
+            <span
+              ><i class="ti ti-video mr-2"></i><%= videos.length %> videos</span
+            >
+            <% if (totalDuration) { %>
+            <span
+              ><i class="ti ti-clock mr-2"></i><%= Math.floor(totalDuration /
+              60) %> minutes</span
+            >
+            <% } %>
+          </div>
+
+          <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+            <button
+              onclick="openAddVideosModal()"
+              class="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm"
+            >
+              <i class="ti ti-plus"></i>
+              <span>Add Videos</span>
+            </button>
+            <% if (videos.length > 0) { %>
+            <button
+              onclick="startPlaylistBroadcast()"
+              class="flex-1 sm:flex-initial flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition text-sm"
+            >
+              <i class="ti ti-player-play"></i>
+              <span>Stream Playlist</span>
+            </button>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Videos List -->
+      <div class="bg-gray-800 rounded-lg border border-gray-700">
+        <% if (videos.length === 0) { %>
+        <div class="p-12 text-center">
+          <i class="ti ti-video-off text-6xl text-gray-600 mb-4"></i>
+          <h3 class="text-xl font-semibold text-white mb-2">
+            No Videos in Playlist
+          </h3>
+          <p class="text-gray-400 mb-4">
+            Add videos to start building your playlist
+          </p>
+          <button
+            onclick="openAddVideosModal()"
+            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
+          >
+            <i class="ti ti-plus"></i>
+            <span>Add Videos</span>
+          </button>
+        </div>
+        <% } else { %>
+        <div id="videosList" class="divide-y divide-gray-700">
+          <% videos.forEach(function(video, index) { %>
+          <div
+            class="p-4 hover:bg-gray-700 transition group"
+            data-video-id="<%= video.content_id %>"
+            data-order-index="<%= video.order_index %>"
+          >
+            <div class="flex gap-4">
+              <!-- Drag Handle -->
+              <div
+                class="flex items-center text-gray-500 cursor-move"
+                title="Drag to reorder"
+              >
+                <i class="ti ti-grip-vertical"></i>
+              </div>
+
+              <!-- Order Number -->
+              <div class="flex items-center">
+                <span class="text-gray-400 font-mono text-sm w-8"
+                  ><%= index + 1 %>.</span
+                >
+              </div>
+
+              <!-- Thumbnail -->
+              <div
+                class="w-32 h-18 bg-gray-900 rounded overflow-hidden flex-shrink-0"
+              >
+                <% if (video.thumbnail_path) { %>
+                <img
+                  src="/storage/thumbnails/<%= video.thumbnail_path %>"
+                  alt="<%= video.title %>"
+                  class="w-full h-full object-cover"
+                />
+                <% } else { %>
+                <div class="w-full h-full flex items-center justify-center">
+                  <i class="ti ti-video text-2xl text-gray-600"></i>
+                </div>
+                <% } %>
+              </div>
+
+              <!-- Video Info -->
+              <div class="flex-1 min-w-0">
+                <h4 class="text-white font-medium mb-1 truncate">
+                  <%= video.title %>
+                </h4>
+                <div
+                  class="flex flex-wrap items-center gap-3 text-xs text-gray-500"
+                >
+                  <% if (video.duration_seconds) { %>
+                  <span
+                    ><i class="ti ti-clock mr-1"></i><%=
+                    Math.floor(video.duration_seconds / 60) %>:<%=
+                    String(Math.floor(video.duration_seconds % 60)).padStart(2,
+                    '0') %></span
+                  >
+                  <% } %> <% if (video.filesize) { %>
+                  <span
+                    ><i class="ti ti-file mr-1"></i><%= (video.filesize / (1024
+                    * 1024)).toFixed(2) %> MB</span
+                  >
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div
+                class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <!-- Move Up Button -->
+                <% if (index > 0) { %>
+                <button
+                  onclick="moveVideo('<%= video.content_id %>', 'up')"
+                  class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-2 rounded text-sm transition"
+                  title="Move up"
+                >
+                  <i class="ti ti-arrow-up"></i>
+                </button>
+                <% } %>
+
+                <!-- Move Down Button -->
+                <% if (index < videos.length - 1) { %>
+                <button
+                  onclick="moveVideo('<%= video.content_id %>', 'down')"
+                  class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-2 rounded text-sm transition"
+                  title="Move down"
+                >
+                  <i class="ti ti-arrow-down"></i>
+                </button>
+                <% } %>
+
+                <!-- Remove Button -->
+                <button
+                  onclick="removeFromPlaylist('<%= video.content_id %>')"
+                  class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm transition"
+                  title="Remove from playlist"
+                >
+                  <i class="ti ti-x"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Videos Modal -->
+<div
+  id="addVideosModal"
+  class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4"
+>
+  <div
+    class="bg-gray-800 rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+  >
+    <div
+      class="flex items-center justify-between p-4 sm:p-6 border-b border-gray-700"
+    >
+      <h3 class="text-lg sm:text-xl font-bold text-white">
+        Add Videos to Playlist
+      </h3>
+      <button
+        onclick="closeAddVideosModal()"
+        class="text-gray-400 hover:text-white transition"
+      >
+        <i class="ti ti-x text-2xl"></i>
+      </button>
+    </div>
+
+    <div class="p-4 sm:p-6 overflow-y-auto">
+      <div
+        id="availableVideos"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+        <% allVideos.forEach(function(video) { %>
+        <div
+          class="bg-gray-700 rounded-lg overflow-hidden border border-gray-600 hover:border-blue-500 transition cursor-pointer"
+          onclick="toggleVideoSelection('<%= video.content_id %>')"
+        >
+          <div class="aspect-video bg-gray-900 relative">
+            <% if (video.thumbnail_path) { %>
+            <img
+              src="/storage/thumbnails/<%= video.thumbnail_path %>"
+              alt="<%= video.title %>"
+              class="w-full h-full object-cover"
+            />
+            <% } else { %>
+            <div class="w-full h-full flex items-center justify-center">
+              <i class="ti ti-video text-4xl text-gray-600"></i>
+            </div>
+            <% } %>
+            <div class="absolute top-2 right-2">
+              <input
+                type="checkbox"
+                id="video-<%= video.content_id %>"
+                class="video-checkbox w-5 h-5 rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500"
+                onchange="event.stopPropagation()"
+              />
+            </div>
+          </div>
+          <div class="p-3">
+            <p class="text-white text-sm font-medium truncate">
+              <%= video.title %>
+            </p>
+            <% if (video.duration_seconds) { %>
+            <p class="text-xs text-gray-400 mt-1">
+              <%= Math.floor(video.duration_seconds / 60) %>:<%=
+              String(Math.floor(video.duration_seconds % 60)).padStart(2, '0')
+              %>
+            </p>
+            <% } %>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+    </div>
+
+    <div class="p-4 sm:p-6 border-t border-gray-700">
+      <div class="flex gap-3">
+        <button
+          onclick="closeAddVideosModal()"
+          class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
+        >
+          Cancel
+        </button>
+        <button
+          onclick="addSelectedVideos()"
+          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+        >
+          Add Selected
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+  const playlistId = "<%= playlist.playlist_id %>";
+</script>
+<script src="/js/playlist-detail.js"></script>

@@ -1,0 +1,110 @@
+<!-- Video Grid -->
+<% if (contentList.length === 0) { %>
+<div class="bg-gray-800 rounded-lg p-12 text-center">
+  <div
+    class="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center mx-auto mb-4"
+  >
+    <i class="ti ti-video text-gray-500 text-3xl"></i>
+  </div>
+  <h3 class="text-xl font-semibold mb-2">No videos yet</h3>
+  <p class="text-gray-400 mb-6">Upload your first video to start streaming</p>
+  <button
+    onclick="openUploadModal()"
+    class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
+  >
+    <i class="ti ti-upload"></i>
+    <span>Upload Video</span>
+  </button>
+</div>
+<% } else { %>
+<div
+  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+  id="videoGrid"
+>
+  <% contentList.forEach(function(content) { %>
+  <div
+    class="bg-gray-800 rounded-lg overflow-hidden hover:ring-2 hover:ring-blue-500 transition group"
+  >
+    <!-- Thumbnail -->
+    <div class="aspect-video bg-gray-900 relative">
+      <% if (content.thumbnail_path) { %>
+      <img
+        src="/storage/thumbnails/<%= content.thumbnail_path %>"
+        alt="<%= content.title %>"
+        class="w-full h-full object-cover"
+        onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center\'><i class=\'ti ti-video text-4xl text-gray-600\'></i></div>';"
+      />
+      <% } else { %>
+      <div class="w-full h-full flex items-center justify-center">
+        <i class="ti ti-video text-4xl text-gray-600"></i>
+      </div>
+      <% } %>
+
+      <!-- Duration Badge -->
+      <div
+        class="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded text-xs font-medium"
+      >
+        <%= formatDuration(content.duration_seconds) %>
+      </div>
+
+      <!-- Hover Actions -->
+      <div
+        class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2"
+      >
+        <button
+          onclick="playVideo('<%= content.content_id %>')"
+          class="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition"
+          title="Preview"
+        >
+          <i class="ti ti-player-play text-white"></i>
+        </button>
+        <button
+          onclick="useForStream('<%= content.content_id %>')"
+          class="w-10 h-10 bg-green-600 hover:bg-green-700 rounded-full flex items-center justify-center transition"
+          title="Use for Stream"
+        >
+          <i class="ti ti-broadcast text-white"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="p-4">
+      <h3 class="font-semibold mb-1 truncate" title="<%= content.title %>">
+        <%= content.title %>
+      </h3>
+      <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+        <span><%= new Date(content.upload_date).toLocaleDateString() %></span>
+        <span><%= formatFileSize(content.filesize) %></span>
+      </div>
+      <% if (content.resolution) { %>
+      <div class="flex items-center gap-1 text-xs text-gray-500 mb-3">
+        <i class="ti ti-aspect-ratio"></i>
+        <span><%= content.resolution %></span>
+      </div>
+      <% } else { %>
+      <div class="h-5 mb-3"></div>
+      <% } %>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-2">
+        <button
+          onclick="editVideo('<%= content.content_id %>')"
+          class="flex-1 flex items-center justify-center gap-1 bg-gray-700 hover:bg-gray-600 text-white text-sm px-3 py-2 rounded transition"
+        >
+          <i class="ti ti-edit text-sm"></i>
+          <span>Edit</span>
+        </button>
+        <button
+          onclick="deleteVideo('<%= content.content_id %>')"
+          class="w-8 h-8 flex items-center justify-center bg-gray-700 hover:bg-red-600 text-white rounded transition"
+          title="Delete"
+        >
+          <i class="ti ti-trash text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <% }) %>
+</div>
+<% } %>

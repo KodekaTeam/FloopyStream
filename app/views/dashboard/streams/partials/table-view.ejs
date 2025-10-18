@@ -1,0 +1,273 @@
+﻿    <div class="overflow-x-auto bg-gray-800 rounded-lg">
+      <table class="w-full">
+        <thead class="bg-gray-900 border-b border-gray-700">
+          <tr>
+            <th
+              class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+            >
+              Stream Name
+            </th>
+            <th
+              class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+            >
+              Platform
+            </th>
+            <th
+              class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+            >
+              Start Date
+            </th>
+            <th
+              class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+            >
+              Schedule
+            </th>
+            <th
+              class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+            >
+              Duration
+            </th>
+            <th
+              class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+            >
+              Status
+            </th>
+            <th
+              class="px-6 py-4 text-right text-sm font-semibold text-gray-300"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-700" id="streamsTableBody">
+          <% if (broadcasts.length === 0) { %>
+          <tr>
+            <td colspan="7" class="px-6 py-12 text-center">
+              <div class="flex flex-col items-center gap-3">
+                <i class="ti ti-broadcast text-5xl text-gray-600"></i>
+                <p class="text-gray-400 font-medium">No streams found</p>
+                <p class="text-gray-500">
+                  Create your first stream to start broadcasting
+                </p>
+              </div>
+            </td>
+          </tr>
+          <% } else { %> <% broadcasts.forEach(function(broadcast) { %>
+          <tr
+            class="hover:bg-gray-700 transition-colors"
+            data-broadcast-id="<%= broadcast.broadcast_id %>"
+          >
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-28 h-16 rounded overflow-hidden flex-shrink-0 <%= broadcast.content_type === 'playlist' ? 'bg-gradient-to-br from-purple-600 to-blue-600' : 'bg-gray-700' %>"
+                >
+                  <% if (broadcast.thumbnail_path) { %>
+                  <img
+                    src="/storage/thumbnails/<%= broadcast.thumbnail_path %>"
+                    alt="Thumbnail"
+                    class="w-full h-full object-cover"
+                  />
+                  <% } else if (broadcast.content_type === 'playlist') {
+                  %>
+                  <div
+                    class="w-full h-full flex items-center justify-center"
+                  >
+                    <i class="ti ti-playlist text-3xl text-white"></i>
+                  </div>
+                  <% } else { %>
+                  <div
+                    class="w-full h-full flex items-center justify-center"
+                  >
+                    <i class="ti ti-video text-2xl text-gray-500"></i>
+                  </div>
+                  <% } %>
+                </div>
+                <div>
+                  <p class="text-white font-medium">
+                    <%= broadcast.broadcast_name || 'Untitled Broadcast'
+                    %>
+                  </p>
+                  <p class="text-sm text-gray-400">
+                    <% if (broadcast.content_type === 'playlist' &&
+                    broadcast.playlist_name) { %>
+                    <i class="ti ti-playlist text-blue-400"></i> <%=
+                    broadcast.playlist_name %> <% if
+                    (broadcast.playback_mode === 'shuffle') { %> â€¢
+                    <i class="ti ti-arrows-shuffle text-xs"></i> Shuffle
+                    <% } %> <% } else if (broadcast.content_title) { %>
+                    <i class="ti ti-video"></i> <%=
+                    broadcast.content_title %> <% } %>
+                  </p>
+                  <p class="text-xs text-gray-500">
+                    <% if (broadcast.resolution) { %> <%=
+                    broadcast.resolution %> â€¢ <%= broadcast.bitrate ||
+                    'N/A' %> kbps â€¢ <%= broadcast.frame_rate || 30 %> FPS
+                    <% } else { %> 1920Ã—1080 â€¢ 2500 kbps â€¢ 30 FPS <% } %>
+                  </p>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-2">
+                <% const platformIcons = { youtube: 'brand-youtube',
+                facebook: 'brand-facebook', twitch: 'brand-twitch',
+                tiktok: 'brand-tiktok', instagram: 'brand-instagram' };
+                const icon =
+                platformIcons[broadcast.platform_name.toLowerCase()] ||
+                'cast'; %>
+                <i class="ti ti-<%= icon %> text-xl text-gray-400"></i>
+                <span class="text-white capitalize"
+                  ><%= broadcast.platform_name %></span
+                >
+              </div>
+            </td>
+            <td class="px-6 py-4 text-gray-300">
+              <%= broadcast.created_at ? new
+              Date(broadcast.created_at).toLocaleString() : '--' %>
+            </td>
+            <td class="px-6 py-4 text-gray-300">
+              <%= broadcast.scheduled_time ? new
+              Date(broadcast.scheduled_time).toLocaleString() : '--' %>
+            </td>
+            <td class="px-6 py-4">
+              <% if (broadcast.broadcast_status === 'active') { %>
+              <div class="flex items-center gap-2">
+                <span class="relative flex h-2 w-2">
+                  <span
+                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
+                  ></span>
+                  <span
+                    class="relative inline-flex rounded-full h-2 w-2 bg-red-500"
+                  ></span>
+                </span>
+                <span class="text-red-400 font-medium">Live</span>
+                <span class="text-gray-400">â€¢</span>
+                <span
+                  class="text-gray-300 font-mono timer"
+                  data-start="<%= broadcast.started_at || broadcast.created_at %>"
+                  >00:00:00</span
+                >
+              </div>
+              <% } else { %>
+              <span class="text-gray-300">
+                <%= broadcast.duration_seconds ?
+                Math.floor(broadcast.duration_seconds / 60) + 'm' : '--'
+                %>
+              </span>
+              <% } %>
+            </td>
+            <td class="px-6 py-4">
+              <% const statusConfig = { active: { color: 'bg-green-600',
+              text: 'LIVE', icon: 'point-filled' }, completed: { color:
+              'bg-blue-600', text: 'COMPLETED', icon: 'check' },
+              scheduled: { color: 'bg-yellow-600', text: 'SCHEDULED',
+              icon: 'clock' }, offline: { color: 'bg-gray-600', text:
+              'OFFLINE', icon: 'circle' }, failed: { color: 'bg-red-600',
+              text: 'FAILED', icon: 'x' } }; const config =
+              statusConfig[broadcast.broadcast_status] || { color:
+              'bg-gray-600', text:
+              broadcast.broadcast_status.toUpperCase(), icon: 'circle' };
+              %>
+              <div class="flex items-center gap-2">
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-medium text-white <%= config.color %> flex items-center gap-1"
+                >
+                  <i class="ti ti-<%= config.icon %>"></i>
+                  <%= config.text %>
+                </span>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center justify-end gap-2">
+                <% if (broadcast.broadcast_status === 'active') { %>
+                <!-- Stop button for ACTIVE streams -->
+                <button
+                  onclick="stopBroadcast('<%= broadcast.broadcast_id %>')"
+                  class="p-2 text-red-400 hover:bg-gray-600 rounded transition-colors"
+                  title="Stop Stream"
+                >
+                  <i class="ti ti-player-stop"></i>
+                </button>
+                <% } else { %>
+                <!-- Start button for OFFLINE, SCHEDULED, FAILED, COMPLETED streams -->
+                <button
+                  onclick="startBroadcast('<%= broadcast.broadcast_id %>')"
+                  class="p-2 text-green-400 hover:bg-gray-600 rounded transition-colors"
+                  title="Start Stream"
+                >
+                  <i class="ti ti-player-play"></i>
+                </button>
+                <% } %>
+                <button
+                  onclick="openStreamInfoModal('<%= broadcast.broadcast_id %>')"
+                  class="p-2 text-cyan-400 hover:bg-gray-600 rounded transition-colors"
+                  title="Info"
+                >
+                  <i class="ti ti-info-circle"></i>
+                </button>
+                <button
+                  onclick="openEditStreamModal('<%= broadcast.broadcast_id %>')"
+                  class="p-2 text-blue-400 hover:bg-gray-600 rounded transition-colors"
+                  title="Edit Stream"
+                >
+                  <i class="ti ti-edit"></i>
+                </button>
+                <!-- <button
+                  onclick="editBroadcast('<%= broadcast.broadcast_id %>')"
+                  class="p-2 text-amber-400 hover:bg-gray-600 rounded transition-colors"
+                  title="Configure Broadcast Settings (Platform, Schedule, Content)"
+                >
+                  <i class="ti ti-settings"></i>
+                </button> -->
+                <button
+                  onclick="deleteBroadcast('<%= broadcast.broadcast_id %>')"
+                  class="p-2 text-red-400 hover:bg-gray-600 rounded transition-colors"
+                  title="Delete"
+                >
+                  <i class="ti ti-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <% }) %> <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Table Pagination -->
+    <% if (broadcasts.length > 0) { %>
+    <div
+      class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4"
+    >
+      <!-- Pagination Buttons -->
+      <div class="flex items-center gap-2">
+        <button
+          onclick="changePage('prev')"
+          class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          id="tablePrevBtn"
+        >
+          <i class="ti ti-chevron-left"></i>
+        </button>
+
+        <div id="tablePaginationNumbers" class="flex items-center gap-2">
+          <!-- Page numbers will be generated by JavaScript -->
+        </div>
+
+        <button
+          onclick="changePage('next')"
+          class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          id="tableNextBtn"
+        >
+          <i class="ti ti-chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Showing Info -->
+      <p class="text-sm text-gray-400" id="tableShowingInfo">
+        Showing 1-<%= Math.min(broadcasts.length, 12) %> of <%=
+        broadcasts.length %> streams
+      </p>
+    </div>
+    <% } %>
+  </div>

@@ -1,0 +1,119 @@
+<!-- Tab Content: Security -->
+<div id="securityContent" class="tab-content hidden">
+  <div class="bg-gray-800 rounded-lg border border-gray-700">
+    <div class="p-4 sm:p-6 border-b border-gray-700">
+      <h3 class="text-lg font-bold text-white flex items-center gap-2">
+        <i class="ti ti-lock"></i>
+        Security Settings
+      </h3>
+      <p class="text-xs text-gray-400 mt-1">
+        Change your password to keep your account secure
+      </p>
+    </div>
+
+    <form id="passwordForm" class="p-4 sm:p-6 space-y-4">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+      <!-- Current Password -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Current Password
+        </label>
+        <div class="relative">
+          <input
+            type="password"
+            name="currentPassword"
+            id="currentPassword"
+            required
+            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter your current password"
+          />
+          <button
+            type="button"
+            onclick="togglePassword('currentPassword')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+          >
+            <i class="ti ti-eye" id="currentPasswordIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- New Password -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          New Password
+        </label>
+        <div class="relative">
+          <input
+            type="password"
+            name="newPassword"
+            id="newPassword"
+            required
+            minlength="6"
+            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter new password (min 6 characters)"
+          />
+          <button
+            type="button"
+            onclick="togglePassword('newPassword')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+          >
+            <i class="ti ti-eye" id="newPasswordIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirm New Password -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Confirm New Password
+        </label>
+        <div class="relative">
+          <input
+            type="password"
+            name="confirmPassword"
+            id="confirmPassword"
+            required
+            minlength="6"
+            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Confirm your new password"
+          />
+          <button
+            type="button"
+            onclick="togglePassword('confirmPassword')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+          >
+            <i class="ti ti-eye" id="confirmPasswordIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Password Requirements -->
+      <div class="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4">
+        <p class="text-xs text-blue-300 font-medium mb-2">
+          Password Requirements:
+        </p>
+        <ul class="text-xs text-gray-400 space-y-1">
+          <li class="flex items-center gap-2">
+            <i class="ti ti-check text-blue-400"></i>
+            Minimum 6 characters long
+          </li>
+          <li class="flex items-center gap-2">
+            <i class="ti ti-check text-blue-400"></i>
+            Use a strong, unique password
+          </li>
+        </ul>
+      </div>
+
+      <div class="flex gap-3 pt-4">
+        <button
+          type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2 font-medium"
+        >
+          <i class="ti ti-key"></i>
+          <span>Change Password</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

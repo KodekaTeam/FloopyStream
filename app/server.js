@@ -1,0 +1,150 @@
+require('dotenv').config();
+require('./services/activityLogger');
+
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const session = require('express-session');
+const SQLiteStore = require('connect-sqlite3')(session);
+const engine = require('ejs-mate');
+
+// Import utilities and services
+const { createRequiredDirectories } = require('./utilities/fileManager');
+const { initializeDriveClient } = require('./utilities/cloudStorage');
+const { startMonitoring } = require('./services/performanceMonitor');
+const { startScheduler } = require('./services/taskScheduler');
+const { logInfo, logError } = require('./services/activityLogger');
+const rateLimit = require('express-rate-limit');
+
+// Import utilities
+const { formatDuration } = require('./utilities/mediaProcessor');
+const { formatFileSize } = require('./utilities/fileManager');
+
+// Initialize Express app
+const app = express();
+const port = process.env.PORT || 8080;
+
+// Import routes
+const routes = require('./routes');
+
+// Create required directories
+createRequiredDirectories();
+
+// Clean up old mediaflow.db files (if they exist) - migrate to floopystream.db
+// try {
+//   const oldDbPath = path.join(__dirname, 'storage', 'database', 'mediaflow.db');
+//   if (fs.existsSync(oldDbPath)) {
+//     fs.unlinkSync(oldDbPath);
+//     console.log('✓ Cleaned up old mediaflow.db file');
+//   }
+// } catch (error) {
+//   console.warn('Note: Could not clean mediaflow.db -', error.message);
+// }
+
+// Initialize Google Drive (if configured)
+initializeDriveClient();
+
+// Error handling
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('=== UNHANDLED REJECTION ===');
+  console.error('Promise:', promise);
+  console.error('Reason:', reason);
+  logError('Unhandled rejection', { reason: String(reason) });
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('=== UNCAUGHT EXCEPTION ===');
+  console.error('Error:', error);
+  logError('Uncaught exception', { error: error.message, stack: error.stack });
+});
+
+// Configure view engine
+app.engine('ejs', engine);
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.set('trust proxy', 1);
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/storage', express.static(path.join(__dirname, 'storage')));
+
+// Session configuration
+app.use(session({
+  store: new SQLiteStore({
+    db: 'sessions.db',
+    dir: process.env.DB_PATH ? path.dirname(process.env.DB_PATH) : './storage/database'
+  }),
+  secret: process.env.SESSION_SECRET || 'change-this-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Rate limiting
+const apiLimiter = rateLimit({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+  message: 'Too many requests, please try again later'
+});
+
+// Make session available to all views
+app.use((req, res, next) => {
+  res.locals.session = req.session;
+  next();
+});
+
+// Helper functions for views
+app.locals.formatFileSize = formatFileSize;
+app.locals.formatDuration = formatDuration;
+app.locals.appName = process.env.APP_NAME || 'FLoopyStream';
+
+// ============================================
+// ROUTES - All modular routes
+// ============================================
+
+app.use(routes);
+
+// ============================================
+// START SERVER
+// ============================================
+
+app.listen(port, () => {
+  const { getTimezoneInfo } = require('./utils/datetime');
+  const tzInfo = getTimezoneInfo();
+  
+  console.log('='.repeat(50));
+  console.log(`🚀 ${process.env.APP_NAME || 'FLoopyStream'} is running`);
+  console.log(`📡 Server: http://localhost:${port}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🕐 Timezone: ${tzInfo.timezone} (${tzInfo.offset})`);
+  console.log('='.repeat(50));
+  
+  // Start monitoring and scheduler
+  startMonitoring(5);
+  startScheduler(30);
+  
+  logInfo('Application started', { 
+    port, 
+    env: process.env.NODE_ENV || 'development',
+    timezone: tzInfo.timezone 
+  });
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('\n👋 Shutting down gracefully...');
+  logInfo('Application shutting down');
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('\n👋 Shutting down gracefully...');
+  logInfo('Application shutting down');
+  process.exit(0);
+});

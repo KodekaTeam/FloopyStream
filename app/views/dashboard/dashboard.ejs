@@ -1,0 +1,1681 @@
+<% layout('dashboard/layout') %>
+
+<div class="flex h-screen bg-gray-900 overflow-hidden">
+  <%- include('partials/navbar') %> <%- include('partials/sidebar') %>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-auto lg:ml-20 pt-16">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <!-- Header -->
+      <div class="mb-6 sm:mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white">Dashboard</h2>
+        <p class="text-gray-400 mt-1 text-sm sm:text-base">
+          Manage your live streams and broadcasts
+        </p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div
+        class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8"
+      >
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-gray-400 text-sm">Active Streams</p>
+            <i class="ti ti-broadcast text-gray-500"></i>
+          </div>
+          <p class="text-2xl font-bold text-white" id="activeBroadcastCount">
+            <%= activeBroadcastCount || 0 %>
+          </p>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-gray-400 text-sm">CPU Usage</p>
+            <i class="ti ti-cpu text-gray-500"></i>
+          </div>
+          <p class="text-2xl font-bold text-white">
+            <span id="cpuUsage">0</span>%
+          </p>
+          <div class="w-full bg-gray-700 rounded-full h-1 mt-3">
+            <div
+              id="cpuBar"
+              class="bg-blue-500 h-1 rounded-full transition-all duration-300"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-gray-400 text-sm">Memory</p>
+            <i class="ti ti-device-sd-card text-gray-500"></i>
+          </div>
+          <p class="text-2xl font-bold text-white">
+            <span id="memoryUsed">0.00</span> GB
+          </p>
+          <p class="text-sm text-gray-500 mt-1">
+            / <span id="memoryTotal">0.00</span> GB
+          </p>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-gray-400 text-sm">Internet Speed</p>
+            <i class="ti ti-wifi text-gray-500"></i>
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <i class="ti ti-arrow-up text-green-400 text-sm"></i>
+              <!-- <span class="text-sm text-gray-400 block sm:hidden">U</span> -->
+              <span class="text-sm text-gray-400 hidden sm:block">Upload</span>
+              <span
+                class="text-sm font-semibold text-green-400 ml-auto"
+                id="uploadSpeed"
+              >
+                <span class="block sm:hidden">0 Kbps</span>
+                <span class="hidden sm:block">0 Mbps</span>
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i class="ti ti-arrow-down text-blue-400 text-sm"></i>
+              <!-- <span class="text-sm text-gray-400 block sm:hidden">D</span> -->
+              <span class="text-sm text-gray-400 hidden sm:block"
+                >Download</span
+              >
+              <span
+                class="text-sm font-semibold text-blue-400 ml-auto"
+                id="downloadSpeed"
+              >
+                <span class="block sm:hidden">0 Kbps</span>
+                <span class="hidden sm:block">0 Mbps</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Streaming Status Section -->
+      <div class="bg-gray-800 rounded-lg border border-gray-700">
+        <div class="p-4 sm:p-6 border-b border-gray-700">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+          >
+            <div>
+              <h3 class="text-lg sm:text-xl font-bold text-white">
+                Streaming Status
+              </h3>
+              <p class="text-xs sm:text-sm text-gray-400 mt-1">
+                Manage your live broadcasts
+              </p>
+            </div>
+            <div
+              class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+            >
+              <div class="relative flex-1 sm:flex-initial">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  id="searchInput"
+                  class="w-full sm:w-64 bg-gray-700 border border-gray-600 text-white pl-9 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
+                <i
+                  class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                ></i>
+              </div>
+
+              <!-- View Toggle (Tablet & Desktop only, auto card view on mobile) -->
+              <div
+                class="hidden md:flex items-center gap-1 bg-gray-700 rounded-lg p-1"
+              >
+                <button
+                  id="cardViewBtn"
+                  onclick="switchView('card')"
+                  class="px-3 py-1.5 rounded transition-colors"
+                  title="Card View"
+                >
+                  <i class="ti ti-layout-grid"></i>
+                </button>
+                <button
+                  id="tableViewBtn"
+                  onclick="switchView('table')"
+                  class="px-3 py-1.5 rounded transition-colors bg-gray-600"
+                  title="Table View"
+                >
+                  <i class="ti ti-table"></i>
+                </button>
+              </div>
+
+              <button
+                onclick="openNewStreamModal()"
+                class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm sm:text-base whitespace-nowrap"
+              >
+                <i class="ti ti-plus"></i>
+                <span>New Stream</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Streams Table - Hidden on Mobile -->
+        <div id="tableViewContainer" class="hidden md:block">
+          <div class="overflow-x-auto bg-gray-800 rounded-lg">
+            <table class="w-full">
+              <thead class="bg-gray-900 border-b border-gray-700">
+                <tr>
+                  <th
+                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+                  >
+                    Stream Name
+                  </th>
+                  <th
+                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+                  >
+                    Platform
+                  </th>
+                  <th
+                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+                  >
+                    Start Date
+                  </th>
+                  <th
+                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+                  >
+                    Schedule
+                  </th>
+                  <th
+                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+                  >
+                    Duration
+                  </th>
+                  <th
+                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="px-6 py-4 text-right text-sm font-semibold text-gray-300"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-700" id="streamsTableBody">
+                <% if (broadcasts.length === 0) { %>
+                <tr>
+                  <td colspan="7" class="px-6 py-12 text-center">
+                    <div class="flex flex-col items-center gap-3">
+                      <i class="ti ti-broadcast text-5xl text-gray-600"></i>
+                      <p class="text-gray-400 font-medium">No streams found</p>
+                      <p class="text-gray-500">
+                        Create your first stream to start broadcasting
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+                <% } else { %> <% broadcasts.forEach(function(broadcast) { %>
+                <tr
+                  class="hover:bg-gray-700 transition-colors"
+                  data-broadcast-id="<%= broadcast.broadcast_id %>"
+                >
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-4">
+                      <div
+                        class="w-28 h-16 rounded overflow-hidden flex-shrink-0 <%= broadcast.content_type === 'playlist' ? 'bg-gradient-to-br from-purple-600 to-blue-600' : 'bg-gray-700' %>"
+                      >
+                        <% if (broadcast.thumbnail_path) { %>
+                        <img
+                          src="/storage/thumbnails/<%= broadcast.thumbnail_path %>"
+                          alt="Thumbnail"
+                          class="w-full h-full object-cover"
+                        />
+                        <% } else if (broadcast.content_type === 'playlist') {
+                        %>
+                        <div
+                          class="w-full h-full flex items-center justify-center"
+                        >
+                          <i class="ti ti-playlist text-3xl text-white"></i>
+                        </div>
+                        <% } else { %>
+                        <div
+                          class="w-full h-full flex items-center justify-center"
+                        >
+                          <i class="ti ti-video text-2xl text-gray-500"></i>
+                        </div>
+                        <% } %>
+                      </div>
+                      <div>
+                        <p class="text-white font-medium">
+                          <%= broadcast.broadcast_name || 'Untitled Broadcast'
+                          %>
+                        </p>
+                        <p class="text-sm text-gray-400">
+                          <% if (broadcast.content_type === 'playlist' &&
+                          broadcast.playlist_name) { %>
+                          <i class="ti ti-playlist text-blue-400"></i> <%=
+                          broadcast.playlist_name %> <% if
+                          (broadcast.playback_mode === 'shuffle') { %> •
+                          <i class="ti ti-arrows-shuffle text-xs"></i> Shuffle
+                          <% } %> <% } else if (broadcast.content_title) { %>
+                          <i class="ti ti-video"></i> <%=
+                          broadcast.content_title %> <% } %>
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          <% if (broadcast.resolution) { %> <%=
+                          broadcast.resolution %> • <%= broadcast.bitrate ||
+                          'N/A' %> kbps • <%= broadcast.frame_rate || 30 %> FPS
+                          <% } else { %> 1920×1080 • 2500 kbps • 30 FPS <% } %>
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-2">
+                      <% const platformIcons = { youtube: 'brand-youtube',
+                      facebook: 'brand-facebook', twitch: 'brand-twitch',
+                      tiktok: 'brand-tiktok', instagram: 'brand-instagram' };
+                      const icon =
+                      platformIcons[broadcast.platform_name.toLowerCase()] ||
+                      'cast'; %>
+                      <i class="ti ti-<%= icon %> text-xl text-gray-400"></i>
+                      <span class="text-white capitalize"
+                        ><%= broadcast.platform_name %></span
+                      >
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-gray-300">
+                    <%= broadcast.created_at ? new
+                    Date(broadcast.created_at).toLocaleString() : '--' %>
+                  </td>
+                  <td class="px-6 py-4 text-gray-300">
+                    <%= broadcast.scheduled_time ? new
+                    Date(broadcast.scheduled_time).toLocaleString() : '--' %>
+                  </td>
+                  <td class="px-6 py-4">
+                    <% if (broadcast.broadcast_status === 'active') { %>
+                    <div class="flex items-center gap-2">
+                      <span class="relative flex h-2 w-2">
+                        <span
+                          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"
+                        ></span>
+                        <span
+                          class="relative inline-flex rounded-full h-2 w-2 bg-red-500"
+                        ></span>
+                      </span>
+                      <span class="text-red-400 font-medium">Live</span>
+                      <span class="text-gray-400">•</span>
+                      <span
+                        class="text-gray-300 font-mono timer"
+                        data-start="<%= broadcast.started_at || broadcast.created_at %>"
+                        >00:00:00</span
+                      >
+                    </div>
+                    <% } else { %>
+                    <span class="text-gray-300">
+                      <%= broadcast.duration_seconds ?
+                      Math.floor(broadcast.duration_seconds / 60) + 'm' : '--'
+                      %>
+                    </span>
+                    <% } %>
+                  </td>
+                  <td class="px-6 py-4">
+                    <% const statusConfig = { active: { color: 'bg-green-600',
+                    text: 'LIVE', icon: 'point-filled' }, completed: { color:
+                    'bg-blue-600', text: 'COMPLETED', icon: 'check' },
+                    scheduled: { color: 'bg-yellow-600', text: 'SCHEDULED',
+                    icon: 'clock' }, offline: { color: 'bg-gray-600', text:
+                    'OFFLINE', icon: 'circle' }, failed: { color: 'bg-red-600',
+                    text: 'FAILED', icon: 'x' } }; const config =
+                    statusConfig[broadcast.broadcast_status] || { color:
+                    'bg-gray-600', text:
+                    broadcast.broadcast_status.toUpperCase(), icon: 'circle' };
+                    %>
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="px-3 py-1 rounded-full text-xs font-medium text-white <%= config.color %> flex items-center gap-1"
+                      >
+                        <i class="ti ti-<%= config.icon %>"></i>
+                        <%= config.text %>
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center justify-end gap-2">
+                      <% if (broadcast.broadcast_status === 'active') { %>
+                      <!-- Stop button for ACTIVE streams -->
+                      <button
+                        onclick="stopBroadcast('<%= broadcast.broadcast_id %>')"
+                        class="p-2 text-red-400 hover:bg-gray-600 rounded transition-colors"
+                        title="Stop Stream"
+                      >
+                        <i class="ti ti-player-stop"></i>
+                      </button>
+                      <% } else { %>
+                      <!-- Start button for OFFLINE, SCHEDULED, FAILED, COMPLETED streams -->
+                      <button
+                        onclick="startBroadcast('<%= broadcast.broadcast_id %>')"
+                        class="p-2 text-green-400 hover:bg-gray-600 rounded transition-colors"
+                        title="Start Stream"
+                      >
+                        <i class="ti ti-player-play"></i>
+                      </button>
+                      <% } %>
+                      <!-- <button
+                        onclick="openStreamInfoModal('<%= broadcast.broadcast_id %>')"
+                        class="p-2 text-cyan-400 hover:bg-gray-600 rounded transition-colors"
+                        title="Info"
+                      >
+                        <i class="ti ti-info-circle"></i>
+                      </button> -->
+                      <button
+                        onclick="openEditStreamModal('<%= broadcast.broadcast_id %>')"
+                        class="p-2 text-blue-400 hover:bg-gray-600 rounded transition-colors"
+                        title="Edit Stream"
+                      >
+                        <i class="ti ti-edit"></i>
+                      </button>
+                      <!-- <button
+                        onclick="editBroadcast('<%= broadcast.broadcast_id %>')"
+                        class="p-2 text-amber-400 hover:bg-gray-600 rounded transition-colors"
+                        title="Configure Broadcast Settings (Platform, Schedule, Content)"
+                      >
+                        <i class="ti ti-settings"></i>
+                      </button> -->
+                      <button
+                        onclick="deleteBroadcast('<%= broadcast.broadcast_id %>')"
+                        class="p-2 text-red-400 hover:bg-gray-600 rounded transition-colors"
+                        title="Delete"
+                      >
+                        <i class="ti ti-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <% }) %> <% } %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Table Pagination -->
+          <% if (broadcasts.length > 0) { %>
+          <div
+            class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
+            <!-- Pagination Buttons -->
+            <div class="flex items-center gap-2">
+              <button
+                onclick="changePage('prev')"
+                class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                id="tablePrevBtn"
+              >
+                <i class="ti ti-chevron-left"></i>
+              </button>
+
+              <div id="tablePaginationNumbers" class="flex items-center gap-2">
+                <!-- Page numbers will be generated by JavaScript -->
+              </div>
+
+              <button
+                onclick="changePage('next')"
+                class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                id="tableNextBtn"
+              >
+                <i class="ti ti-chevron-right"></i>
+              </button>
+            </div>
+
+            <!-- Showing Info -->
+            <p class="text-sm text-gray-400" id="tableShowingInfo">
+              Showing 1-<%= Math.min(broadcasts.length, 12) %> of <%=
+              broadcasts.length %> streams
+            </p>
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Card View - Visible on Mobile, Hidden on Desktop when Table Toggle is Active -->
+      <div id="cardViewContainer" class="block md:hidden">
+        <div
+          id="cardGrid"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-6"
+        >
+          <% if (broadcasts.length === 0) { %>
+          <div class="col-span-full bg-gray-800 rounded-lg p-12 text-center">
+            <i class="ti ti-broadcast text-5xl text-gray-600 mb-4"></i>
+            <p class="text-gray-400 font-medium mb-2">No streams found</p>
+            <p class="text-gray-500 mb-6">
+              Create your first stream to start broadcasting
+            </p>
+            <button
+              onclick="openNewStreamModal()"
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
+            >
+              <i class="ti ti-plus"></i>
+              <span>New Stream</span>
+            </button>
+          </div>
+          <% } else { %> <% broadcasts.forEach(function(broadcast) { %>
+          <div
+            class="bg-gray-800 rounded-lg overflow-hidden group hover:ring-2 hover:ring-blue-500 transition-all"
+          >
+            <!-- Thumbnail with overlay -->
+            <div
+              class="relative w-full aspect-video overflow-hidden <%= broadcast.content_type === 'playlist' ? 'bg-gradient-to-br from-purple-600 to-blue-600' : 'bg-gray-900' %>"
+            >
+              <% if (broadcast.thumbnail_path) { %>
+              <img
+                src="/storage/thumbnails/<%= broadcast.thumbnail_path %>"
+                alt="<%= broadcast.broadcast_name || 'Untitled' %>"
+                class="w-full h-full object-cover"
+              />
+              <% } else if (broadcast.content_type === 'playlist') { %>
+              <div class="w-full h-full flex items-center justify-center">
+                <i class="ti ti-playlist text-6xl text-white opacity-90"></i>
+              </div>
+              <% } else { %>
+              <div class="w-full h-full flex items-center justify-center">
+                <i class="ti ti-video text-5xl text-gray-600"></i>
+              </div>
+              <% } %>
+
+              <!-- Status Badge Overlay -->
+              <div class="absolute top-2 right-2">
+                <% if (broadcast.broadcast_status === 'active') { %>
+                <span
+                  class="flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium"
+                >
+                  <span
+                    class="w-2 h-2 bg-white rounded-full animate-pulse"
+                  ></span>
+                  LIVE
+                </span>
+                <% } else if (broadcast.broadcast_status === 'scheduled') { %>
+                <span
+                  class="bg-yellow-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium"
+                >
+                  SCHEDULED
+                </span>
+                <% } else if (broadcast.broadcast_status === 'completed') { %>
+                <span
+                  class="bg-blue-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium"
+                >
+                  COMPLETED
+                </span>
+                <% } else if (broadcast.broadcast_status === 'offline') { %>
+                <span
+                  class="bg-gray-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium"
+                >
+                  OFFLINE
+                </span>
+                <% } else { %>
+                <span
+                  class="bg-gray-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium"
+                >
+                  <%= broadcast.broadcast_status.toUpperCase() %>
+                </span>
+                <% } %>
+              </div>
+
+              <!-- Hover Overlay with Quick Actions -->
+              <div
+                class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"
+              >
+                <% if (broadcast.broadcast_status === 'active') { %>
+                <!-- Stop button for ACTIVE streams -->
+                <button
+                  onclick="stopBroadcast('<%= broadcast.broadcast_id %>')"
+                  class="w-10 h-10 flex items-center justify-center bg-red-600 hover:bg-red-700 rounded-full transition-colors"
+                  title="Stop Stream"
+                >
+                  <i class="ti ti-player-stop text-white"></i>
+                </button>
+                <% } else { %>
+                <!-- Start button for OFFLINE, SCHEDULED, FAILED, COMPLETED streams -->
+                <button
+                  onclick="startBroadcast('<%= broadcast.broadcast_id %>')"
+                  class="w-10 h-10 flex items-center justify-center bg-green-600 hover:bg-green-700 rounded-full transition-colors"
+                  title="Start Stream"
+                >
+                  <i class="ti ti-player-play text-white"></i>
+                </button>
+                <% } %>
+                <!-- <button
+                  onclick="openStreamInfoModal('<%= broadcast.broadcast_id %>')"
+                  class="w-10 h-10 flex items-center justify-center bg-cyan-600 hover:bg-cyan-700 rounded-full transition-colors"
+                  title="Info"
+                >
+                  <i class="ti ti-info-circle text-white"></i>
+                </button> -->
+                <button
+                  onclick="openEditStreamModal('<%= broadcast.broadcast_id %>')"
+                  class="w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-700 rounded-full transition-colors"
+                  title="Edit"
+                >
+                  <i class="ti ti-edit text-white"></i>
+                </button>
+                <button
+                  onclick="deleteBroadcast('<%= broadcast.broadcast_id %>')"
+                  class="w-10 h-10 flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded-full transition-colors"
+                  title="Delete"
+                >
+                  <i class="ti ti-trash text-red-400"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Card Content -->
+            <div class="p-4">
+              <h3
+                class="font-semibold text-white mb-1 truncate"
+                title="<%= broadcast.broadcast_name || broadcast.stream_title || 'Untitled Broadcast' %>"
+              >
+                <%= broadcast.broadcast_name || broadcast.stream_title ||
+                'Untitled Broadcast' %>
+              </h3>
+
+              <!-- Content Info -->
+              <% if (broadcast.content_type === 'playlist' &&
+              broadcast.playlist_name) { %>
+              <div class="flex items-center gap-1.5 text-xs text-blue-400 mb-2">
+                <i class="ti ti-playlist"></i>
+                <span><%= broadcast.playlist_name %></span>
+                <% if (broadcast.playback_mode === 'shuffle') { %>
+                <i class="ti ti-arrows-shuffle text-xs"></i>
+                <% } %>
+              </div>
+              <% } else if (broadcast.content_title) { %>
+              <div class="flex items-center gap-1.5 text-xs text-gray-400 mb-2">
+                <i class="ti ti-video"></i>
+                <span class="truncate"><%= broadcast.content_title %></span>
+              </div>
+              <% } %>
+
+              <div class="flex items-center gap-2 text-sm text-gray-400 mb-3">
+                <% const platformIcons = { youtube: 'brand-youtube', facebook:
+                'brand-facebook', twitch: 'brand-twitch', tiktok:
+                'brand-tiktok', instagram: 'brand-instagram', custom: 'cast' };
+                const platformIcon =
+                platformIcons[broadcast.platform_name?.toLowerCase()] || 'cast';
+                %>
+                <i class="ti ti-<%= platformIcon %>"></i>
+                <span class="capitalize"
+                  ><%= broadcast.platform_name || 'Custom' %></span
+                >
+                <% if (broadcast.resolution || broadcast.bitrate) { %>
+                <span>•</span>
+                <span> <%= broadcast.resolution || '1920×1080' %> </span>
+                <% } %>
+              </div>
+
+              <div
+                class="flex items-center justify-between text-xs text-gray-500"
+              >
+                <div class="flex items-center gap-1">
+                  <i class="ti ti-clock"></i>
+                  <span>
+                    <%= broadcast.created_at ? new
+                    Date(broadcast.created_at).toLocaleDateString() : '--' %>
+                  </span>
+                </div>
+                <% if (broadcast.duration_seconds) { %>
+                <div class="flex items-center gap-1">
+                  <i class="ti ti-video"></i>
+                  <span
+                    ><%= Math.floor(broadcast.duration_seconds / 60) %>m</span
+                  >
+                </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          <% }) %> <% } %>
+        </div>
+
+        <!-- Card Pagination -->
+        <% if (broadcasts.length > 0) { %>
+        <div
+          class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
+          <!-- Pagination Buttons -->
+          <div class="flex items-center gap-2">
+            <button
+              onclick="changeCardPage('prev')"
+              class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              id="cardPrevBtn"
+            >
+              <i class="ti ti-chevron-left"></i>
+            </button>
+
+            <div id="cardPaginationNumbers" class="flex items-center gap-2">
+              <!-- Page numbers will be generated by JavaScript -->
+            </div>
+
+            <button
+              onclick="changeCardPage('next')"
+              class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              id="cardNextBtn"
+            >
+              <i class="ti ti-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- Showing Info -->
+          <p class="text-sm text-gray-400" id="cardShowingInfo">
+            Showing 1-<%= Math.min(broadcasts.length, 12) %> of <%=
+            broadcasts.length %> streams
+          </p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- New Stream Modal -->
+<div
+  id="newStreamModal"
+  class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4"
+>
+  <div
+    class="bg-gray-900 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+  >
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b border-gray-700">
+      <h3 class="text-xl font-bold text-white">Create New Stream</h3>
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm flex items-center gap-2"
+        >
+          <i class="ti ti-bulb"></i>
+          <span>Tips</span>
+        </button>
+        <button
+          onclick="closeNewStreamModal()"
+          class="text-gray-400 hover:text-white p-2"
+        >
+          <i class="ti ti-x text-2xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <form id="newStreamForm" class="flex-1 overflow-y-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+        <!-- Left Column: Form -->
+        <div class="space-y-4 order-2 lg:order-1">
+          <!-- Select Video -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2"
+              >Select Video</label
+            >
+
+            <!-- Custom Dropdown Button -->
+            <div class="relative">
+              <button
+                type="button"
+                id="videoDropdownButton"
+                onclick="toggleVideoDropdown()"
+                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between hover:bg-gray-600 transition-colors"
+              >
+                <span id="selectedVideoText" class="text-gray-400"
+                  >Choose a video...</span
+                >
+                <i class="ti ti-chevron-down"></i>
+              </button>
+
+              <!-- Hidden input for form submission -->
+              <input
+                type="hidden"
+                name="contentId"
+                id="selectedContentId"
+                required
+              />
+
+              <!-- Dropdown List -->
+              <div
+                id="videoDropdownList"
+                class="hidden absolute z-50 w-full mt-2 bg-gray-800 border border-gray-600 rounded-lg shadow-lg max-h-96 overflow-y-auto"
+              >
+                <!-- Search Box -->
+                <div
+                  class="sticky top-0 bg-gray-800 border-b border-gray-700 p-3"
+                >
+                  <div class="relative">
+                    <i
+                      class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    ></i>
+                    <input
+                      type="text"
+                      id="videoSearchInput"
+                      placeholder="Search videos..."
+                      onkeyup="filterVideoDropdown()"
+                      class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 pl-10 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <!-- Video List -->
+                <div class="p-2">
+                  <!-- Playlists Section -->
+                  <% if (playlists && playlists.length > 0) { %>
+                  <div class="px-2 py-1 text-xs text-gray-400 font-medium">
+                    PLAYLISTS
+                  </div>
+                  <% playlists.forEach(function(playlist) { %>
+                  <div
+                    class="video-dropdown-item flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-700 transition-colors"
+                    data-content-id="<%= playlist.playlist_id %>"
+                    data-filename=""
+                    data-title="<%= playlist.playlist_name %>"
+                    data-duration="0"
+                    data-resolution="Playlist"
+                    data-type="playlist"
+                    data-video-count="<%= playlist.video_count || 0 %>"
+                    onclick="selectVideoFromDropdownItem(this)"
+                  >
+                    <!-- Playlist Icon with Gradient -->
+                    <div
+                      class="w-24 h-14 bg-gradient-to-br from-purple-600 to-blue-600 rounded overflow-hidden flex-shrink-0 flex items-center justify-center"
+                    >
+                      <i class="ti ti-playlist text-white text-2xl"></i>
+                    </div>
+
+                    <!-- Playlist Info -->
+                    <div class="flex-1 min-w-0">
+                      <p
+                        class="text-white font-medium truncate flex items-center gap-2"
+                      >
+                        <i class="ti ti-playlist text-purple-400 text-sm"></i>
+                        <%= playlist.playlist_name %>
+                      </p>
+                      <p class="text-xs text-gray-400">
+                        Playlist • <%= playlist.video_count || 0 %> videos
+                      </p>
+                    </div>
+                  </div>
+                  <% }) %>
+
+                  <!-- Divider -->
+                  <div class="my-2 border-t border-gray-700"></div>
+                  <div class="px-2 py-1 text-xs text-gray-400 font-medium">
+                    VIDEOS
+                  </div>
+                  <% } %>
+
+                  <!-- Videos Section -->
+                  <% if (contentList && contentList.length > 0) { %> <%
+                  contentList.forEach(function(content) { %>
+                  <div
+                    class="video-dropdown-item flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-700 transition-colors"
+                    data-content-id="<%= content.content_id %>"
+                    data-filename="<%= content.filename %>"
+                    data-title="<%= content.title %>"
+                    data-duration="<%= content.duration_seconds || 0 %>"
+                    data-resolution="<%= content.resolution || 'N/A' %>"
+                    data-type="content"
+                    onclick="selectVideoFromDropdownItem(this)"
+                  >
+                    <!-- Thumbnail Preview -->
+                    <div
+                      class="w-24 h-14 bg-gray-700 rounded overflow-hidden flex-shrink-0"
+                    >
+                      <% if (content.thumbnail_path) { %>
+                      <img
+                        src="/storage/thumbnails/<%= content.thumbnail_path %>"
+                        alt="<%= content.title %>"
+                        class="w-full h-full object-cover"
+                      />
+                      <% } else { %>
+                      <div
+                        class="w-full h-full flex items-center justify-center"
+                      >
+                        <i class="ti ti-video text-gray-500"></i>
+                      </div>
+                      <% } %>
+                    </div>
+
+                    <!-- Video Info -->
+                    <div class="flex-1 min-w-0">
+                      <p class="text-white font-medium truncate">
+                        <%= content.title %>
+                      </p>
+                      <p class="text-xs text-gray-400">
+                        <%= content.resolution || '1248×704' %> • <% const
+                        duration = content.duration_seconds || 0; const mins =
+                        Math.floor(duration / 60); const secs =
+                        Math.floor(duration % 60); %> <%= mins %>:<%=
+                        String(secs).padStart(2, '0') %>
+                      </p>
+                    </div>
+                  </div>
+                  <% }) %> <% } else { %>
+                  <div class="p-4 text-center text-gray-400">
+                    <i class="ti ti-inbox text-3xl mb-2"></i>
+                    <p>No videos available</p>
+                  </div>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Broadcast Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2"
+              >Broadcast Name</label
+            >
+            <input
+              type="text"
+              name="broadcastName"
+              id="broadcastNameInput"
+              placeholder="Enter broadcast name..."
+              class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- Platform Selection -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2"
+              >Streaming Platform</label
+            >
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              <button
+                type="button"
+                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="youtube"
+                data-url="rtmp://a.rtmp.youtube.com/live2/"
+                onclick="selectPlatform(this)"
+              >
+                <i class="ti ti-brand-youtube text-2xl text-red-500"></i>
+                <span class="text-xs text-gray-300">YouTube</span>
+              </button>
+
+              <button
+                type="button"
+                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="facebook"
+                data-url="rtmps://live-api-s.facebook.com:443/rtmp/"
+                onclick="selectPlatform(this)"
+              >
+                <i class="ti ti-brand-facebook text-2xl text-blue-500"></i>
+                <span class="text-xs text-gray-300">Facebook</span>
+              </button>
+
+              <button
+                type="button"
+                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="twitch"
+                data-url="rtmp://live.twitch.tv/app/"
+                onclick="selectPlatform(this)"
+              >
+                <i class="ti ti-brand-twitch text-2xl text-purple-500"></i>
+                <span class="text-xs text-gray-300">Twitch</span>
+              </button>
+
+              <button
+                type="button"
+                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="tiktok"
+                data-url="rtmp://push.tiktok.com/live/"
+                onclick="selectPlatform(this)"
+              >
+                <i class="ti ti-brand-tiktok text-2xl text-gray-300"></i>
+                <span class="text-xs text-gray-300">TikTok</span>
+              </button>
+
+              <button
+                type="button"
+                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="instagram"
+                data-url="rtmps://live-upload.instagram.com:443/rtmp/"
+                onclick="selectPlatform(this)"
+              >
+                <i class="ti ti-brand-instagram text-2xl text-pink-500"></i>
+                <span class="text-xs text-gray-300">Instagram</span>
+              </button>
+
+              <button
+                type="button"
+                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-blue-500 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="custom"
+                data-url=""
+                onclick="selectPlatform(this)"
+              >
+                <i class="ti ti-cast text-2xl text-gray-300"></i>
+                <span class="text-xs text-gray-300">Custom</span>
+              </button>
+            </div>
+            <input
+              type="hidden"
+              name="platformName"
+              id="platformNameInput"
+              value="custom"
+            />
+          </div>
+
+          <!-- Stream Configuration -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2"
+              >Stream Configuration</label
+            >
+
+            <!-- RTMP URL -->
+            <div class="relative mb-3">
+              <i
+                class="ti ti-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              ></i>
+              <input
+                type="text"
+                name="destinationUrl"
+                id="destinationUrlInput"
+                required
+                placeholder="RTMP URL (will be auto-filled when selecting platform)"
+                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                title="RTMP Configuration"
+              >
+                <i class="ti ti-settings"></i>
+              </button>
+            </div>
+
+            <!-- Stream Key -->
+            <div class="relative">
+              <i
+                class="ti ti-key absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              ></i>
+              <input
+                type="password"
+                name="streamKey"
+                id="streamKeyInput"
+                placeholder="Stream Key (paste your stream key here)"
+                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onclick="toggleStreamKeyVisibility()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+              >
+                <i class="ti ti-eye" id="toggleKeyIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Schedule Settings -->
+          <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+            <div class="mb-3">
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-sm font-medium text-gray-300"
+                  >Schedule Settings</label
+                >
+                <span class="text-xs text-gray-500 hidden sm:inline"
+                  >Server time: <%= new Date().toLocaleString('en-US', {
+                  timeZone: process.env.TIMEZONE || 'UTC' }).replace(',', '')
+                  %></span
+                >
+              </div>
+              <span class="text-xs text-gray-500 block sm:hidden"
+                >Server time: <%= new Date().toLocaleString('en-US', { timeZone:
+                process.env.TIMEZONE || 'UTC' }).replace(',', '') %></span
+              >
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <!-- Loop Video Toggle -->
+              <div
+                class="flex items-center justify-between sm:justify-start gap-2"
+              >
+                <label class="text-sm text-gray-400">Loop Video</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="loopVideo"
+                    class="sr-only peer"
+                    checked
+                  />
+                  <div
+                    class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                  ></div>
+                </label>
+              </div>
+
+              <!-- Schedule Time -->
+              <div class="flex flex-col sm:flex-row gap-3">
+                <div class="flex-1">
+                  <label class="block text-xs text-gray-400 mb-1.5"
+                    >Schedule Time</label
+                  >
+                  <input
+                    type="datetime-local"
+                    name="scheduledTime"
+                    class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="<%= new Date().toISOString().slice(0,16) %>"
+                  />
+                </div>
+
+                <!-- Duration -->
+                <div class="w-full sm:w-32">
+                  <label class="block text-xs text-gray-400 mb-1.5"
+                    >Duration</label
+                  >
+                  <input
+                    type="number"
+                    name="duration"
+                    placeholder="minutes"
+                    class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="0"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Advanced Settings -->
+          <details class="bg-gray-800 border border-gray-700 rounded-lg">
+            <summary
+              class="cursor-pointer p-4 flex items-center justify-between"
+            >
+              <div class="flex items-center gap-2">
+                <i class="ti ti-settings text-gray-400"></i>
+                <span class="text-sm font-medium text-white"
+                  >Advanced Settings</span
+                >
+              </div>
+              <i class="ti ti-chevron-down text-gray-400"></i>
+            </summary>
+
+            <!-- Warning Banner -->
+            <div
+              class="mx-4 mb-4 bg-amber-900/20 border border-amber-700 rounded-lg p-3 flex gap-3"
+            >
+              <i class="ti ti-alert-triangle text-amber-500 mt-0.5"></i>
+              <div>
+                <p class="text-amber-400 text-xs font-medium">
+                  Advanced Settings Warning
+                </p>
+                <p class="text-amber-300/70 text-xs mt-1">
+                  Using advanced settings will make the streaming process more
+                  resource-intensive
+                </p>
+              </div>
+            </div>
+
+            <div class="px-4 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Bitrate -->
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">Bitrate</label>
+                <select
+                  name="bitrate"
+                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="2500k" selected>2500 kbps</option>
+                  <option value="3000k">3000 kbps</option>
+                  <option value="4500k">4500 kbps</option>
+                  <option value="6000k">6000 kbps</option>
+                </select>
+              </div>
+
+              <!-- Frame Rate -->
+              <div>
+                <label class="block text-xs text-gray-400 mb-1"
+                  >Frame Rate</label
+                >
+                <select
+                  name="framerate"
+                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="30" selected>30 FPS</option>
+                  <option value="60">60 FPS</option>
+                </select>
+              </div>
+
+              <!-- Resolution -->
+              <div>
+                <label class="block text-xs text-gray-400 mb-1"
+                  >Resolution</label
+                >
+                <select
+                  name="resolution"
+                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="720p" selected>720p HD</option>
+                  <option value="1080p">1080p Full HD</option>
+                  <option value="1440p">1440p Quad HD</option>
+                  <option value="2160p">2160p 4K UHD</option>
+                </select>
+                <p class="text-xs text-gray-500 mt-1">1280×720 (720p HD)</p>
+              </div>
+
+              <!-- Orientation -->
+              <div>
+                <label class="block text-xs text-gray-400 mb-1"
+                  >Orientation</label
+                >
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    class="flex-1 flex items-center justify-center gap-1 bg-blue-600 text-white px-3 py-2 rounded text-xs font-medium"
+                    onclick="selectOrientation('landscape', this)"
+                  >
+                    <i class="ti ti-device-laptop"></i>
+                    <span>Landscape</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="flex-1 flex items-center justify-center gap-1 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs"
+                    onclick="selectOrientation('portrait', this)"
+                  >
+                    <i class="ti ti-device-mobile"></i>
+                    <span>Portrait</span>
+                  </button>
+                </div>
+                <input type="hidden" name="orientation" value="landscape" />
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Right Column: Video Preview -->
+        <div class="space-y-4 order-1 lg:order-2">
+          <!-- Video Preview Player -->
+          <div
+            class="bg-black rounded-lg overflow-hidden aspect-video"
+            id="streamPreviewContainer"
+          >
+            <video
+              id="streamPreviewVideo"
+              class="w-full h-full"
+              controls
+              controlsList="nodownload"
+            >
+              <source id="streamPreviewSource" src="" type="video/mp4" />
+              Your browser does not support video tag.
+            </video>
+            <div
+              id="noVideoSelected"
+              class="w-full h-full flex flex-col items-center justify-center text-gray-500 relative"
+            >
+              <i class="ti ti-video-off text-6xl mb-3"></i>
+              <p class="text-sm">Select a video to preview</p>
+            </div>
+          </div>
+
+          <!-- Video Info (shown when video selected) -->
+          <div id="streamVideoInfo" class="hidden">
+            <div class="bg-gray-800 rounded-lg p-4 space-y-2">
+              <p class="text-white font-medium text-sm" id="streamVideoTitle">
+                Video Title
+              </p>
+              <div class="flex items-center gap-4 text-xs text-gray-400">
+                <span id="streamVideoResolution">1248×704</span>
+                <span>•</span>
+                <span id="streamVideoDuration">0:00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Footer -->
+    <div class="flex gap-3 justify-end border-t border-gray-700 p-6">
+      <button
+        type="button"
+        onclick="closeNewStreamModal()"
+        class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        form="newStreamForm"
+        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
+      >
+        <i class="ti ti-broadcast"></i>
+        <span>Create Stream</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Stream Info Modal -->
+<div
+  id="streamInfoModal"
+  class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4"
+>
+  <div
+    class="bg-gray-800 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+  >
+    <div class="flex items-center justify-between p-6 border-b border-gray-700">
+      <h3 class="text-lg font-semibold">Stream Information</h3>
+      <button
+        onclick="closeStreamInfoModal()"
+        class="text-gray-400 hover:text-white"
+      >
+        <i class="ti ti-x text-xl"></i>
+      </button>
+    </div>
+
+    <div class="p-6 space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-gray-400">Broadcast Name</p>
+          <p class="text-white font-medium" id="infoStreamName">-</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-400">Platform</p>
+          <p class="text-white font-medium" id="infoPlatform">-</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-400">Status</p>
+          <p class="text-white font-medium" id="infoStatus">-</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-400">Duration</p>
+          <p class="text-white font-medium" id="infoDuration">-</p>
+        </div>
+        <div class="col-span-2">
+          <p class="text-sm text-gray-400">Destination URL</p>
+          <p
+            class="text-white font-mono text-sm break-all"
+            id="infoDestination"
+          >
+            -
+          </p>
+        </div>
+        <div class="col-span-2">
+          <p class="text-sm text-gray-400">Stream Key</p>
+          <p class="text-white font-mono text-sm" id="infoStreamKey">-</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 border-t border-gray-700 flex gap-3 justify-end">
+      <button
+        onclick="closeStreamInfoModal()"
+        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Stream Modal -->
+<div
+  id="editStreamModal"
+  class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4"
+>
+  <div
+    class="bg-gray-900 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+  >
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b border-gray-700">
+      <h3 class="text-xl font-bold text-white">Edit Stream</h3>
+      <button
+        onclick="closeEditStreamModal()"
+        class="text-gray-400 hover:text-white p-2"
+      >
+        <i class="ti ti-x text-2xl"></i>
+      </button>
+    </div>
+
+    <form
+      id="editStreamForm"
+      onsubmit="updateStream(event)"
+      class="flex-1 overflow-y-auto"
+    >
+      <input type="hidden" id="editBroadcastId" />
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+        <!-- Left Column: Form -->
+        <div class="space-y-4 order-2 lg:order-1">
+          <!-- Broadcast Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              Broadcast Name
+            </label>
+            <input
+              type="text"
+              id="editStreamName"
+              placeholder="Enter broadcast name..."
+              class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <!-- Platform Selection -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              Streaming Platform
+            </label>
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              <button
+                type="button"
+                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="youtube"
+                data-url="rtmp://a.rtmp.youtube.com/live2/"
+                onclick="selectEditPlatform(this)"
+              >
+                <i class="ti ti-brand-youtube text-2xl text-red-500"></i>
+                <span class="text-xs text-gray-300">YouTube</span>
+              </button>
+
+              <button
+                type="button"
+                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="facebook"
+                data-url="rtmps://live-api-s.facebook.com:443/rtmp/"
+                onclick="selectEditPlatform(this)"
+              >
+                <i class="ti ti-brand-facebook text-2xl text-blue-500"></i>
+                <span class="text-xs text-gray-300">Facebook</span>
+              </button>
+
+              <button
+                type="button"
+                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="twitch"
+                data-url="rtmp://live.twitch.tv/app/"
+                onclick="selectEditPlatform(this)"
+              >
+                <i class="ti ti-brand-twitch text-2xl text-purple-500"></i>
+                <span class="text-xs text-gray-300">Twitch</span>
+              </button>
+
+              <button
+                type="button"
+                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="tiktok"
+                data-url="rtmp://push.tiktok.com/live/"
+                onclick="selectEditPlatform(this)"
+              >
+                <i class="ti ti-brand-tiktok text-2xl text-gray-300"></i>
+                <span class="text-xs text-gray-300">TikTok</span>
+              </button>
+
+              <button
+                type="button"
+                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="instagram"
+                data-url="rtmps://live-upload.instagram.com:443/rtmp/"
+                onclick="selectEditPlatform(this)"
+              >
+                <i class="ti ti-brand-instagram text-2xl text-pink-500"></i>
+                <span class="text-xs text-gray-300">Instagram</span>
+              </button>
+
+              <button
+                type="button"
+                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-blue-500 rounded-lg hover:border-blue-500 transition-colors"
+                data-platform="custom"
+                data-url=""
+                onclick="selectEditPlatform(this)"
+              >
+                <i class="ti ti-cast text-2xl text-gray-300"></i>
+                <span class="text-xs text-gray-300">Custom</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Stream Configuration -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              Stream Configuration
+            </label>
+
+            <!-- RTMP URL -->
+            <div class="relative mb-3">
+              <i
+                class="ti ti-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              ></i>
+              <input
+                type="text"
+                id="editDestinationUrl"
+                required
+                placeholder="RTMP URL"
+                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <!-- Stream Key -->
+            <div class="relative">
+              <i
+                class="ti ti-key absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              ></i>
+              <input
+                type="password"
+                id="editStreamKey"
+                placeholder="Stream Key"
+                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="button"
+                onclick="toggleEditStreamKeyVisibility()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+              >
+                <i class="ti ti-eye" id="editToggleKeyIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Schedule Settings -->
+          <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+            <div class="mb-3">
+              <label class="text-sm font-medium text-gray-300"
+                >Schedule Settings</label
+              >
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <!-- Loop Video Toggle -->
+              <div
+                class="flex items-center justify-between sm:justify-start gap-2"
+              >
+                <label class="text-sm text-gray-400">Loop Video</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="editLoopVideo"
+                    class="sr-only peer"
+                    checked
+                    disabled
+                  />
+                  <div
+                    class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                  ></div>
+                </label>
+              </div>
+
+              <p class="text-xs text-gray-500">
+                <i class="ti ti-info-circle"></i>
+                Loop and schedule settings cannot be changed after broadcast
+                creation
+              </p>
+            </div>
+          </div>
+
+          <!-- Advanced Settings -->
+          <details class="bg-gray-800 border border-gray-700 rounded-lg">
+            <summary
+              class="cursor-pointer p-4 flex items-center justify-between"
+            >
+              <div class="flex items-center gap-2">
+                <i class="ti ti-settings text-gray-400"></i>
+                <span class="text-sm font-medium text-white"
+                  >Advanced Settings</span
+                >
+              </div>
+              <i class="ti ti-chevron-down text-gray-400"></i>
+            </summary>
+
+            <div class="px-4 pb-4">
+              <p class="text-xs text-gray-500 mb-3">
+                <i class="ti ti-info-circle"></i>
+                Advanced settings are applied during broadcast creation and
+                cannot be modified
+              </p>
+            </div>
+          </details>
+        </div>
+
+        <!-- Right Column: Preview -->
+        <div class="order-1 lg:order-2">
+          <div class="bg-gray-800 rounded-lg p-4 sticky top-0">
+            <!-- Video Preview Player -->
+            <div
+              class="bg-black rounded-lg overflow-hidden aspect-video mb-4"
+              id="editVideoPreviewContainer"
+            >
+              <video
+                id="editPreviewVideo"
+                class="w-full h-full hidden"
+                controls
+                controlsList="nodownload"
+              >
+                <source id="editPreviewSource" src="" type="video/mp4" />
+                Your browser does not support video tag.
+              </video>
+              <div
+                id="editNoVideoSelected"
+                class="w-full h-full flex flex-col items-center justify-center text-gray-500"
+              >
+                <i class="ti ti-video-off text-4xl mb-2"></i>
+                <p class="text-sm">Video Preview</p>
+                <p class="text-xs" id="editVideoInfo">Loading...</p>
+              </div>
+            </div>
+
+            <!-- Schedule Settings Preview (Read-only) -->
+            <div
+              class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4"
+              id="editScheduleSettingsPreview"
+              style="display: none"
+            >
+              <div class="mb-3">
+                <label
+                  class="text-sm font-medium text-gray-300 flex items-center gap-2"
+                >
+                  <i class="ti ti-lock text-gray-500"></i>
+                  Schedule Settings (Read-only)
+                </label>
+              </div>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-400">Loop Video:</span>
+                  <span class="text-white" id="editPreviewLoopVideo">-</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-400">Schedule Time:</span>
+                  <span class="text-white" id="editPreviewScheduleTime">-</span>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 mt-3 flex items-center gap-1">
+                <i class="ti ti-info-circle"></i>
+                Schedule settings cannot be changed after broadcast creation
+              </p>
+            </div>
+
+            <!-- Advanced Settings Preview (Read-only) -->
+            <div
+              class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4"
+              id="editAdvancedSettingsPreview"
+              style="display: none"
+            >
+              <div class="mb-3">
+                <label
+                  class="text-sm font-medium text-gray-300 flex items-center gap-2"
+                >
+                  <i class="ti ti-lock text-gray-500"></i>
+                  Advanced Settings (Read-only)
+                </label>
+              </div>
+              <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="bg-gray-900 rounded p-3">
+                  <p class="text-xs text-gray-500 mb-1">Bitrate</p>
+                  <p class="text-white font-medium" id="editPreviewBitrate">
+                    -
+                  </p>
+                </div>
+                <div class="bg-gray-900 rounded p-3">
+                  <p class="text-xs text-gray-500 mb-1">Frame Rate</p>
+                  <p class="text-white font-medium" id="editPreviewFrameRate">
+                    -
+                  </p>
+                </div>
+                <div class="bg-gray-900 rounded p-3">
+                  <p class="text-xs text-gray-500 mb-1">Resolution</p>
+                  <p class="text-white font-medium" id="editPreviewResolution">
+                    -
+                  </p>
+                </div>
+                <div class="bg-gray-900 rounded p-3">
+                  <p class="text-xs text-gray-500 mb-1">Orientation</p>
+                  <p class="text-white font-medium" id="editPreviewOrientation">
+                    -
+                  </p>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 mt-3 flex items-center gap-1">
+                <i class="ti ti-info-circle"></i>
+                Advanced settings are applied during broadcast and cannot be
+                changed
+              </p>
+            </div>
+
+            <!-- Broadcast Info -->
+            <div class="space-y-3">
+              <div>
+                <label class="text-xs text-gray-400">Broadcast ID</label>
+                <p class="text-sm text-white" id="editBroadcastIdDisplay">-</p>
+              </div>
+
+              <div>
+                <label class="text-xs text-gray-400">Status</label>
+                <p class="text-sm" id="editBroadcastStatus">
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-1 bg-gray-700 rounded text-xs"
+                  >
+                    <i class="ti ti-circle-filled text-xs"></i>
+                    <span>Loading...</span>
+                  </span>
+                </p>
+              </div>
+
+              <div>
+                <label class="text-xs text-gray-400">Content Type</label>
+                <p class="text-sm text-white" id="editContentType">-</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div
+        class="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-6 flex gap-3 justify-end"
+      >
+        <button
+          type="button"
+          onclick="closeEditStreamModal()"
+          class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition flex items-center gap-2"
+        >
+          <i class="ti ti-x"></i>
+          <span>Cancel</span>
+        </button>
+        <button
+          type="submit"
+          class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2"
+        >
+          <i class="ti ti-device-floppy"></i>
+          <span>Save Changes</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/dashboard.js"></script>
+<script src="/js/broadcast-content-selector.js"></script>

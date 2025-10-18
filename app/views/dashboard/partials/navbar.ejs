@@ -1,0 +1,307 @@
+<!-- Top Navbar -->
+<nav
+  class="fixed top-0 left-0 right-0 lg:left-20 z-40 bg-gray-800 border-b border-gray-700"
+>
+  <div class="px-4 sm:px-6 py-3">
+    <div class="flex items-center justify-between">
+      <!-- Left: App Name/Logo -->
+      <div class="flex items-center gap-1">
+        <div class="lg:hidden">
+          <!-- <i class="ti ti-broadcast text-blue-500 text-2xl"></i> -->
+          <img src="/images/favicon.ico" alt="Logo" class="w-10 h-10" />
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white">
+            <%= process.env.APP_NAME || 'FloopyStream' %>
+          </h1>
+          <p class="text-xs text-gray-400 hidden sm:block">
+            Live Broadcasting Platform
+          </p>
+        </div>
+      </div>
+
+      <!-- Right: Actions -->
+      <div class="flex items-center gap-2">
+        <!-- Dark Mode Toggle -->
+        <button
+          id="darkModeToggle"
+          class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+          title="Toggle Dark Mode"
+        >
+          <i class="ti ti-moon text-xl"></i>
+        </button>
+
+        <!-- PWA Install -->
+        <button
+          id="pwaInstallBtn"
+          class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+          title="Install App"
+          style="display: none"
+        >
+          <i class="ti ti-device-mobile text-xl"></i>
+        </button>
+
+        <!-- GitHub Link -->
+        <a
+          href="https://github.com/KodekaTeam/FloopyStream"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+          title="GitHub Repository"
+        >
+          <i class="ti ti-brand-github text-xl"></i>
+        </a>
+
+        <!-- Notifications -->
+        <div class="relative">
+          <button
+            id="notificationBtn"
+            onclick="toggleNotifications()"
+            class="relative p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+            title="Notifications"
+          >
+            <i class="ti ti-bell text-xl"></i>
+            <!-- Notification Badge -->
+            <span
+              id="notificationBadge"
+              class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full hidden"
+            ></span>
+          </button>
+
+          <!-- Notification Dropdown -->
+          <div
+            id="notificationDropdown"
+            class="hidden absolute right-0 mt-2 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-lg"
+          >
+            <!-- Header -->
+            <div
+              class="p-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0"
+            >
+              <h3 class="font-semibold text-white">Notifications</h3>
+              <button
+                onclick="markAllAsRead()"
+                class="text-xs text-blue-400 hover:text-blue-300"
+              >
+                Mark all as read
+              </button>
+            </div>
+
+            <!-- Notification List -->
+            <div class="max-h-80 overflow-y-auto" id="notificationList">
+              <!-- Empty State -->
+              <div class="p-8 text-center text-gray-400">
+                <i class="ti ti-bell-off text-4xl mb-2"></i>
+                <p class="text-sm">No notifications yet</p>
+              </div>
+
+              <!-- Example notification (hidden by default) -->
+              <div
+                class="hidden notification-item p-4 border-b border-gray-700 hover:bg-gray-700 cursor-pointer"
+              >
+                <div class="flex gap-3">
+                  <div class="flex-shrink-0">
+                    <div
+                      class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center"
+                    >
+                      <i class="ti ti-broadcast text-white"></i>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm text-white font-medium">Stream Started</p>
+                    <p class="text-xs text-gray-400 mt-1">
+                      Your stream "Test Stream" is now live
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1">2 minutes ago</p>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full block"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-3 border-t border-gray-700 text-center">
+              <a href="#" class="text-sm text-blue-400 hover:text-blue-300">
+                View all notifications
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Profile (Desktop) -->
+        <div class="hidden lg:block relative">
+          <button
+            id="profileMenuBtn"
+            onclick="toggleProfileMenu()"
+            class="flex items-center gap-2 pl-2 ml-2 border-l border-gray-700 hover:bg-gray-700 rounded-lg pr-2 py-1 transition-colors"
+          >
+            <div class="text-right">
+              <p class="text-sm font-medium text-white">
+                <%= session.username %>
+              </p>
+              <p class="text-xs text-gray-400"><%= session.accountRole %></p>
+            </div>
+            <div
+              class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold"
+            >
+              <%= session.username.charAt(0).toUpperCase() %>
+            </div>
+          </button>
+
+          <!-- Profile Dropdown Menu -->
+          <div
+            id="profileDropdown"
+            class="hidden absolute right-0 mt-3 w-64 bg-gray-800 border border-gray-700 rounded-lg shadow-xl"
+          >
+            <!-- User Info -->
+            <div
+              class="p-4 border-b border-gray-700"
+              style="background-color: #1f2937"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
+                >
+                  <%= session.username.charAt(0).toUpperCase() %>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-white font-semibold truncate">
+                    <%= session.username %>
+                  </p>
+                  <p class="text-xs text-gray-400 truncate">
+                    <%= session.email || 'No email' %>
+                  </p>
+                </div>
+              </div>
+              <% if (session.accountRole === 'admin') { %>
+              <div class="mt-2">
+                <span
+                  class="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full"
+                >
+                  <i class="ti ti-shield text-sm"></i>
+                  Administrator
+                </span>
+              </div>
+              <% } %>
+            </div>
+
+            <!-- Menu Items -->
+            <div class="py-2">
+              <a
+                href="/dashboard"
+                class="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors block"
+              >
+                <i class="ti ti-layout-dashboard text-lg"></i>
+                <span>Dashboard</span>
+              </a>
+
+              <% if (session.accountRole === 'admin') { %>
+              <a
+                href="/user-management"
+                class="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors block"
+              >
+                <i class="ti ti-users text-lg"></i>
+                <span>Members</span>
+              </a>
+              <% } %>
+
+              <a
+                href="/donate"
+                target="_blank"
+                class="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors block"
+              >
+                <i class="ti ti-gift text-lg"></i>
+                <span>Donate</span>
+                <i class="ti ti-coin text-lg text-yellow-400"></i>
+              </a>
+
+              <a
+                href="/settings"
+                class="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors block"
+              >
+                <i class="ti ti-settings text-lg"></i>
+                <span>Settings</span>
+              </a>
+
+              <a
+                href="/aboutus"
+                target="_blank"
+                class="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors block"
+              >
+                <i class="ti ti-info-circle text-lg"></i>
+                <span>About us</span>
+              </a>
+
+              <div class="border-t border-gray-700 my-2"></div>
+
+              <a
+                href="/logout"
+                class="flex items-center gap-3 px-4 py-2.5 text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors block"
+              >
+                <i class="ti ti-logout text-lg"></i>
+                <span>Sign Out</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Notification functions
+  function toggleNotifications() {
+    const dropdown = document.getElementById("notificationDropdown");
+    dropdown.classList.toggle("hidden");
+  }
+
+  function markAllAsRead() {
+    const badge = document.getElementById("notificationBadge");
+    badge.classList.add("hidden");
+
+    // Update all notification items to read state
+    document
+      .querySelectorAll(".notification-item .bg-blue-500")
+      .forEach((dot) => {
+        dot.classList.remove("bg-blue-500");
+        dot.classList.add("bg-transparent");
+      });
+  }
+
+  function toggleProfileMenu() {
+    const dropdown = document.getElementById("profileDropdown");
+    dropdown.classList.toggle("hidden");
+  }
+
+  // Close dropdowns when clicking outside
+  document.addEventListener("click", (e) => {
+    const notificationBtn = document.getElementById("notificationBtn");
+    const notificationDropdown = document.getElementById(
+      "notificationDropdown"
+    );
+    const profileBtn = document.getElementById("profileMenuBtn");
+    const profileDropdown = document.getElementById("profileDropdown");
+
+    // Close notification dropdown
+    if (notificationBtn && notificationDropdown) {
+      if (
+        !notificationBtn.contains(e.target) &&
+        !notificationDropdown.contains(e.target)
+      ) {
+        notificationDropdown.classList.add("hidden");
+      }
+    }
+
+    // Close profile dropdown
+    if (profileBtn && profileDropdown) {
+      if (
+        !profileBtn.contains(e.target) &&
+        !profileDropdown.contains(e.target)
+      ) {
+        profileDropdown.classList.add("hidden");
+      }
+    }
+  });
+</script>

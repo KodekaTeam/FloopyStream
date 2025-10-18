@@ -1,0 +1,84 @@
+<!-- LEFT COLUMN: Account Information -->
+<div class="lg:col-span-1">
+  <div class="bg-gray-800 rounded-lg border border-gray-700 sticky top-4">
+    <div class="p-4 sm:p-6 border-b border-gray-700">
+      <h3 class="text-lg font-bold text-white flex items-center gap-2">
+        <i class="ti ti-info-circle"></i>
+        Account Information
+      </h3>
+    </div>
+
+    <div class="p-4 sm:p-6">
+      <!-- Avatar -->
+      <div class="flex flex-col items-center mb-6">
+        <div
+          class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-3xl mb-3"
+        >
+          <%= session.username.charAt(0).toUpperCase() %>
+        </div>
+        <p class="text-white font-medium text-lg"><%= session.username %></p>
+        <p class="text-xs text-gray-400">
+          Member since <%= new Date(account.created_at).toLocaleDateString() %>
+        </p>
+        <% if (session.accountRole === 'admin') { %>
+        <span
+          class="inline-flex items-center gap-1 mt-2 px-3 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full"
+        >
+          <i class="ti ti-shield"></i>
+          Administrator
+        </span>
+        <% } %>
+      </div>
+
+      <!-- Account Details -->
+      <div class="space-y-3">
+        <div class="py-2 border-b border-gray-700">
+          <span class="text-xs text-gray-400">Account ID</span>
+          <p class="text-white font-mono text-sm mt-1">
+            <%= account.account_id %>
+          </p>
+        </div>
+        <div class="py-2 border-b border-gray-700">
+          <span class="text-xs text-gray-400">Role</span>
+          <p class="text-white capitalize text-sm mt-1">
+            <%= account.account_role %>
+          </p>
+        </div>
+        <div class="py-2 border-b border-gray-700">
+          <span class="text-xs text-gray-400">Status</span>
+          <p
+            class="<%= account.is_active ? 'text-green-400' : 'text-red-400' %> text-sm mt-1"
+          >
+            <%= account.is_active ? 'Active' : 'Inactive' %>
+          </p>
+        </div>
+        <div class="py-2">
+          <span class="text-xs text-gray-400">Created</span>
+          <p class="text-white text-sm mt-1">
+            <%= new Date(account.created_at).toLocaleString() %>
+          </p>
+        </div>
+      </div>
+
+      <!-- User Management Link (Admin Only) -->
+      <% if (session.accountRole === 'admin') { %>
+      <div class="mt-6 pt-6 border-t border-gray-700">
+        <a
+          href="/user-management"
+          class="flex items-center justify-between w-full p-3 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-600/30 rounded-lg transition-colors group"
+        >
+          <div class="flex items-center gap-2">
+            <i class="ti ti-users text-blue-400"></i>
+            <span class="text-blue-400 text-sm font-medium"
+              >User Management</span
+            >
+          </div>
+          <i
+            class="ti ti-arrow-right text-blue-400 group-hover:translate-x-1 transition-transform"
+          ></i>
+        </a>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>

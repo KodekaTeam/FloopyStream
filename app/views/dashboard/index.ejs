@@ -1,0 +1,203 @@
+<% layout('dashboard/layout') %>
+
+<!-- Hero Section with Gradient Background -->
+<section class="hero-section">
+  <div class="hero-background">
+    <div class="hero-gradient"></div>
+  </div>
+
+  <div class="container hero-container">
+    <div class="hero-content animate-fade-in">
+      <div class="hero-badge">
+        <span class="badge-text">🚀 Next Generation Platform</span>
+      </div>
+
+      <h1 class="hero-title">Professional Live Broadcasting Made Simple</h1>
+
+      <p class="hero-subtitle">
+        Stream, manage, and monetize your content with our powerful platform.
+        Professional-grade tools for creators and broadcasters worldwide.
+      </p>
+
+      <% if (session && session.accountId) { %>
+      <div class="hero-actions">
+        <a href="/dashboard" class="btn btn-primary btn-lg">
+          <span class="btn-icon">📊</span>
+          Go to Dashboard
+        </a>
+      </div>
+      <% } else { %>
+      <div class="hero-actions">
+        <a href="/register" class="btn btn-primary btn-lg">
+          <span class="btn-icon">✨</span>
+          Get Started Free
+        </a>
+        <a href="/login" class="btn btn-secondary btn-lg">
+          <span class="btn-icon">🔐</span>
+          Sign In
+        </a>
+      </div>
+      <% } %>
+
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">10K+</span>
+          <span class="stat-label">Active Creators</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">1M+</span>
+          <span class="stat-label">Daily Viewers</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">99.9%</span>
+          <span class="stat-label">Uptime</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual animate-float">
+      <div class="hero-card">
+        <div class="card-header">
+          <div class="record-dot"></div>
+          <span>Live Stream</span>
+        </div>
+        <div class="card-content">
+          <div class="video-placeholder">
+            <svg
+              viewBox="0 0 100 100"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                stroke="currentColor"
+                stroke-width="2"
+                opacity="0.2"
+              />
+              <path
+                d="M40 35 L40 65 L65 50 Z"
+                fill="currentColor"
+                opacity="0.3"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Powerful Features</h2>
+      <p class="section-subtitle">
+        Everything you need to succeed as a broadcaster
+      </p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card card-hover-effect">
+        <div class="feature-header">
+          <div class="feature-icon-wrapper">🎥</div>
+        </div>
+        <h3>Live Broadcasting</h3>
+        <p>
+          Stream to multiple platforms simultaneously with ultra-low latency and
+          crystal-clear quality
+        </p>
+        <div class="feature-footer">
+          <a href="#" class="learn-more">Learn more →</a>
+        </div>
+      </div>
+
+      <div class="feature-card card-hover-effect">
+        <div class="feature-header">
+          <div class="feature-icon-wrapper">📹</div>
+        </div>
+        <h3>Media Management</h3>
+        <p>
+          Organize, edit, and manage your entire video library with powerful
+          tools and storage
+        </p>
+        <div class="feature-footer">
+          <a href="#" class="learn-more">Learn more →</a>
+        </div>
+      </div>
+
+      <div class="feature-card card-hover-effect">
+        <div class="feature-header">
+          <div class="feature-icon-wrapper">⏰</div>
+        </div>
+        <h3>Smart Scheduling</h3>
+        <p>
+          Plan your broadcasts in advance with automatic reminders and audience
+          notifications
+        </p>
+        <div class="feature-footer">
+          <a href="#" class="learn-more">Learn more →</a>
+        </div>
+      </div>
+
+      <div class="feature-card card-hover-effect">
+        <div class="feature-header">
+          <div class="feature-icon-wrapper">📊</div>
+        </div>
+        <h3>Live Analytics</h3>
+        <p>
+          Real-time performance monitoring with detailed insights into viewer
+          engagement and growth
+        </p>
+        <div class="feature-footer">
+          <a href="#" class="learn-more">Learn more →</a>
+        </div>
+      </div>
+
+      <div class="feature-card card-hover-effect">
+        <div class="feature-header">
+          <div class="feature-icon-wrapper">�</div>
+        </div>
+        <h3>Monetization</h3>
+        <p>
+          Multiple revenue streams including ads, subscriptions, donations, and
+          sponsorships
+        </p>
+        <div class="feature-footer">
+          <a href="#" class="learn-more">Learn more →</a>
+        </div>
+      </div>
+
+      <div class="feature-card card-hover-effect">
+        <div class="feature-header">
+          <div class="feature-icon-wrapper">🌐</div>
+        </div>
+        <h3>Global Reach</h3>
+        <p>
+          Broadcast to audiences worldwide with servers in multiple regions for
+          optimal performance
+        </p>
+        <div class="feature-footer">
+          <a href="#" class="learn-more">Learn more →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h2>Ready to Start Broadcasting?</h2>
+      <p>Join thousands of creators already using our platform</p>
+      <% if (!session || !session.accountId) { %>
+      <a href="/register" class="btn btn-primary btn-lg btn-cta">
+        Start Your Free Trial
+      </a>
+      <% } %>
+    </div>
+  </div>
+</section>

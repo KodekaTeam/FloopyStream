@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+.DS_Store
+README.md
+QUICKSTART.md
+INSTALL.md
+LICENSE.md
+*.md
+views_backup_*
+backup
+.env.example
+.vscode
+.idea
+*.log

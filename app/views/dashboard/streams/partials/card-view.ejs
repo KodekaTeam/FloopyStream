@@ -1,0 +1,234 @@
+﻿<!-- Card View - Visible on Mobile, Hidden on Desktop when Table Toggle is Active -->
+<div id="cardViewContainer" class="block md:hidden">
+  <div
+    id="cardGrid"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-6"
+  >
+    <% if (broadcasts.length === 0) { %>
+    <div class="col-span-full bg-gray-800 rounded-lg p-12 text-center">
+      <i class="ti ti-broadcast text-5xl text-gray-600 mb-4"></i>
+      <p class="text-gray-400 font-medium mb-2">No streams found</p>
+      <p class="text-gray-500 mb-6">
+        Create your first stream to start broadcasting
+      </p>
+      <button
+        onclick="openNewStreamModal()"
+        class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
+      >
+        <i class="ti ti-plus"></i>
+        <span>New Stream</span>
+      </button>
+    </div>
+    <% } else { %> <% broadcasts.forEach(function(broadcast) { %>
+    <div
+      class="bg-gray-800 rounded-lg overflow-hidden group hover:ring-2 hover:ring-blue-500 transition-all"
+    >
+      <!-- Thumbnail with overlay -->
+      <div
+        class="relative w-full aspect-video overflow-hidden <%= broadcast.content_type === 'playlist' ? 'bg-gradient-to-br from-purple-600 to-blue-600' : 'bg-gray-900' %>"
+      >
+        <% if (broadcast.thumbnail_path) { %>
+        <img
+          src="/storage/thumbnails/<%= broadcast.thumbnail_path %>"
+          alt="<%= broadcast.broadcast_name || 'Untitled' %>"
+          class="w-full h-full object-cover"
+        />
+        <% } else if (broadcast.content_type === 'playlist') { %>
+        <div class="w-full h-full flex items-center justify-center">
+          <i class="ti ti-playlist text-6xl text-white opacity-90"></i>
+        </div>
+        <% } else { %>
+        <div class="w-full h-full flex items-center justify-center">
+          <i class="ti ti-video text-5xl text-gray-600"></i>
+        </div>
+        <% } %>
+
+        <!-- Status Badge Overlay -->
+        <div class="absolute top-2 right-2">
+          <% if (broadcast.broadcast_status === 'active') { %>
+          <span
+            class="flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium"
+          >
+            <span
+              class="w-2 h-2 bg-white rounded-full animate-pulse"
+            ></span>
+            LIVE
+          </span>
+          <% } else if (broadcast.broadcast_status === 'scheduled') { %>
+          <span
+            class="bg-yellow-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium"
+          >
+            SCHEDULED
+          </span>
+          <% } else if (broadcast.broadcast_status === 'completed') { %>
+          <span
+            class="bg-blue-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium"
+          >
+            COMPLETED
+          </span>
+          <% } else if (broadcast.broadcast_status === 'offline') { %>
+          <span
+            class="bg-gray-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium"
+          >
+            OFFLINE
+          </span>
+          <% } else { %>
+          <span
+            class="bg-gray-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium"
+          >
+            <%= broadcast.broadcast_status.toUpperCase() %>
+          </span>
+          <% } %>
+        </div>
+
+        <!-- Hover Overlay with Quick Actions -->
+        <div
+          class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"
+        >
+          <% if (broadcast.broadcast_status === 'active') { %>
+          <!-- Stop button for ACTIVE streams -->
+          <button
+            onclick="stopBroadcast('<%= broadcast.broadcast_id %>')"
+            class="w-10 h-10 flex items-center justify-center bg-red-600 hover:bg-red-700 rounded-full transition-colors"
+            title="Stop Stream"
+          >
+            <i class="ti ti-player-stop text-white"></i>
+          </button>
+          <% } else { %>
+          <!-- Start button for OFFLINE, SCHEDULED, FAILED, COMPLETED streams -->
+          <button
+            onclick="startBroadcast('<%= broadcast.broadcast_id %>')"
+            class="w-10 h-10 flex items-center justify-center bg-green-600 hover:bg-green-700 rounded-full transition-colors"
+            title="Start Stream"
+          >
+            <i class="ti ti-player-play text-white"></i>
+          </button>
+          <% } %>
+          <button
+            onclick="openStreamInfoModal('<%= broadcast.broadcast_id %>')"
+            class="w-10 h-10 flex items-center justify-center bg-cyan-600 hover:bg-cyan-700 rounded-full transition-colors"
+            title="Info"
+          >
+            <i class="ti ti-info-circle text-white"></i>
+          </button>
+          <button
+            onclick="openEditStreamModal('<%= broadcast.broadcast_id %>')"
+            class="w-10 h-10 flex items-center justify-center bg-blue-600 hover:bg-blue-700 rounded-full transition-colors"
+            title="Edit"
+          >
+            <i class="ti ti-edit text-white"></i>
+          </button>
+          <button
+            onclick="deleteBroadcast('<%= broadcast.broadcast_id %>')"
+            class="w-10 h-10 flex items-center justify-center bg-gray-700 hover:bg-gray-600 rounded-full transition-colors"
+            title="Delete"
+          >
+            <i class="ti ti-trash text-red-400"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Card Content -->
+      <div class="p-4">
+        <h3
+          class="font-semibold text-white mb-1 truncate"
+          title="<%= broadcast.broadcast_name || broadcast.stream_title || 'Untitled Broadcast' %>"
+        >
+          <%= broadcast.broadcast_name || broadcast.stream_title ||
+          'Untitled Broadcast' %>
+        </h3>
+
+        <!-- Content Info -->
+        <% if (broadcast.content_type === 'playlist' &&
+        broadcast.playlist_name) { %>
+        <div class="flex items-center gap-1.5 text-xs text-blue-400 mb-2">
+          <i class="ti ti-playlist"></i>
+          <span><%= broadcast.playlist_name %></span>
+          <% if (broadcast.playback_mode === 'shuffle') { %>
+          <i class="ti ti-arrows-shuffle text-xs"></i>
+          <% } %>
+        </div>
+        <% } else if (broadcast.content_title) { %>
+        <div class="flex items-center gap-1.5 text-xs text-gray-400 mb-2">
+          <i class="ti ti-video"></i>
+          <span class="truncate"><%= broadcast.content_title %></span>
+        </div>
+        <% } %>
+
+        <div class="flex items-center gap-2 text-sm text-gray-400 mb-3">
+          <% const platformIcons = { youtube: 'brand-youtube', facebook:
+          'brand-facebook', twitch: 'brand-twitch', tiktok:
+          'brand-tiktok', instagram: 'brand-instagram', custom: 'cast' };
+          const platformIcon =
+          platformIcons[broadcast.platform_name?.toLowerCase()] || 'cast';
+          %>
+          <i class="ti ti-<%= platformIcon %>"></i>
+          <span class="capitalize"
+            ><%= broadcast.platform_name || 'Custom' %></span
+          >
+          <% if (broadcast.resolution || broadcast.bitrate) { %>
+          <span>â€¢</span>
+          <span> <%= broadcast.resolution || '1920Ã—1080' %> </span>
+          <% } %>
+        </div>
+
+        <div
+          class="flex items-center justify-between text-xs text-gray-500"
+        >
+          <div class="flex items-center gap-1">
+            <i class="ti ti-clock"></i>
+            <span>
+              <%= broadcast.created_at ? new
+              Date(broadcast.created_at).toLocaleDateString() : '--' %>
+            </span>
+          </div>
+          <% if (broadcast.duration_seconds) { %>
+          <div class="flex items-center gap-1">
+            <i class="ti ti-video"></i>
+            <span
+              ><%= Math.floor(broadcast.duration_seconds / 60) %>m</span
+            >
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <% }) %> <% } %>
+  </div>
+
+  <!-- Card Pagination -->
+  <% if (broadcasts.length > 0) { %>
+  <div
+    class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4"
+  >
+    <!-- Pagination Buttons -->
+    <div class="flex items-center gap-2">
+      <button
+        onclick="changeCardPage('prev')"
+        class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        id="cardPrevBtn"
+      >
+        <i class="ti ti-chevron-left"></i>
+      </button>
+
+      <div id="cardPaginationNumbers" class="flex items-center gap-2">
+        <!-- Page numbers will be generated by JavaScript -->
+      </div>
+
+      <button
+        onclick="changeCardPage('next')"
+        class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        id="cardNextBtn"
+      >
+        <i class="ti ti-chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- Showing Info -->
+    <p class="text-sm text-gray-400" id="cardShowingInfo">
+      Showing 1-<%= Math.min(broadcasts.length, 12) %> of <%=
+      broadcasts.length %> streams
+    </p>
+  </div>
+  <% } %>
+</div>

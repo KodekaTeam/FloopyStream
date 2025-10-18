@@ -1,0 +1,180 @@
+<% layout('dashboard/layout') %>
+
+<div class="flex h-screen bg-gray-900 overflow-hidden">
+  <%- include('../../partials/navbar') %> <%- include('../../partials/sidebar')
+  %>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-auto lg:ml-20 pt-16">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <!-- Header -->
+      <div class="mb-6 sm:mb-8">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        >
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-white">
+              User Management
+            </h2>
+            <p class="text-gray-400 mt-1 text-sm sm:text-base">
+              Manage user accounts and permissions
+            </p>
+          </div>
+          <button
+            onclick="openCreateUserModal()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 transition-colors font-medium"
+          >
+            <i class="ti ti-plus"></i>
+            <span>Create New User</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div
+        class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8"
+      >
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-gray-400 text-sm">Total Users</p>
+            <i class="ti ti-users text-gray-500"></i>
+          </div>
+          <p class="text-2xl font-bold text-white" id="totalUsers">0</p>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-gray-400 text-sm">Active Users</p>
+            <i class="ti ti-user-check text-green-500"></i>
+          </div>
+          <p class="text-2xl font-bold text-green-400" id="activeUsers">0</p>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-gray-400 text-sm">Administrators</p>
+            <i class="ti ti-shield text-blue-500"></i>
+          </div>
+          <p class="text-2xl font-bold text-blue-400" id="adminUsers">0</p>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-gray-400 text-sm">Members</p>
+            <i class="ti ti-user text-gray-500"></i>
+          </div>
+          <p class="text-2xl font-bold text-gray-300" id="memberUsers">0</p>
+        </div>
+      </div>
+
+      <!-- Search and Filters -->
+      <div class="mb-6 flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+          <div class="relative">
+            <i
+              class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            ></i>
+            <input
+              type="text"
+              id="searchUsers"
+              placeholder="Search users..."
+              class="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
+              oninput="filterUsers()"
+            />
+          </div>
+        </div>
+        <select
+          id="filterRole"
+          class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
+          onchange="filterUsers()"
+        >
+          <option value="all">All Roles</option>
+          <option value="admin">Admin</option>
+          <option value="member">Member</option>
+        </select>
+        <select
+          id="filterStatus"
+          class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
+          onchange="filterUsers()"
+        >
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <!-- Users Table -->
+      <div
+        class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden"
+      >
+        <div class="p-4 sm:p-6 border-b border-gray-700">
+          <h3 class="text-lg sm:text-xl font-bold text-white">All Users</h3>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-900">
+              <tr>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                >
+                  User
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                >
+                  Role
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                >
+                  Status
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider hidden md:table-cell"
+                >
+                  Video
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider hidden md:table-cell"
+                >
+                  Streaming
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider hidden lg:table-cell"
+                >
+                  Created
+                </th>
+                <th
+                  class="px-4 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody" class="divide-y divide-gray-700">
+              <!-- Users will be loaded here dynamically -->
+              <tr>
+                <td colspan="7" class="px-4 py-8 text-center text-gray-400">
+                  <i class="ti ti-loader-2 animate-spin text-2xl"></i>
+                  <p class="mt-2">Loading users...</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Create User Modal -->
+<%- include('./modals/create-user') %>
+
+<!-- Edit User Modal -->
+<%- include('./modals/edit-user') %>
+
+<!-- Delete Confirmation Modal -->
+<%- include('./modals/delete-user') %>
+
+<script src="/js/user-management.js"></script>

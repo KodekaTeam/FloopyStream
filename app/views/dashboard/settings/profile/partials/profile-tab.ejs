@@ -1,0 +1,77 @@
+<!-- Tab Content: Profile Information -->
+<div id="profileContent" class="tab-content">
+  <div class="bg-gray-800 rounded-lg border border-gray-700">
+    <div class="p-4 sm:p-6 border-b border-gray-700">
+      <h3 class="text-lg font-bold text-white flex items-center gap-2">
+        <i class="ti ti-user"></i>
+        Profile Information
+      </h3>
+      <p class="text-xs text-gray-400 mt-1">
+        Update your personal information and email
+      </p>
+    </div>
+
+    <form id="profileForm" class="p-4 sm:p-6 space-y-4">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+      <!-- Username (Read-only) -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Username
+        </label>
+        <input
+          type="text"
+          value="<%= account.username %>"
+          disabled
+          class="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-500 cursor-not-allowed"
+        />
+        <p class="text-xs text-gray-500 mt-1">
+          <i class="ti ti-info-circle"></i>
+          Username cannot be changed
+        </p>
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Email Address
+        </label>
+        <input
+          type="email"
+          name="email"
+          value="<%= account.email || '' %>"
+          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Enter your email address"
+        />
+      </div>
+
+      <!-- Display Name -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Display Name
+        </label>
+        <input
+          type="text"
+          name="displayName"
+          value="<%= account.display_name || '' %>"
+          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Enter your display name"
+        />
+        <p class="text-xs text-gray-500 mt-1">
+          <i class="ti ti-info-circle"></i>
+          This name will be displayed across the platform
+        </p>
+      </div>
+
+      <div class="flex gap-3 pt-4">
+        <button
+          type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2 font-medium"
+        >
+          <i class="ti ti-device-floppy"></i>
+          <span>Save Changes</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

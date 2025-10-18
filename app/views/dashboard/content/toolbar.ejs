@@ -1,0 +1,77 @@
+<!-- Toolbar -->
+<div
+  class="bg-gray-800 rounded-lg p-4 mb-4 sm:mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
+>
+  <div class="relative flex-1 max-w-md">
+    <input
+      type="text"
+      id="searchVideos"
+      placeholder="Search videos..."
+      class="w-full bg-gray-700 border border-gray-600 text-white pl-9 pr-4 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
+    />
+    <i
+      class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+    ></i>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <select
+      id="sortSelect"
+      class="flex-1 sm:flex-initial bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
+    >
+      <option value="newest">Newest</option>
+      <option value="oldest">Oldest</option>
+      <option value="name">Name</option>
+      <option value="size">File Size</option>
+    </select>
+
+    <!-- Upload Button with Dropdown -->
+    <div class="relative" id="uploadDropdownContainer">
+      <button
+        onclick="toggleUploadDropdown()"
+        class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition whitespace-nowrap text-sm sm:text-base"
+      >
+        <i class="ti ti-upload"></i>
+        <span class="hidden sm:inline">Upload Video</span>
+        <span class="sm:hidden">Upload</span>
+        <i class="ti ti-chevron-down text-xs"></i>
+      </button>
+
+      <!-- Dropdown Menu -->
+      <div
+        id="uploadDropdown"
+        class="hidden absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50"
+      >
+        <button
+          onclick="openUploadModal(); closeUploadDropdown();"
+          class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition text-left rounded-t-lg"
+        >
+          <div
+            class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center"
+          >
+            <i class="ti ti-upload text-white"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-white font-medium text-sm">Upload from Device</p>
+            <p class="text-gray-400 text-xs">Select files from computer</p>
+          </div>
+        </button>
+
+        <button
+          onclick="openImportDriveModal(); closeUploadDropdown();"
+          class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition text-left rounded-b-lg border-t border-gray-700"
+        >
+          <div
+            class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center"
+          >
+            <i class="ti ti-brand-google-drive text-white"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-white font-medium text-sm">Import from Drive</p>
+            <p class="text-gray-400 text-xs">Import from Google Drive</p>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

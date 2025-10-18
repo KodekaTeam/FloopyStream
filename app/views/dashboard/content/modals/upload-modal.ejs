@@ -1,0 +1,97 @@
+<!-- Upload Modal -->
+<div
+  id="uploadModal"
+  class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4"
+>
+  <div class="bg-gray-800 rounded-lg w-full max-w-2xl">
+    <div class="flex items-center justify-between p-6 border-b border-gray-700">
+      <h3 class="text-lg font-semibold">Upload Video</h3>
+      <button
+        onclick="closeUploadModal()"
+        class="text-gray-400 hover:text-white"
+      >
+        <i class="ti ti-x text-xl"></i>
+      </button>
+    </div>
+
+    <form id="uploadForm" enctype="multipart/form-data" class="p-6">
+      <div class="space-y-4">
+        <!-- File Upload Area -->
+        <div>
+          <label class="block text-sm font-medium mb-2">Video File</label>
+          <div
+            class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 transition cursor-pointer"
+            id="dropZone"
+          >
+            <input
+              type="file"
+              name="videoFile"
+              id="videoFileInput"
+              accept="video/*"
+              required
+              class="hidden"
+            />
+            <i class="ti ti-upload text-4xl text-gray-500 mb-2"></i>
+            <p class="text-gray-400 mb-1">Click to upload or drag and drop</p>
+            <p class="text-xs text-gray-500">MP4, AVI, MOV, MKV (Max 5GB)</p>
+          </div>
+          <div id="fileInfo" class="hidden mt-2 text-sm text-gray-400"></div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">Title</label>
+          <input
+            type="text"
+            name="title"
+            required
+            placeholder="Enter video title"
+            class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2"
+            >Description (Optional)</label
+          >
+          <textarea
+            name="description"
+            rows="3"
+            placeholder="Add description..."
+            class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div id="uploadProgress" class="hidden mt-4">
+        <div class="w-full bg-gray-700 rounded-full h-2">
+          <div
+            id="uploadProgressBar"
+            class="bg-blue-600 h-2 rounded-full transition-all"
+            style="width: 0%"
+          ></div>
+        </div>
+        <p class="text-sm text-gray-400 mt-2 text-center">
+          Uploading... <span id="uploadPercent">0</span>%
+        </p>
+      </div>
+
+      <div class="mt-6 flex gap-3 justify-end">
+        <button
+          type="button"
+          onclick="closeUploadModal()"
+          class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          id="uploadButton"
+          class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+        >
+          Upload
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

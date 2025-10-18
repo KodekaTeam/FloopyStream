@@ -1,0 +1,77 @@
+<% layout('dashboard/layout') %>
+
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>Create Account</h2>
+
+    <% if (!allowRegistration) { %>
+    <div class="alert alert-warning">
+      <p>Registration is currently closed. Please contact an administrator.</p>
+    </div>
+    <% } else { %> <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/register" class="auth-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          class="form-control"
+          required
+          minlength="3"
+          autocomplete="username"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="form-control"
+          required
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          class="form-control"
+          required
+          minlength="6"
+          autocomplete="new-password"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          name="confirmPassword"
+          class="form-control"
+          required
+          minlength="6"
+          autocomplete="new-password"
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Register</button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a href="/login">Login here</a></p>
+    </div>
+    <% } %>
+  </div>
+</div>

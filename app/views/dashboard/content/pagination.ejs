@@ -1,0 +1,36 @@
+<% if (contentList.length > 0) { %>
+<!-- Pagination -->
+<div class="mt-6 flex items-center justify-center gap-2">
+  <button
+    class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <i class="ti ti-chevron-left"></i>
+  </button>
+
+  <button
+    class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded"
+  >
+    1
+  </button>
+  <button
+    class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition"
+  >
+    2
+  </button>
+  <button
+    class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition"
+  >
+    3
+  </button>
+
+  <button
+    class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition"
+  >
+    <i class="ti ti-chevron-right"></i>
+  </button>
+</div>
+
+<p class="text-center text-sm text-gray-500 mt-4">
+  Showing 1-4 of <%= contentList.length %> videos
+</p>
+<% } %>

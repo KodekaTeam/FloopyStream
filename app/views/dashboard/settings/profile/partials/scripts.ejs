@@ -1,0 +1,148 @@
+<script>
+  // Tab switching functionality
+  function switchTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll(".tab-content").forEach((content) => {
+      content.classList.add("hidden");
+    });
+
+    // Remove active state from all tabs
+    document.querySelectorAll(".tab-button").forEach((button) => {
+      button.classList.remove("bg-blue-600", "text-white");
+      button.classList.add("bg-gray-700", "text-gray-300");
+    });
+
+    // Show selected tab content
+    document.getElementById(tabName + "Content").classList.remove("hidden");
+
+    // Add active state to selected tab
+    const activeTab = document.getElementById(tabName + "Tab");
+    activeTab.classList.remove("bg-gray-700", "text-gray-300");
+    activeTab.classList.add("bg-blue-600", "text-white");
+  }
+
+  // Toggle password visibility
+  function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const icon = document.getElementById(fieldId + "Icon");
+
+    if (field.type === "password") {
+      field.type = "text";
+      icon.classList.remove("ti-eye");
+      icon.classList.add("ti-eye-off");
+    } else {
+      field.type = "password";
+      icon.classList.remove("ti-eye-off");
+      icon.classList.add("ti-eye");
+    }
+  }
+
+  // Handle profile form submission
+  document
+    .getElementById("profileForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = {
+        email: formData.get("email"),
+        displayName: formData.get("displayName"),
+      };
+
+      try {
+        const response = await fetch("/api/profile/update", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showToast("Profile updated successfully", "success");
+        } else {
+          showToast(result.message || "Failed to update profile", "error");
+        }
+      } catch (error) {
+        console.error("Update profile error:", error);
+        showToast("Error updating profile", "error");
+      }
+    });
+
+  // Handle password form submission
+  document
+    .getElementById("passwordForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const newPassword = formData.get("newPassword");
+      const confirmPassword = formData.get("confirmPassword");
+
+      if (newPassword !== confirmPassword) {
+        showToast("Passwords do not match", "error");
+        return;
+      }
+
+      const data = {
+        currentPassword: formData.get("currentPassword"),
+        newPassword: newPassword,
+      };
+
+      try {
+        const response = await fetch("/api/profile/change-password", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showToast("Password changed successfully", "success");
+          this.reset();
+        } else {
+          showToast(result.message || "Failed to change password", "error");
+        }
+      } catch (error) {
+        console.error("Change password error:", error);
+        showToast("Error changing password", "error");
+      }
+    });
+
+  // Toast notification function
+  function showToast(message, type = "info") {
+    const toast = document.createElement("div");
+    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 transform transition-all duration-300 ${
+      type === "success"
+        ? "bg-green-600"
+        : type === "error"
+        ? "bg-red-600"
+        : "bg-blue-600"
+    }`;
+
+    const icon =
+      type === "success"
+        ? "ti-check"
+        : type === "error"
+        ? "ti-alert-circle"
+        : "ti-info-circle";
+
+    toast.innerHTML = `
+      <i class="ti ${icon} text-white text-xl"></i>
+      <span class="text-white font-medium">${message}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateY(20px)";
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+</script>

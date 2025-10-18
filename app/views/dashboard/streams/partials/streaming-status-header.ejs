@@ -1,0 +1,66 @@
+﻿  </div>
+</div>
+
+<!-- Streaming Status Section -->
+<div class="bg-gray-800 rounded-lg border border-gray-700">
+  <div class="p-4 sm:p-6 border-b border-gray-700">
+    <div
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+    >
+      <div>
+        <h3 class="text-lg sm:text-xl font-bold text-white">
+          Streaming Status
+        </h3>
+        <p class="text-xs sm:text-sm text-gray-400 mt-1">
+          Manage your live broadcasts
+        </p>
+      </div>
+      <div
+        class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+      >
+        <div class="relative flex-1 sm:flex-initial">
+          <input
+            type="text"
+            placeholder="Search..."
+            id="searchInput"
+            class="w-full sm:w-64 bg-gray-700 border border-gray-600 text-white pl-9 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+          <i
+            class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          ></i>
+        </div>
+
+        <!-- View Toggle (Tablet & Desktop only, auto card view on mobile) -->
+        <div
+          class="hidden md:flex items-center gap-1 bg-gray-700 rounded-lg p-1"
+        >
+          <button
+            id="cardViewBtn"
+            onclick="switchView('card')"
+            class="px-3 py-1.5 rounded transition-colors"
+            title="Card View"
+          >
+            <i class="ti ti-layout-grid"></i>
+          </button>
+          <button
+            id="tableViewBtn"
+            onclick="switchView('table')"
+            class="px-3 py-1.5 rounded transition-colors bg-gray-600"
+            title="Table View"
+          >
+            <i class="ti ti-table"></i>
+          </button>
+        </div>
+
+        <button
+          onclick="openNewStreamModal()"
+          class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm sm:text-base whitespace-nowrap"
+        >
+          <i class="ti ti-plus"></i>
+          <span>New Stream</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Streams Table - Hidden on Mobile -->
