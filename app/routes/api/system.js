@@ -24,6 +24,7 @@ router.get('/', requireAuth, async (req, res) => {
       uptime: stats?.uptime || 0
     };
 
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.json({
       success: true,
       stats: validStats
@@ -31,6 +32,7 @@ router.get('/', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('System stats error:', error);
     await logError('Failed to fetch system stats', { error: error.message });
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.status(500).json({ 
       success: false, 
       message: error.message,
@@ -60,6 +62,7 @@ router.get('/stats', requireAuth, async (req, res) => {
       uptime: stats?.uptime || 0
     };
 
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.json({
       success: true,
       stats: validStats
@@ -67,6 +70,7 @@ router.get('/stats', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('System stats error:', error);
     await logError('Failed to fetch system stats', { error: error.message });
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.status(500).json({ 
       success: false, 
       message: error.message,
