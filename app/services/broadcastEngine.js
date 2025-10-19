@@ -667,7 +667,6 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
     const bufferSize = (Number(baseVideoBitrate.replace('k', '')) * 2) + 'k';
 
     // Output options - FORCE RE-ENCODE for now (safer than copy codec)
-<<<<<<< HEAD
     const outputOptions = [
       '-c:v', 'libx264',                   // H.264 video codec
       '-preset', 'ultrafast',              // Fastest encoding (less CPU)
@@ -689,125 +688,6 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
       '-f', 'flv'                          // FLV format for RTMP
     ];
     
-=======
-    // TODO: Test copy codec after confirming re-encode works
-    // CPU-friendly output options: prefer hardware encoder if enabled, otherwise use very fast x264 preset
-    let outputOptions = [];
-    const hwAccel = process.env.FFMPEG_HW_ACCEL || ""; // set to 'nvenc' or 'vaapi' in env to enable hardware accel
-
-    if (hwAccel === "nvenc") {
-      // NVENC hardware encoder (NVIDIA). Offloads CPU to GPU.
-      outputOptions.push(
-        "-c:v",
-        "h264_nvenc",
-        // nvenc presets vary by driver; "fast" is a reasonable balance (lower CPU)
-        "-preset",
-        "fast",
-        "-b:v",
-        baseVideoBitrate,
-        "-maxrate",
-        maxBitrate,
-        "-bufsize",
-        bufferSize,
-        "-pix_fmt",
-        "yuv420p",
-        "-r",
-        String(frameRate),
-        "-s",
-        `${outputWidth}x${outputHeight}`,
-        // audio
-        "-c:a",
-        "aac",
-        "-b:a",
-        "128k",
-        "-ar",
-        "44100",
-        "-ac",
-        "2",
-        "-f",
-        "flv"
-      );
-    } else if (hwAccel === "vaapi") {
-      // VAAPI (Intel/AMD) hardware encoder. Requires proper VAAPI setup in the container/host.
-      // Note: when using vaapi you normally need to upload to hardware frames via vf filters.
-      outputOptions.push(
-        "-hwaccel",
-        "vaapi",
-        "-hwaccel_output_format",
-        "vaapi",
-        "-c:v",
-        "h264_vaapi",
-        "-vf",
-        `scale=${outputWidth}:${outputHeight},format=nv12,hwupload`,
-        "-b:v",
-        baseVideoBitrate,
-        "-maxrate",
-        maxBitrate,
-        "-bufsize",
-        bufferSize,
-        "-r",
-        String(frameRate),
-        "-c:a",
-        "aac",
-        "-b:a",
-        "128k",
-        "-ar",
-        "44100",
-        "-ac",
-        "2",
-        "-f",
-        "flv"
-      );
-    } else {
-      // CPU encode path (x264) - use veryfast/ultrafast to minimize CPU usage.
-      // ultrafast uses least CPU but larger bitrate; veryfast is a compromise.
-      const x264Preset = process.env.FFMPEG_X264_PRESET || "veryfast";
-      // Optionally limit encoder threads to reduce CPU spikes (set THREAD_LIMIT env to control)
-      const threadLimit = process.env.FFMPEG_THREAD_LIMIT || "1";
-
-      outputOptions = [
-        "-c:v",
-        "libx264",
-        "-preset",
-        x264Preset, // veryfast/ultrafast for lower CPU usage
-        "-tune",
-        "zerolatency",
-        "-profile:v",
-        "baseline",
-        "-level",
-        "3.0",
-        "-b:v",
-        baseVideoBitrate,
-        "-maxrate",
-        maxBitrate,
-        "-bufsize",
-        bufferSize,
-        "-pix_fmt",
-        "yuv420p",
-        "-g",
-        "60",
-        "-r",
-        String(frameRate),
-        "-s",
-        `${outputWidth}x${outputHeight}`,
-        "-threads",
-        threadLimit, // limit threads to reduce CPU usage (default 1)
-        "-c:a",
-        "aac",
-        "-b:a",
-        "128k",
-        "-ar",
-        "44100",
-        "-ac",
-        "2",
-        "-max_muxing_queue_size",
-        "1024",
-        "-f",
-        "flv",
-      ];
-    }
-
->>>>>>> e3e3ee7ac35ba48aff359997d3455295dc47a28d
     // Add duration limit if specified
     if (maxDurationSeconds && maxDurationSeconds > 0) {
       outputOptions.push('-t', maxDurationSeconds.toString());
