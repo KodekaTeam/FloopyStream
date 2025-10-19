@@ -485,14 +485,47 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
       throw new Error('Broadcast is already active');
     }
 
-    // Parse Advanced Settings
-    // bitrate format: "2500k", frame_rate: "30", resolution: "720p", orientation: "landscape"
-    const bitrate = advancedSettings.bitrate || '2500k';
-    const frameRate = advancedSettings.frame_rate || 30;
+    // Determine default values from video if advancedSettings not provided
+    let videoResolution = { width: 1280, height: 720 }; // Default fallback
+    let videoFrameRate = 30; // Default fallback
+    let videoBitrate = '2500k'; // Default fallback
+
+    // Get video resolution and frame rate
+    try {
+      const ffprobe = require('fluent-ffmpeg');
+      await new Promise((resolve, reject) => {
+        ffprobe.ffprobe(videoFilePath, (err, metadata) => {
+          if (err) return reject(err);
+          const videoStream = metadata.streams.find(s => s.codec_type === 'video');
+          if (videoStream) {
+            if (videoStream.width && videoStream.height) {
+              videoResolution = { width: videoStream.width, height: videoStream.height };
+            }
+            if (videoStream.avg_frame_rate) {
+              // avg_frame_rate format: "30/1"
+              const parts = videoStream.avg_frame_rate.split('/');
+              if (parts.length === 2 && Number(parts[1]) !== 0) {
+                videoFrameRate = Math.round(Number(parts[0]) / Number(parts[1]));
+              }
+            }
+            if (videoStream.bit_rate) {
+              videoBitrate = Math.round(Number(videoStream.bit_rate) / 1000) + 'k';
+            }
+          }
+          resolve();
+        });
+      });
+    } catch (err) {
+      console.warn('Could not detect video resolution/bitrate/frame rate, using defaults');
+    }
+
+    // Parse Advanced Settings, fallback to video values if not provided
+    const bitrate = advancedSettings.bitrate || videoBitrate;
+    const frameRate = advancedSettings.frame_rate || videoFrameRate;
     const resolution = advancedSettings.resolution || null;
     const orientation = advancedSettings.orientation || 'landscape';
-    
-    console.log(`📊 Advanced Settings: Bitrate=${bitrate}, FPS=${frameRate}, Resolution=${resolution}, Orientation=${orientation}`);
+
+    console.log(`📊 Broadcast Settings: Bitrate=${bitrate}, FPS=${frameRate}, Resolution=${resolution || `${videoResolution.width}x${videoResolution.height}`}, Orientation=${orientation}`);
 
     // Construct full destination URL, handling trailing slashes
     const baseUrl = destinationUrl.endsWith('/') 
@@ -517,128 +550,47 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
       await logInfo('Video has no audio, generating silent audio', { broadcastId });
     }
 
-    // Get video resolution if not provided
-    let videoResolution = { width: 1280, height: 720 }; // Default fallback
-    try {
-      videoResolution = await getVideoResolution(videoFilePath);
-      console.log(`Video resolution detected: ${videoResolution.width}x${videoResolution.height}`);
-    } catch (err) {
-      console.warn('Could not detect video resolution, using default 1280x720');
-    }
+    // videoResolution sudah didapatkan di atas dari ffprobe
 
     // Determine output resolution
     // Priority: Advanced Settings resolution > original video resolution (min 480p) > default 720p
-    // Determine whether user provided any advanced settings
-    const usingAdvancedSettings = advancedSettings && (
-      advancedSettings.bitrate ||
-      advancedSettings.frame_rate ||
-      advancedSettings.resolution
-    );
-
-    // Start with defaults from advancedSettings (or fallbacks defined earlier)
     let outputWidth, outputHeight;
-    let baseVideoBitrate = bitrate; // string like "2500k"
-    let usedFrameRate = frameRate;
-
-    if (!usingAdvancedSettings) {
-      // No advanced settings provided => prefer original video's bitrate, frame rate and resolution
-      try {
-      const probe = await new Promise((resolve, reject) => {
-        ffmpeg.ffprobe(videoFilePath, (err, metadata) => err ? reject(err) : resolve(metadata));
-      });
-
-      const videoStream = probe.streams.find(s => s.codec_type === 'video');
-
-      // Frame rate: prefer avg_frame_rate, fallback to r_frame_rate
-      if (videoStream) {
-        const fpsStr = videoStream.avg_frame_rate || videoStream.r_frame_rate || String(frameRate);
-        let fps = Number(frameRate);
-        if (fpsStr && typeof fpsStr === 'string' && fpsStr.includes('/')) {
-        const [num, den] = fpsStr.split('/').map(Number);
-        if (den && !Number.isNaN(num) && !Number.isNaN(den)) fps = num / den;
-        } else if (fpsStr) {
-        const n = Number(fpsStr);
-        if (!Number.isNaN(n)) fps = n;
-        }
-        usedFrameRate = Math.max(1, Math.round(fps));
-
-        // Bitrate: prefer stream bit_rate, fallback to format bit_rate
-        const bitRateNum = (videoStream.bit_rate && Number(videoStream.bit_rate)) ||
-                 (probe.format && probe.format.bit_rate && Number(probe.format.bit_rate)) ||
-                 null;
-        if (bitRateNum && !Number.isNaN(bitRateNum) && bitRateNum > 0) {
-        // Convert to "NNNk"
-        const kbps = Math.max(200, Math.round(bitRateNum / 1000)); // enforce a sensible minimum
-        baseVideoBitrate = `${kbps}k`;
-        }
-
-        // Resolution from probed stream (fallback to earlier getVideoResolution result)
-        if (videoStream.width && videoStream.height) {
-        outputWidth = videoStream.width;
-        outputHeight = videoStream.height;
-        }
-      }
-      } catch (probeErr) {
-      console.warn('Could not probe video for defaults, falling back to configured defaults:', probeErr.message);
-      }
-
-      // If probe didn't set resolution, use previously-detected videoResolution (from getVideoResolution)
-      if (!outputWidth || !outputHeight) {
-      outputWidth = videoResolution.width || 1280;
-      outputHeight = videoResolution.height || 720;
-      }
-
-      // Ensure minimum height of 480px
-      if (outputHeight < 480) {
-      const scale = 480 / outputHeight;
-      outputHeight = 480;
-      outputWidth = Math.round(outputWidth * scale);
-      }
-
-      // Ensure width is even (required by many encoders)
-      if (outputWidth % 2 !== 0) outputWidth++;
-
-      console.log(`Using original video defaults -> Resolution: ${outputWidth}x${outputHeight}, FPS: ${usedFrameRate}, Bitrate: ${baseVideoBitrate}`);
-    } else {
-      // User provided advanced settings (use them, with fallbacks)
-      if (resolution && resolution !== 'auto' && resolution !== 'auto-detect') {
+    
+    if (resolution && resolution !== 'auto' && resolution !== 'auto-detect') {
+      // User specified resolution in Advanced Settings (e.g., "720p", "1080p")
       const resolutionMap = {
         '720p': { w: 1280, h: 720 },
         '1080p': { w: 1920, h: 1080 },
         '1440p': { w: 2560, h: 1440 },
         '2160p': { w: 3840, h: 2160 }
       };
-
+      
       if (resolutionMap[resolution]) {
         outputWidth = resolutionMap[resolution].w;
         outputHeight = resolutionMap[resolution].h;
         console.log(`📐 Using Advanced Settings resolution: ${outputWidth}x${outputHeight} (${resolution})`);
       } else {
+        // Fallback to video resolution
         outputWidth = videoResolution.width;
         outputHeight = videoResolution.height;
         console.log(`Using original video resolution: ${outputWidth}x${outputHeight}`);
       }
-      } else {
+    } else {
+      // Use original video resolution, but ensure minimum 480p
       outputWidth = videoResolution.width;
       outputHeight = videoResolution.height;
-
+      
+      // Ensure minimum height of 480px
       if (outputHeight < 480) {
         const scale = 480 / outputHeight;
         outputHeight = 480;
         outputWidth = Math.round(outputWidth * scale);
+        // Ensure width is even number (required by x264)
         if (outputWidth % 2 !== 0) outputWidth++;
         console.log(`Upscaling to minimum 480p: ${outputWidth}x${outputHeight}`);
       } else {
         console.log(`Using original video resolution: ${outputWidth}x${outputHeight}`);
       }
-      }
-
-      // If user provided a bitrate/frame_rate, respect them
-      if (advancedSettings.bitrate) baseVideoBitrate = advancedSettings.bitrate;
-      if (advancedSettings.frame_rate) usedFrameRate = advancedSettings.frame_rate;
-
-      // Ensure width even
-      if (outputWidth % 2 !== 0) outputWidth++;
     }
 
     await logInfo('Starting broadcast', { 
@@ -646,9 +598,7 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
       destination: destinationUrl,
       maxDuration: maxDurationSeconds ? `${maxDurationSeconds}s` : 'unlimited',
       hasAudio: videoHasAudio,
-      resolution: `${outputWidth}x${outputHeight}`,
-      frameRate: usedFrameRate,
-      bitrate: baseVideoBitrate
+      resolution: `${outputWidth}x${outputHeight}`
     });
 
     // Input options - proven config + SAFER settings
@@ -662,12 +612,16 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
       '-stream_loop', '-1'                 // Loop the video indefinitely
     ];
 
-    // Calculate bitrate values from chosen baseVideoBitrate
-    const maxBitrate = (Number(baseVideoBitrate.replace('k', '')) * 1.5) + 'k';
-    const bufferSize = (Number(baseVideoBitrate.replace('k', '')) * 2) + 'k';
+    // Calculate bitrate values from Advanced Settings
+    // Bitrate format: "2500k", "3000k", "4500k", "6000k"
+    const baseVideoBitrate = bitrate; // e.g., "2500k"
+    const maxBitrate = bitrate.replace('k', '') * 1.5 + 'k'; // 1.5x for maxrate
+    const bufferSize = bitrate.replace('k', '') * 2 + 'k'; // 2x for bufsize
 
     // Output options - FORCE RE-ENCODE for now (safer than copy codec)
+    // TODO: Test copy codec after confirming re-encode works
     const outputOptions = [
+      // ALWAYS re-encode with SAFE settings (no copy codec for now)
       '-c:v', 'libx264',                   // H.264 video codec
       '-preset', 'ultrafast',              // Fastest encoding (less CPU)
       '-tune', 'zerolatency',              // Low latency
@@ -678,7 +632,7 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
       '-bufsize', bufferSize,              // Buffer size
       '-pix_fmt', 'yuv420p',               // Pixel format
       '-g', '60',                          // GOP size (2 seconds at 30fps)
-      '-r', String(usedFrameRate),         // Frame rate
+      '-r', String(frameRate),             // Frame rate
       '-s', `${outputWidth}x${outputHeight}`, // Output size
       '-c:a', 'aac',                       // AAC audio codec
       '-b:a', '128k',                      // Audio bitrate
