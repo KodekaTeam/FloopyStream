@@ -654,8 +654,19 @@ body {
 /* Mobile Bottom Navigation Spacing */
 @media (max-width: 1023px) {
   /* Add padding to prevent content being hidden under bottom nav */
+  /* Removed padding-bottom from .flex.h-screen to avoid double padding */
+
+  /* Ensure dashboard container uses full available height on mobile */
   .flex.h-screen {
-    padding-bottom: 4rem;
+    height: calc(100vh - 4rem - env(safe-area-inset-bottom));
+    min-height: calc(100vh - 4rem - env(safe-area-inset-bottom));
+    overflow: visible; /* Allow content to show, main will handle scroll */
+  }
+
+  /* Ensure main content fills available height and is not cut off by bottom nav */
+  main.flex-1.overflow-auto {
+    height: 100%;
+    min-height: 100%;
   }
 }
 
