@@ -20,7 +20,7 @@ function requireAuth(req, res, next) {
   const isApiRoute = req.path.startsWith('/api/');
   
   // Return JSON for AJAX, API routes, or explicit JSON accept header
-  if (isAjaxRequest || acceptsJson || isApiRoute) {
+  if (isAjaxRequest || isApiRoute) { // removed 'acceptsJson' to avoid false positives on normal page loads
     return res.status(401).json({ 
       success: false, 
       message: 'Authentication required' 
