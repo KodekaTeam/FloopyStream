@@ -33,6 +33,10 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
       - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-}
       - GOOGLE_REFRESH_TOKEN=${GOOGLE_REFRESH_TOKEN:-}
+      # FFmpeg specific settings for stability
+      - FFMPEG_PATH=/usr/bin/ffmpeg
+      - FFPROBE_PATH=/usr/bin/ffprobe
+      - FFMPEG_MEMORY_LIMIT=2G
     volumes:
       - ./app/storage/database:/app/storage/database
       - ./app/storage/uploads:/app/storage/uploads

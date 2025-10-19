@@ -1,14 +1,22 @@
 # Use Node.js LTS as base image
-FROM node:18-alpine
+FROM node:18-slim
 
-# Install system dependencies
-RUN apk add --no-cache \
+# Set locale to prevent encoding issues
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Install system dependencies in a single layer
+RUN apt-get update && apt-get install -y \
     curl \
-    ffmpeg \
     python3 \
     make \
     g++ \
-    sqlite
+    sqlite3 \
+    ca-certificates \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/* \
+    && ffmpeg -version | head -1 \
+    && echo "✓ FFmpeg installed successfully"
 
 # Set working directory
 WORKDIR /app
@@ -16,7 +24,7 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies (production only)
 RUN npm ci --only=production && \
     npm cache clean --force
 
