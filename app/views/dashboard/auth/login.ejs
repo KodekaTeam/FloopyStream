@@ -2,7 +2,14 @@
 
 <div class="auth-container">
   <div class="auth-card">
-    <h2>Login to <%= appName %></h2>
+    <h2>
+      <img
+        src="/images/favicon.ico"
+        alt="Logo"
+        class="w-16 h-16 inline-block align-middle mr-1"
+      /><%= appName %>
+      <p class="text-sm text-gray-500 mt-0">Sign in to manage your account.</p>
+    </h2>
 
     <% if (error) { %>
     <div class="alert alert-error"><%= error %></div>
@@ -12,7 +19,10 @@
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
       <div class="form-group">
-        <label for="username">Username</label>
+        <label for="username" class="flex items-center">
+          <i class="ti ti-user mr-2 text-gray-500" aria-hidden="true"></i>
+          <span>Username</span>
+        </label>
         <input
           type="text"
           id="username"
@@ -24,15 +34,29 @@
       </div>
 
       <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          class="form-control"
-          required
-          autocomplete="current-password"
-        />
+        <label for="password" class="flex items-center">
+          <i class="ti ti-lock mr-2 text-gray-500" aria-hidden="true"></i>
+          <span>Password</span>
+        </label>
+        <div class="relative">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-control pr-10"
+            required
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            onclick="togglePasswordVisibility('password', 'toggleLoginPasswordIcon')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600"
+            tabindex="-1"
+            style="background: none; border: none; padding: 0"
+          >
+            <i class="ti ti-eye" id="toggleLoginPasswordIcon"></i>
+          </button>
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary btn-block">Login</button>

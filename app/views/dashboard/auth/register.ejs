@@ -42,28 +42,48 @@
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          class="form-control"
-          required
-          minlength="6"
-          autocomplete="new-password"
-        />
+        <div class="relative">
+          <input
+            type="password"
+            id="registerPassword"
+            name="password"
+            class="form-control pr-10"
+            required
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            onclick="togglePasswordVisibility('registerPassword','registerPasswordIcon')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600"
+            tabindex="-1"
+            style="background: none; border: none; padding: 0"
+          >
+            <i class="ti ti-eye" id="registerPasswordIcon"></i>
+          </button>
+        </div>
       </div>
 
       <div class="form-group">
         <label for="confirmPassword">Confirm Password</label>
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          class="form-control"
-          required
-          minlength="6"
-          autocomplete="new-password"
-        />
+        <div class="relative">
+          <input
+            type="password"
+            id="registerConfirmPassword"
+            name="confirmPassword"
+            class="form-control pr-10"
+            required
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            onclick="togglePasswordVisibility('registerConfirmPassword','registerConfirmPasswordIcon')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600"
+            tabindex="-1"
+            style="background: none; border: none; padding: 0"
+          >
+            <i class="ti ti-eye" id="registerConfirmPasswordIcon"></i>
+          </button>
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary btn-block">Register</button>
