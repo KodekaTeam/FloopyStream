@@ -783,10 +783,10 @@ Have a feature idea?
 ### Fixed Issues
 
 - ✅ v1.0.0: Initial release
-- ✅ v1.1.0: Added playlist support
+<!-- - ✅ v1.1.0: Added playlist support
 - ✅ v1.2.0: Improved performance monitoring
 - ✅ v2.0.0: Docker support added
-- ✅ v2.1.0: Enhanced security
+- ✅ v2.1.0: Enhanced security -->
 
 ---
 
