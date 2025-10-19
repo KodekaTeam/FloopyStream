@@ -363,4 +363,4 @@ docker stats
 ---
 
 **Last Updated:** October 16, 2025
-**Configuration Version:** 2.0 (Updated)
+**Configuration Version:** 1.0.0
