@@ -1,0 +1,351 @@
+<% layout('dashboard/layout') %>
+
+<div class="flex h-screen bg-gray-900 overflow-hidden">
+  <%- include('../../partials/navbar') %> <%- include('../../partials/sidebar')
+  %>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-auto lg:ml-20 pt-16">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <!-- Header -->
+      <div class="mb-6 sm:mb-8">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white">About Us</h2>
+        <p class="text-gray-400 mt-1 text-sm sm:text-base">
+          Learn more about FloopyStream
+        </p>
+      </div>
+
+      <!-- About Content -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+        <!-- Main About Section -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- About FloopyStream -->
+          <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <h3
+              class="text-xl font-bold text-white mb-4 flex items-center gap-2"
+            >
+              <!-- <i class="ti ti-broadcast text-blue-500"></i> -->
+              <img src="/images/favicon.ico" alt="Logo" class="w-10 h-10" />
+              About FloopyStream
+            </h3>
+            <p class="text-gray-300 leading-relaxed mb-4">
+              FloopyStream is a modern, open-source live broadcasting platform
+              designed to empower creators with a flexible and scalable solution
+              for streaming content. Whether you're streaming live events,
+              gaming, or educational content, FloopyStream provides the tools
+              you need to engage with your audience.
+            </p>
+            <p class="text-gray-300 leading-relaxed">
+              Built with modern web technologies and designed with simplicity
+              and power in mind, FloopyStream makes it easy to create, manage,
+              and broadcast your content to the world.
+            </p>
+          </div>
+
+          <!-- Features -->
+          <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <h3
+              class="text-xl font-bold text-white mb-4 flex items-center gap-2"
+            >
+              <i class="ti ti-star text-yellow-400"></i>
+              Key Features
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="flex gap-3">
+                <div class="flex-shrink-0">
+                  <div
+                    class="flex items-center justify-center h-8 w-8 rounded-md bg-blue-500/20"
+                  >
+                    <i class="ti ti-broadcast text-blue-400"></i>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-white font-semibold">Live Broadcasting</h4>
+                  <p class="text-gray-400 text-sm">
+                    Stream to your audience in real-time
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <div class="flex-shrink-0">
+                  <div
+                    class="flex items-center justify-center h-8 w-8 rounded-md bg-purple-500/20"
+                  >
+                    <i class="ti ti-video text-purple-400"></i>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-white font-semibold">Video Management</h4>
+                  <p class="text-gray-400 text-sm">
+                    Organize and manage your content library
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <div class="flex-shrink-0">
+                  <div
+                    class="flex items-center justify-center h-8 w-8 rounded-md bg-green-500/20"
+                  >
+                    <i class="ti ti-list text-green-400"></i>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-white font-semibold">Playlist Support</h4>
+                  <p class="text-gray-400 text-sm">
+                    Create and manage playlists effortlessly
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <div class="flex-shrink-0">
+                  <div
+                    class="flex items-center justify-center h-8 w-8 rounded-md bg-orange-500/20"
+                  >
+                    <i class="ti ti-users text-orange-400"></i>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-white font-semibold">User Management</h4>
+                  <p class="text-gray-400 text-sm">
+                    Control access and manage your team
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <div class="flex-shrink-0">
+                  <div
+                    class="flex items-center justify-center h-8 w-8 rounded-md bg-pink-500/20"
+                  >
+                    <i class="ti ti-adjustments text-pink-400"></i>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-white font-semibold">Customizable</h4>
+                  <p class="text-gray-400 text-sm">
+                    Customize your broadcasting experience
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <div class="flex-shrink-0">
+                  <div
+                    class="flex items-center justify-center h-8 w-8 rounded-md bg-red-500/20"
+                  >
+                    <i class="ti ti-code text-red-400"></i>
+                  </div>
+                </div>
+                <div>
+                  <h4 class="text-white font-semibold">Open Source</h4>
+                  <p class="text-gray-400 text-sm">
+                    Community-driven development
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Technology Stack -->
+          <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <h3
+              class="text-xl font-bold text-white mb-4 flex items-center gap-2"
+            >
+              <i class="ti ti-code-plus text-green-500"></i>
+              Technology Stack
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                <p class="text-gray-300 text-sm font-semibold">Node.js</p>
+                <p class="text-gray-400 text-xs mt-1">Backend Runtime</p>
+              </div>
+              <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                <p class="text-gray-300 text-sm font-semibold">Express</p>
+                <p class="text-gray-400 text-xs mt-1">Web Framework</p>
+              </div>
+              <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                <p class="text-gray-300 text-sm font-semibold">EJS</p>
+                <p class="text-gray-400 text-xs mt-1">Template Engine</p>
+              </div>
+              <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                <p class="text-gray-300 text-sm font-semibold">Tailwind CSS</p>
+                <p class="text-gray-400 text-xs mt-1">CSS Framework</p>
+              </div>
+              <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                <p class="text-gray-300 text-sm font-semibold">PostgreSQL</p>
+                <p class="text-gray-400 text-xs mt-1">Database</p>
+              </div>
+              <div class="bg-gray-700/50 rounded-lg p-4 text-center">
+                <p class="text-gray-300 text-sm font-semibold">Docker</p>
+                <p class="text-gray-400 text-xs mt-1">Containerization</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+          <!-- Quick Links -->
+          <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <h3 class="text-lg font-bold text-white mb-4">Quick Links</h3>
+            <div class="space-y-3">
+              <a
+                href="https://github.com/KodekaTeam/FloopyStream"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-3 p-3 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-colors group"
+              >
+                <i
+                  class="ti ti-brand-github text-lg text-gray-400 group-hover:text-white"
+                ></i>
+                <div>
+                  <p class="text-white font-semibold text-sm">
+                    GitHub Repository
+                  </p>
+                  <p class="text-gray-400 text-xs">View source code</p>
+                </div>
+              </a>
+              <a
+                href="https://github.com/KodekaTeam/FloopyStream/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-3 p-3 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-colors group"
+              >
+                <i
+                  class="ti ti-bug text-lg text-gray-400 group-hover:text-white"
+                ></i>
+                <div>
+                  <p class="text-white font-semibold text-sm">Report Issues</p>
+                  <p class="text-gray-400 text-xs">Help improve FloopyStream</p>
+                </div>
+              </a>
+              <a
+                href="https://github.com/KodekaTeam/FloopyStream/discussions"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-3 p-3 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-colors group"
+              >
+                <i
+                  class="ti ti-message-circle text-lg text-gray-400 group-hover:text-white"
+                ></i>
+                <div>
+                  <p class="text-white font-semibold text-sm">Discussions</p>
+                  <p class="text-gray-400 text-xs">Join the community</p>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- Version Info -->
+          <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <h3 class="text-lg font-bold text-white mb-4">Version Info</h3>
+            <div class="space-y-3">
+              <div>
+                <p class="text-gray-400 text-sm">App Name</p>
+                <p class="text-white font-semibold">
+                  <%= process.env.APP_NAME || 'FloopyStream' %>
+                </p>
+              </div>
+              <div>
+                <p class="text-gray-400 text-sm">Version</p>
+                <p class="text-white font-semibold">
+                  <%= process.env.APP_VERSION || '1.0.0' %>
+                </p>
+              </div>
+              <div>
+                <p class="text-gray-400 text-sm">Platform</p>
+                <p class="text-white font-semibold">Open Source</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Support -->
+          <div class="bg-blue-500/10 rounded-lg p-6 border border-blue-500/20">
+            <h3
+              class="text-lg font-bold text-white mb-3 flex items-center gap-2"
+            >
+              <i class="ti ti-help text-blue-400"></i>
+              Need Help?
+            </h3>
+            <p class="text-gray-300 text-sm mb-4">
+              Have questions or need support? Check our documentation or reach
+              out to the community.
+            </p>
+            <button
+              class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+            >
+              Get Support
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Section -->
+      <div class="mt-8 bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <i class="ti ti-users text-purple-500"></i>
+          Our Team
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="text-center">
+            <div
+              class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 mx-auto mb-3 flex items-center justify-center"
+            >
+              <i class="ti ti-user text-white text-2xl"></i>
+            </div>
+            <h4 class="text-white font-semibold">Kodeka Team</h4>
+            <p class="text-gray-400 text-sm mt-1">Core Development</p>
+          </div>
+          <div class="text-center">
+            <div
+              class="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-teal-600 mx-auto mb-3 flex items-center justify-center"
+            >
+              <i class="ti ti-users-group text-white text-2xl"></i>
+            </div>
+            <h4 class="text-white font-semibold">Community</h4>
+            <p class="text-gray-400 text-sm mt-1">Contributors</p>
+          </div>
+          <div class="text-center">
+            <div
+              class="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500 to-red-600 mx-auto mb-3 flex items-center justify-center"
+            >
+              <i class="ti ti-bulb text-white text-2xl"></i>
+            </div>
+            <h4 class="text-white font-semibold">Innovators</h4>
+            <p class="text-gray-400 text-sm mt-1">Features & Ideas</p>
+          </div>
+          <div class="text-center">
+            <div
+              class="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 mx-auto mb-3 flex items-center justify-center"
+            >
+              <i class="ti ti-heart text-white text-2xl"></i>
+            </div>
+            <h4 class="text-white font-semibold">Supporters</h4>
+            <p class="text-gray-400 text-sm mt-1">Users & Feedback</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- License Section -->
+      <div class="mt-6 bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <h3 class="text-lg font-bold text-white mb-3">License</h3>
+        <p class="text-gray-300 mb-3">
+          FloopyStream is released under an open-source license. We believe in
+          the power of community-driven development and transparency.
+        </p>
+        <a
+          href="https://github.com/KodekaTeam/FloopyStream/blob/main/LICENSE.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+        >
+          <span>View License</span>
+          <i class="ti ti-external-link"></i>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
