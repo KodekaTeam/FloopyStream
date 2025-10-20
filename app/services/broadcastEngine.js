@@ -485,47 +485,14 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
       throw new Error('Broadcast is already active');
     }
 
-    // Determine default values from video if advancedSettings not provided
-    let videoResolution = { width: 1280, height: 720 }; // Default fallback
-    let videoFrameRate = 30; // Default fallback
-    let videoBitrate = '2500k'; // Default fallback
-
-    // Get video resolution and frame rate
-    try {
-      const ffprobe = require('fluent-ffmpeg');
-      await new Promise((resolve, reject) => {
-        ffprobe.ffprobe(videoFilePath, (err, metadata) => {
-          if (err) return reject(err);
-          const videoStream = metadata.streams.find(s => s.codec_type === 'video');
-          if (videoStream) {
-            if (videoStream.width && videoStream.height) {
-              videoResolution = { width: videoStream.width, height: videoStream.height };
-            }
-            if (videoStream.avg_frame_rate) {
-              // avg_frame_rate format: "30/1"
-              const parts = videoStream.avg_frame_rate.split('/');
-              if (parts.length === 2 && Number(parts[1]) !== 0) {
-                videoFrameRate = Math.round(Number(parts[0]) / Number(parts[1]));
-              }
-            }
-            if (videoStream.bit_rate) {
-              videoBitrate = Math.round(Number(videoStream.bit_rate) / 1000) + 'k';
-            }
-          }
-          resolve();
-        });
-      });
-    } catch (err) {
-      console.warn('Could not detect video resolution/bitrate/frame rate, using defaults');
-    }
-
-    // Parse Advanced Settings, fallback to video values if not provided
-    const bitrate = advancedSettings.bitrate || videoBitrate;
-    const frameRate = advancedSettings.frame_rate || videoFrameRate;
+    // Parse Advanced Settings
+    // bitrate format: "2500k", frame_rate: "30", resolution: "720p", orientation: "landscape"
+    const bitrate = advancedSettings.bitrate || '2500k';
+    const frameRate = advancedSettings.frame_rate || 30;
     const resolution = advancedSettings.resolution || null;
     const orientation = advancedSettings.orientation || 'landscape';
-
-    console.log(`📊 Broadcast Settings: Bitrate=${bitrate}, FPS=${frameRate}, Resolution=${resolution || `${videoResolution.width}x${videoResolution.height}`}, Orientation=${orientation}`);
+    
+    console.log(`📊 Advanced Settings: Bitrate=${bitrate}, FPS=${frameRate}, Resolution=${resolution}, Orientation=${orientation}`);
 
     // Construct full destination URL, handling trailing slashes
     const baseUrl = destinationUrl.endsWith('/') 
@@ -550,7 +517,14 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
       await logInfo('Video has no audio, generating silent audio', { broadcastId });
     }
 
-    // videoResolution sudah didapatkan di atas dari ffprobe
+    // Get video resolution if not provided
+    let videoResolution = { width: 1280, height: 720 }; // Default fallback
+    try {
+      videoResolution = await getVideoResolution(videoFilePath);
+      console.log(`Video resolution detected: ${videoResolution.width}x${videoResolution.height}`);
+    } catch (err) {
+      console.warn('Could not detect video resolution, using default 1280x720');
+    }
 
     // Determine output resolution
     // Priority: Advanced Settings resolution > original video resolution (min 480p) > default 720p
