@@ -339,26 +339,29 @@ async function startPlaylistBroadcast(broadcastId, videos, destinationUrl, strea
     const maxBitrate = bitrate.replace('k', '') * 1.5 + 'k';
     const bufferSize = bitrate.replace('k', '') * 2 + 'k';
 
-    // Output options - FORCE RE-ENCODE for now (safer than copy codec)
+    // Output options - CPU-optimized settings for playlist streaming
     const outputOptions = [
-      // ALWAYS re-encode with SAFE settings
+      // CPU-friendly encoding settings for playlist
       '-c:v', 'libx264',                   // H.264 video codec
-      '-preset', 'ultrafast',              // Fastest encoding (less CPU)
-      '-tune', 'zerolatency',              // Low latency
-      '-profile:v', 'baseline',            // BASELINE profile (most compatible)
-      '-level', '3.0',                     // Level 3.0 (compatible)
+      '-preset', 'veryfast',               // Balanced speed/quality (lighter CPU)
+      '-tune', 'zerolatency',              // Low latency for live streaming
+      '-profile:v', 'main',                // Main profile (good compatibility)
+      '-level', '4.0',                     // Level 4.0 (better for HD)
       '-b:v', baseVideoBitrate,            // Video bitrate
       '-maxrate', maxBitrate,              // Max bitrate
       '-bufsize', bufferSize,              // Buffer size
       '-pix_fmt', 'yuv420p',               // Pixel format
-      '-g', '60',                          // GOP size
+      '-g', String(frameRate * 2),         // GOP size (2 seconds, adaptive)
+      '-keyint_min', String(frameRate),    // Minimum GOP size
+      '-sc_threshold', '0',                // Disable scene change detection (saves CPU)
       '-r', String(frameRate),             // Frame rate
       '-s', `${outputWidth}x${outputHeight}`, // Output size
+      '-threads', '2',                     // Limit encoding threads (reduce CPU usage)
       '-c:a', 'aac',                       // AAC audio codec
-      '-b:a', '128k',                      // Audio bitrate
+      '-b:a', '96k',                       // Lower audio bitrate (saves CPU)
       '-ar', '44100',                      // Audio sample rate
       '-ac', '2',                          // Stereo audio
-      '-max_muxing_queue_size', '1024',    // Large muxing queue
+      '-max_muxing_queue_size', '512',     // Reduced muxing queue (lower memory)
       '-f', 'flv'                          // FLV format
     ];
 
@@ -592,27 +595,29 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
     const maxBitrate = bitrate.replace('k', '') * 1.5 + 'k'; // 1.5x for maxrate
     const bufferSize = bitrate.replace('k', '') * 2 + 'k'; // 2x for bufsize
 
-    // Output options - FORCE RE-ENCODE for now (safer than copy codec)
-    // TODO: Test copy codec after confirming re-encode works
+    // Output options - CPU-optimized settings for lower resource usage
     const outputOptions = [
-      // ALWAYS re-encode with SAFE settings (no copy codec for now)
+      // CPU-friendly encoding settings
       '-c:v', 'libx264',                   // H.264 video codec
-      '-preset', 'ultrafast',              // Fastest encoding (less CPU)
-      '-tune', 'zerolatency',              // Low latency
-      '-profile:v', 'baseline',            // BASELINE profile (most compatible)
-      '-level', '3.0',                     // Level 3.0 (compatible)
+      '-preset', 'veryfast',               // Balanced speed/quality (lighter CPU than ultrafast)
+      '-tune', 'zerolatency',              // Low latency for live streaming
+      '-profile:v', 'main',                // Main profile (good compatibility, better compression)
+      '-level', '4.0',                     // Level 4.0 (better for HD streaming)
       '-b:v', baseVideoBitrate,            // Video bitrate
       '-maxrate', maxBitrate,              // Max bitrate
       '-bufsize', bufferSize,              // Buffer size
       '-pix_fmt', 'yuv420p',               // Pixel format
-      '-g', '60',                          // GOP size (2 seconds at 30fps)
+      '-g', String(frameRate * 2),         // GOP size (2 seconds, adaptive to FPS)
+      '-keyint_min', String(frameRate),    // Minimum GOP size
+      '-sc_threshold', '0',                // Disable scene change detection (saves CPU)
       '-r', String(frameRate),             // Frame rate
       '-s', `${outputWidth}x${outputHeight}`, // Output size
+      '-threads', '2',                     // Limit encoding threads (reduce CPU usage)
       '-c:a', 'aac',                       // AAC audio codec
-      '-b:a', '128k',                      // Audio bitrate
+      '-b:a', '96k',                       // Lower audio bitrate (saves bandwidth and CPU)
       '-ar', '44100',                      // Audio sample rate
       '-ac', '2',                          // Stereo audio
-      '-max_muxing_queue_size', '1024',    // Large muxing queue
+      '-max_muxing_queue_size', '512',     // Reduced muxing queue (lower memory)
       '-f', 'flv'                          // FLV format for RTMP
     ];
     
