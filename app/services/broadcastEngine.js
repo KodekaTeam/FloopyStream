@@ -1,24 +1,11 @@
 const ffmpeg = require('fluent-ffmpeg');
+const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+const ffprobeInstaller = require('@ffprobe-installer/ffprobe');
 const { logInfo, logError } = require('./activityLogger');
 const Broadcast = require('../models/Broadcast');
-const ffmpegErrorHandler = require('./ffmpegErrorHandler');
 
-// CRITICAL FIX: Use system FFmpeg instead of @ffmpeg-installer
-// @ffmpeg-installer binaries cause SIGSEGV in Docker due to ABI incompatibility
-// Use system binaries installed via apt in Dockerfile instead
-if (process.env.NODE_ENV === 'production' || process.platform === 'linux') {
-  // Docker/Linux: Use system FFmpeg
-  ffmpeg.setFfmpegPath('/usr/bin/ffmpeg');
-  ffmpeg.setFfprobePath('/usr/bin/ffprobe');
-  console.log('✓ Using system FFmpeg: /usr/bin/ffmpeg');
-} else {
-  // Windows/Mac: Use npm package FFmpeg
-  const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
-  const ffprobeInstaller = require('@ffprobe-installer/ffprobe');
-  ffmpeg.setFfmpegPath(ffmpegInstaller.path);
-  ffmpeg.setFfprobePath(ffprobeInstaller.path);
-  console.log('✓ Using npm FFmpeg:', ffmpegInstaller.path);
-}
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
 /**
  * Check if video has audio stream
@@ -322,47 +309,35 @@ async function startPlaylistBroadcast(broadcastId, videos, destinationUrl, strea
       hasAudio: playlistHasAudio
     });
 
-    // Input options for concat - SAFER settings with verbose logging
+    // Input options for concat
     const inputOptions = [
-      '-re',                               // Read input at native frame rate
-      '-loglevel', 'verbose',              // VERBOSE logging to debug SIGSEGV
-      '-fflags', '+genpts+igndts',         // Generate PTS + ignore DTS
-      '-avoid_negative_ts', 'make_zero',   // Fix timestamp issues
-      '-analyzeduration', '2147483647',    // Max analyze duration
-      '-probesize', '2147483647',          // Max probe size
-      '-f', 'concat',                      // Concat demuxer
-      '-safe', '0'                         // Allow absolute paths
+      '-hwaccel', 'none',
+      '-loglevel', 'error',
+      '-re',
+      '-f', 'concat',
+      '-safe', '0'
     ];
 
+    // Output options - matching single video config with proper resolution
     // Calculate bitrate values from Advanced Settings
     const baseVideoBitrate = bitrate;
     const maxBitrate = bitrate.replace('k', '') * 1.5 + 'k';
     const bufferSize = bitrate.replace('k', '') * 2 + 'k';
 
-    // Output options - CPU-optimized settings for playlist streaming
     const outputOptions = [
-      // CPU-friendly encoding settings for playlist
-      '-c:v', 'libx264',                   // H.264 video codec
-      '-preset', 'veryfast',               // Balanced speed/quality (lighter CPU)
-      '-tune', 'zerolatency',              // Low latency for live streaming
-      '-profile:v', 'main',                // Main profile (good compatibility)
-      '-level', '4.0',                     // Level 4.0 (better for HD)
-      '-b:v', baseVideoBitrate,            // Video bitrate
-      '-maxrate', maxBitrate,              // Max bitrate
-      '-bufsize', bufferSize,              // Buffer size
-      '-pix_fmt', 'yuv420p',               // Pixel format
-      '-g', String(frameRate * 2),         // GOP size (2 seconds, adaptive)
-      '-keyint_min', String(frameRate),    // Minimum GOP size
-      '-sc_threshold', '0',                // Disable scene change detection (saves CPU)
-      '-r', String(frameRate),             // Frame rate
-      '-s', `${outputWidth}x${outputHeight}`, // Output size
-      '-threads', '2',                     // Limit encoding threads (reduce CPU usage)
-      '-c:a', 'aac',                       // AAC audio codec
-      '-b:a', '96k',                       // Lower audio bitrate (saves CPU)
-      '-ar', '44100',                      // Audio sample rate
-      '-ac', '2',                          // Stereo audio
-      '-max_muxing_queue_size', '512',     // Reduced muxing queue (lower memory)
-      '-f', 'flv'                          // FLV format
+      '-c:v', 'libx264',
+      '-preset', 'veryfast',
+      '-b:v', baseVideoBitrate,
+      '-maxrate', maxBitrate,
+      '-bufsize', bufferSize,
+      '-pix_fmt', 'yuv420p',
+      '-g', String(frameRate * 2),
+      '-r', String(frameRate),
+      '-s', `${outputWidth}x${outputHeight}`, // Add resolution
+      '-c:a', 'aac',
+      '-b:a', '128k',
+      '-ar', '44100',
+      '-f', 'flv'
     ];
 
     // Create FFmpeg process for playlist
@@ -409,22 +384,9 @@ async function startPlaylistBroadcast(broadcastId, videos, destinationUrl, strea
         const isUserStop = err.message.includes('killed with signal SIGKILL') || 
                           err.message.includes('killed with signal SIGTERM');
         
-        // Check for SIGSEGV in playlist as well
-        const isSIGSEGV = err.message.includes('killed with signal SIGSEGV');
-        
         if (isUserStop) {
           console.log('Playlist broadcast stopped by user');
           await logInfo('Playlist broadcast stopped by user', { broadcastId });
-        } else if (isSIGSEGV) {
-          console.error('🔴 CRITICAL: ffmpeg crashed with SIGSEGV (segmentation fault) in playlist');
-          console.error('   This usually indicates: insufficient memory, codec library issue, or corrupt video');
-          await logError('Playlist broadcast SIGSEGV crash', { 
-            broadcastId, 
-            error: err.message,
-            suggestion: 'Increase Docker memory or check video files'
-          });
-          await Broadcast.updateStatus(broadcastId, 'failed', 
-            'FFmpeg crashed (SIGSEGV). Try increasing Docker memory or checking video files.');
         } else {
           console.error('Playlist broadcast error:', err.message);
           await logError('Playlist broadcast failed', { 
@@ -578,15 +540,12 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
       resolution: `${outputWidth}x${outputHeight}`
     });
 
-    // Input options - proven config + SAFER settings
+    // Input options - EXACTLY matching v2.0 working config
     const inputOptions = [
-      '-re',                               // Read input at native frame rate
-      '-loglevel', 'verbose',              // VERBOSE logging to debug SIGSEGV
-      '-fflags', '+genpts+igndts',         // Generate PTS + ignore DTS  
-      '-avoid_negative_ts', 'make_zero',   // Fix timestamp issues
-      '-analyzeduration', '2147483647',    // Max analyze duration
-      '-probesize', '2147483647',          // Max probe size
-      '-stream_loop', '-1'                 // Loop the video indefinitely
+      '-hwaccel', 'none',
+      '-loglevel', 'error',
+      '-re', // Read input at native frame rate
+      '-stream_loop', '-1' // Loop the video indefinitely
     ];
 
     // Calculate bitrate values from Advanced Settings
@@ -595,30 +554,26 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
     const maxBitrate = bitrate.replace('k', '') * 1.5 + 'k'; // 1.5x for maxrate
     const bufferSize = bitrate.replace('k', '') * 2 + 'k'; // 2x for bufsize
 
-    // Output options - CPU-optimized settings for lower resource usage
+    // Output options - using Advanced Settings
     const outputOptions = [
-      // CPU-friendly encoding settings
-      '-c:v', 'libx264',                   // H.264 video codec
-      '-preset', 'veryfast',               // Balanced speed/quality (lighter CPU than ultrafast)
-      '-tune', 'zerolatency',              // Low latency for live streaming
-      '-profile:v', 'main',                // Main profile (good compatibility, better compression)
-      '-level', '4.0',                     // Level 4.0 (better for HD streaming)
-      '-b:v', baseVideoBitrate,            // Video bitrate
-      '-maxrate', maxBitrate,              // Max bitrate
-      '-bufsize', bufferSize,              // Buffer size
-      '-pix_fmt', 'yuv420p',               // Pixel format
-      '-g', String(frameRate * 2),         // GOP size (2 seconds, adaptive to FPS)
-      '-keyint_min', String(frameRate),    // Minimum GOP size
-      '-sc_threshold', '0',                // Disable scene change detection (saves CPU)
-      '-r', String(frameRate),             // Frame rate
-      '-s', `${outputWidth}x${outputHeight}`, // Output size
-      '-threads', '2',                     // Limit encoding threads (reduce CPU usage)
-      '-c:a', 'aac',                       // AAC audio codec
-      '-b:a', '96k',                       // Lower audio bitrate (saves bandwidth and CPU)
-      '-ar', '44100',                      // Audio sample rate
-      '-ac', '2',                          // Stereo audio
-      '-max_muxing_queue_size', '512',     // Reduced muxing queue (lower memory)
-      '-f', 'flv'                          // FLV format for RTMP
+      // Video encoding
+      '-c:v', 'libx264', // H.264 codec
+      '-preset', 'veryfast', // Encoding speed
+      '-b:v', baseVideoBitrate, // Video bitrate from Advanced Settings
+      '-maxrate', maxBitrate, // Max bitrate (1.5x bitrate)
+      '-bufsize', bufferSize, // Buffer size (2x bitrate)
+      '-pix_fmt', 'yuv420p', // Pixel format (compatible with most platforms)
+      '-g', String(frameRate * 2), // GOP size (keyframe every 2 seconds)
+      '-r', String(frameRate), // Frame rate from Advanced Settings
+      '-s', `${outputWidth}x${outputHeight}`, // Output resolution
+      
+      // Audio handling
+      '-c:a', 'aac', // AAC audio codec
+      '-b:a', '128k', // Audio bitrate
+      '-ar', '44100', // Audio sample rate
+      
+      // Format
+      '-f', 'flv' // FLV format for RTMP
     ];
     
     // Add duration limit if specified
@@ -675,9 +630,6 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
         const isUserStop = err.message.includes('killed with signal SIGKILL') || 
                           err.message.includes('killed with signal SIGTERM');
         
-        // Check for SIGSEGV (segmentation fault) - likely memory or codec issue
-        const isSIGSEGV = err.message.includes('killed with signal SIGSEGV');
-        
         // Check if this is a Facebook connection error (needs retry)
         const isFBConnectionError = isFacebookStream(destinationUrl) && 
                                    (err.message.includes('Connection refused') ||
@@ -690,17 +642,6 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
           console.log('Broadcast stopped by user');
           await logInfo('Broadcast stopped by user', { broadcastId });
           // Status will be set by stopLiveBroadcast function
-        } else if (isSIGSEGV) {
-          // SIGSEGV indicates ffmpeg crashed - memory or codec issue
-          console.error('🔴 CRITICAL: ffmpeg crashed with SIGSEGV (segmentation fault)');
-          console.error('   This usually indicates: insufficient memory, codec library issue, or corrupt video file');
-          await logError('Broadcast SIGSEGV crash - memory or codec issue', { 
-            broadcastId, 
-            error: err.message,
-            suggestion: 'Increase Docker memory, check video file, or reduce bitrate/resolution'
-          });
-          await Broadcast.updateStatus(broadcastId, 'failed', 
-            'FFmpeg crashed (SIGSEGV). Try reducing bitrate/resolution or increasing Docker memory.');
         } else if (isFBConnectionError) {
           // Facebook connection error (likely previous connection not released)
           console.error('⚠️  Facebook connection error (previous stream may still be active):', err.message);
