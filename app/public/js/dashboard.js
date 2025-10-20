@@ -981,7 +981,7 @@ async function updateSystemStats() {
         downloadKbps + " Kbps";
 
       // Update Active Streams Count
-      const activeCount = document.querySelectorAll(
+      const activeCount = document.getElementById(
         "[data-broadcast-id]"
       ).length;
       document.getElementById("activeBroadcastCount").textContent = activeCount;
