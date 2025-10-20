@@ -425,7 +425,7 @@
 
             <!-- Showing Info -->
             <p class="text-sm text-gray-400" id="tableShowingInfo">
-              Showing 1-<%= Math.min(broadcasts.length, 12) %> of <%=
+              Showing 1-<%= Math.min(broadcasts.length, 10) %> of <%=
               broadcasts.length %> streams
             </p>
           </div>
@@ -457,6 +457,7 @@
           <% } else { %> <% broadcasts.forEach(function(broadcast) { %>
           <div
             class="bg-gray-800 rounded-lg overflow-hidden group hover:ring-2 hover:ring-blue-500 transition-all"
+            data-broadcast-id="<%= broadcast.broadcast_id %>"
           >
             <!-- Thumbnail with overlay -->
             <div
@@ -673,7 +674,7 @@
 
           <!-- Showing Info -->
           <p class="text-sm text-gray-400" id="cardShowingInfo">
-            Showing 1-<%= Math.min(broadcasts.length, 12) %> of <%=
+            Showing 1-<%= Math.min(broadcasts.length, 10) %> of <%=
             broadcasts.length %> streams
           </p>
         </div>
