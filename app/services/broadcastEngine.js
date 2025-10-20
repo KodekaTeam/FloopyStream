@@ -623,8 +623,7 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
     const outputOptions = [
       // ALWAYS re-encode with SAFE settings (no copy codec for now)
       '-c:v', 'libx264',                   // H.264 video codec
-      '-preset', 'ultrafast',              // Fastest encoding (less CPU)
-      '-tune', 'zerolatency',              // Low latency
+      '-preset', 'veryfast',               // Less CPU usage than ultrafast
       '-profile:v', 'baseline',            // BASELINE profile (most compatible)
       '-level', '3.0',                     // Level 3.0 (compatible)
       '-b:v', baseVideoBitrate,            // Video bitrate
@@ -638,7 +637,7 @@ async function startLiveBroadcast(broadcastId, videoFilePath, destinationUrl, st
       '-b:a', '128k',                      // Audio bitrate
       '-ar', '44100',                      // Audio sample rate
       '-ac', '2',                          // Stereo audio
-      '-max_muxing_queue_size', '1024',    // Large muxing queue
+      '-max_muxing_queue_size', '256',     // Lower muxing queue to save resources
       '-f', 'flv'                          // FLV format for RTMP
     ];
     
