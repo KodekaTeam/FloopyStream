@@ -61,7 +61,7 @@
               <!-- Dropdown List -->
               <div
                 id="videoDropdownList"
-                class="hidden absolute top-full left-0 right-0 z-50 w-full mt-2 bg-gray-800 border border-gray-600 rounded-lg shadow-lg max-h-96 overflow-y-auto"
+                class="hidden absolute z-50 w-full mt-2 bg-gray-800 border border-gray-600 rounded-lg shadow-lg max-h-96 overflow-y-auto"
               >
                 <!-- Search Box -->
                 <div
@@ -400,7 +400,11 @@
           </div>
 
           <!-- Advanced Settings -->
-          <details class="bg-gray-800 border border-gray-700 rounded-lg">
+          <details
+            id="advancedSettingsDetails"
+            class="bg-gray-800 border border-gray-700 rounded-lg"
+            onchange="toggleAdvancedSettings(this)"
+          >
             <summary
               class="cursor-pointer p-4 flex items-center justify-between"
             >
@@ -429,13 +433,23 @@
               </div>
             </div>
 
+            <!-- Hidden input to track if Advanced Settings is enabled -->
+            <input
+              type="hidden"
+              name="useAdvancedSettings"
+              id="useAdvancedSettings"
+              value="false"
+            />
+
             <div class="px-4 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- Bitrate -->
               <div>
                 <label class="block text-xs text-gray-400 mb-1">Bitrate</label>
                 <select
                   name="bitrate"
-                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="advSettingBitrate"
+                  disabled
+                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                 >
                   <option value="2500k" selected>2500 kbps</option>
                   <option value="3000k">3000 kbps</option>
@@ -451,7 +465,9 @@
                 >
                 <select
                   name="framerate"
-                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="advSettingFramerate"
+                  disabled
+                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                 >
                   <option value="30" selected>30 FPS</option>
                   <option value="60">60 FPS</option>
@@ -465,7 +481,9 @@
                 >
                 <select
                   name="resolution"
-                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  id="advSettingResolution"
+                  disabled
+                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                 >
                   <option value="720p" selected>720p HD</option>
                   <option value="1080p">1080p Full HD</option>
@@ -483,7 +501,9 @@
                 <div class="flex gap-2">
                   <button
                     type="button"
-                    class="flex-1 flex items-center justify-center gap-1 bg-blue-600 text-white px-3 py-2 rounded text-xs font-medium"
+                    id="advSettingLandscape"
+                    disabled
+                    class="flex-1 flex items-center justify-center gap-1 bg-blue-600 text-white px-3 py-2 rounded text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     onclick="selectOrientation('landscape', this)"
                   >
                     <i class="ti ti-device-laptop"></i>
@@ -491,7 +511,9 @@
                   </button>
                   <button
                     type="button"
-                    class="flex-1 flex items-center justify-center gap-1 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs"
+                    id="advSettingPortrait"
+                    disabled
+                    class="flex-1 flex items-center justify-center gap-1 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                     onclick="selectOrientation('portrait', this)"
                   >
                     <i class="ti ti-device-mobile"></i>

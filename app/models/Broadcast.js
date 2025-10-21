@@ -1,5 +1,5 @@
-const { executeQuery, fetchOne, fetchAll } = require('../core/database');
-const { v4: uuidv4 } = require('uuid');
+const { executeQuery, fetchOne, fetchAll } = require("../core/database");
+const { v4: uuidv4 } = require("uuid");
 
 /**
  * Broadcast Model - manages live broadcasts/streams
@@ -10,13 +10,13 @@ class Broadcast {
    */
   static async createNew(accountId, broadcastData) {
     const broadcastUuid = uuidv4();
-    
-    const broadcastName = broadcastData.broadcastName || 'Untitled Broadcast';
-    
+
+    const broadcastName = broadcastData.broadcastName || "Untitled Broadcast";
+
     // Determine initial status: 'scheduled' if scheduledTime provided, otherwise 'offline'
-    const initialStatus = broadcastData.scheduledTime ? 'scheduled' : 'offline';
-    
-    console.log('Broadcast.createNew called with:', {
+    const initialStatus = broadcastData.scheduledTime ? "scheduled" : "offline";
+
+    console.log("Broadcast.createNew called with:", {
       accountId,
       contentId: broadcastData.contentId,
       platformName: broadcastData.platformName,
@@ -25,23 +25,26 @@ class Broadcast {
       bitrate: broadcastData.bitrate,
       frameRate: broadcastData.frameRate,
       resolution: broadcastData.resolution,
-      orientation: broadcastData.orientation
+      orientation: broadcastData.orientation,
+      advancedSettings: broadcastData.advancedSettings,
+      loopvideo: broadcastData.loopvideo,
+      durationTimeout: broadcastData.durationTimeout,
     });
-    
+
     const sql = `
       INSERT INTO broadcasts (
         broadcast_uuid, account_id, content_id, content_type, platform_name,
         destination_url, stream_key, scheduled_time, broadcast_name, broadcast_status,
-        bitrate, frame_rate, resolution, orientation
+        bitrate, frame_rate, resolution, orientation, advanced_settings, loopvideo, duration_timeout
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    
+
     const params = [
       broadcastUuid,
       accountId,
       broadcastData.contentId || null,
-      broadcastData.contentType || 'content',
+      broadcastData.contentType || "content",
       broadcastData.platformName,
       broadcastData.destinationUrl,
       broadcastData.streamKey || null,
@@ -51,13 +54,29 @@ class Broadcast {
       broadcastData.bitrate || null,
       broadcastData.frameRate || null,
       broadcastData.resolution || null,
-      broadcastData.orientation || null
+      broadcastData.orientation || null,
+      broadcastData.advancedSettings
+        ? JSON.stringify(broadcastData.advancedSettings)
+        : null,
+      broadcastData.loopvideo !== undefined
+        ? broadcastData.loopvideo
+          ? 1
+          : 0
+        : 1,
+      broadcastData.durationTimeout || null,
     ];
-    
+
     const result = await executeQuery(sql, params);
-    
-    console.log('Broadcast created with ID:', result.lastID, 'Name:', broadcastName, 'Status:', initialStatus);
-    
+
+    console.log(
+      "Broadcast created with ID:",
+      result.lastID,
+      "Name:",
+      broadcastName,
+      "Status:",
+      initialStatus
+    );
+
     return { broadcastId: result.lastID, broadcastUuid };
   }
 
@@ -203,26 +222,26 @@ class Broadcast {
    * Update broadcast status
    */
   static async updateStatus(broadcastId, status, errorMessage = null) {
-    const { getCurrentTimestamp } = require('../utils/datetime');
+    const { getCurrentTimestamp } = require("../utils/datetime");
     const currentTime = getCurrentTimestamp();
-    
-    let sql = 'UPDATE broadcasts SET broadcast_status = ?';
+
+    let sql = "UPDATE broadcasts SET broadcast_status = ?";
     const params = [status];
 
-    if (status === 'active' && !errorMessage) {
-      sql += ', started_at = ?';
+    if (status === "active" && !errorMessage) {
+      sql += ", started_at = ?";
       params.push(currentTime);
-    } else if (status === 'completed' || status === 'failed') {
-      sql += ', ended_at = ?';
+    } else if (status === "completed" || status === "failed") {
+      sql += ", ended_at = ?";
       params.push(currentTime);
     }
 
     if (errorMessage) {
-      sql += ', error_message = ?';
+      sql += ", error_message = ?";
       params.push(errorMessage);
     }
 
-    sql += ' WHERE broadcast_id = ?';
+    sql += " WHERE broadcast_id = ?";
     params.push(broadcastId);
 
     return await executeQuery(sql, params);
@@ -232,7 +251,7 @@ class Broadcast {
    * Delete broadcast
    */
   static async deleteBroadcast(broadcastId) {
-    const sql = 'DELETE FROM broadcasts WHERE broadcast_id = ?';
+    const sql = "DELETE FROM broadcasts WHERE broadcast_id = ?";
     return await executeQuery(sql, [broadcastId]);
   }
 
@@ -290,7 +309,9 @@ class Broadcast {
     `;
     const result = await executeQuery(sql);
     if (result && result.changes > 0) {
-      console.log(`✓ Fixed ${result.changes} active broadcast(s) with NULL started_at`);
+      console.log(
+        `✓ Fixed ${result.changes} active broadcast(s) with NULL started_at`
+      );
     }
     return result;
   }
@@ -300,9 +321,9 @@ class Broadcast {
    * Sets all 'active' broadcasts to 'failed' since their FFmpeg processes are lost
    */
   static async cleanupOrphanedBroadcasts() {
-    const { getCurrentTimestamp } = require('../utils/datetime');
+    const { getCurrentTimestamp } = require("../utils/datetime");
     const currentTime = getCurrentTimestamp();
-    
+
     const sql = `
       UPDATE broadcasts 
       SET broadcast_status = 'failed',
@@ -312,7 +333,9 @@ class Broadcast {
     `;
     const result = await executeQuery(sql, [currentTime]);
     if (result && result.changes > 0) {
-      console.log(`✓ Cleaned up ${result.changes} orphaned broadcast(s) from previous session`);
+      console.log(
+        `✓ Cleaned up ${result.changes} orphaned broadcast(s) from previous session`
+      );
     }
     return result;
   }

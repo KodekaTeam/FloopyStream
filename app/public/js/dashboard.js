@@ -497,6 +497,52 @@ function openNewStreamModal() {
 
   // Show modal
   document.getElementById("newStreamModal").classList.remove("hidden");
+
+  // Pastikan Advanced Settings input enable/disable sesuai state collapse
+  const advDetails = document.getElementById("advancedSettingsDetails");
+  if (advDetails) {
+    toggleAdvancedSettings(advDetails);
+    // Tambahkan event listener jika belum ada
+    if (!advDetails.hasListener) {
+      advDetails.addEventListener("toggle", function () {
+        toggleAdvancedSettings(advDetails);
+      });
+      advDetails.hasListener = true;
+    }
+  }
+}
+
+// Toggle Advanced Settings tracking
+function toggleAdvancedSettings(detailsElement) {
+  const useAdvancedSettingsInput = document.getElementById(
+    "useAdvancedSettings"
+  );
+  const isOpen = detailsElement.open;
+
+  if (useAdvancedSettingsInput) {
+    useAdvancedSettingsInput.value = isOpen ? "true" : "false";
+  }
+
+  // Enable/disable Advanced Settings fields based on collapse state
+  const advFields = [
+    "advSettingBitrate",
+    "advSettingFramerate",
+    "advSettingResolution",
+    "advSettingLandscape",
+    "advSettingPortrait",
+  ];
+
+  advFields.forEach((fieldId) => {
+    const field = document.getElementById(fieldId);
+    if (field) {
+      field.disabled = !isOpen;
+    }
+  });
+
+  console.log("[DEBUG] Advanced Settings toggled:", {
+    isOpen: isOpen,
+    fieldsDisabled: !isOpen,
+  });
 }
 
 function closeNewStreamModal() {
@@ -765,11 +811,24 @@ document
       data.broadcastName = ""; // Backend will use default
     }
 
+    // Check if Advanced Settings is enabled
+    const useAdvancedSettings = data.useAdvancedSettings === "true";
+
+    // ALWAYS include Advanced Settings fields with defaults or user values
+    if (!data.bitrate) data.bitrate = "2500k";
+    if (!data.framerate) data.framerate = "60";
+    if (!data.resolution) data.resolution = "480p";
+    if (!data.orientation) data.orientation = "landscape";
+
+    // Keep the tracking field for backend to know if user explicitly enabled Advanced Settings
+    data.useAdvancedSettingsEnabled = useAdvancedSettings;
+
     // Debug: Check what data is being sent
-    console.log("Form data being sent:", data);
-    console.log("Broadcast Name:", data.broadcastName);
-    console.log("Content ID:", data.contentId);
-    console.log("Destination URL:", data.destinationUrl);
+    console.log("[DEBUG] Form submission:", {
+      useAdvancedSettings: useAdvancedSettings,
+      dataToSend: data,
+      hasAdvancedFields: data.bitrate !== undefined,
+    });
 
     try {
       const response = await fetch("/api/broadcast/start", {
@@ -981,9 +1040,7 @@ async function updateSystemStats() {
         downloadKbps + " Kbps";
 
       // Update Active Streams Count
-      const activeCount = document.getElementById(
-        "[data-broadcast-id]"
-      ).length;
+      const activeCount = document.getElementById("[data-broadcast-id]").length;
       document.getElementById("activeBroadcastCount").textContent = activeCount;
 
       // Update live timers
@@ -1172,9 +1229,15 @@ async function openEditStreamModal(broadcastId) {
         // Check if there's any schedule settings
         const hasSchedule =
           broadcast.scheduled_time || broadcast.scheduled_time;
-        const loopVideo = broadcast.content_type === "playlist" || false;
+        const loopVideo =
+          broadcast.loopvideo === "on" ||
+          broadcast.loopvideo === true ||
+          broadcast.loopvideo === 1;
+        const hasDurationTimeout =
+          broadcast.duration_timeout !== null &&
+          broadcast.duration_timeout !== undefined;
 
-        if (hasSchedule) {
+        if (hasSchedule || loopVideo || hasDurationTimeout) {
           scheduleSettingsPreview.style.display = "block";
           document.getElementById("editPreviewLoopVideo").textContent =
             loopVideo ? "Yes" : "No";
@@ -1182,6 +1245,51 @@ async function openEditStreamModal(broadcastId) {
             broadcast.scheduled_time
               ? new Date(broadcast.scheduled_time).toLocaleString()
               : "Not scheduled";
+          // Display duration_timeout in schedule preview (gracefully handle multiple possible keys/formats)
+          // Prefer defensive checks instead of nullish coalescing to avoid syntax errors on older runtimes
+          const durationTimeoutRaw =
+            typeof broadcast.duration_timeout !== "undefined" &&
+            broadcast.duration_timeout !== null &&
+            broadcast.duration_timeout !== ""
+              ? broadcast.duration_timeout
+              : typeof broadcast.durationTimeout !== "undefined" &&
+                broadcast.durationTimeout !== null &&
+                broadcast.durationTimeout !== ""
+              ? broadcast.durationTimeout
+              : typeof broadcast.duration_timeout_seconds !== "undefined" &&
+                broadcast.duration_timeout_seconds !== null &&
+                broadcast.duration_timeout_seconds !== ""
+              ? broadcast.duration_timeout_seconds
+              : null;
+          let durationTimeoutText = "Not set";
+
+          if (
+            durationTimeoutRaw !== null &&
+            durationTimeoutRaw !== "" &&
+            !Number.isNaN(Number(durationTimeoutRaw))
+          ) {
+            const totalSeconds = Math.max(0, Number(durationTimeoutRaw));
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            if (hours > 0) {
+              durationTimeoutText =
+                hours + "h " + minutes + "m " + seconds + "s";
+            } else if (minutes > 0) {
+              durationTimeoutText = minutes + "m " + seconds + "s";
+            } else {
+              durationTimeoutText = seconds + "s";
+            }
+          }
+
+          // Update the DOM element if present
+          const durationElem = document.getElementById(
+            "editPreviewDurationTimeout"
+          );
+          if (durationElem) {
+            durationElem.textContent = durationTimeoutText;
+          }
         } else {
           scheduleSettingsPreview.style.display = "none";
         }
@@ -1193,11 +1301,7 @@ async function openEditStreamModal(broadcastId) {
       );
       if (advancedSettingsPreview) {
         // Check if there's any advanced settings
-        const hasAdvancedSettings =
-          broadcast.bitrate ||
-          broadcast.frame_rate ||
-          broadcast.resolution ||
-          broadcast.orientation;
+        const hasAdvancedSettings = broadcast.advanced_settings;
 
         if (hasAdvancedSettings) {
           advancedSettingsPreview.style.display = "block";
@@ -1214,8 +1318,35 @@ async function openEditStreamModal(broadcastId) {
               ? broadcast.orientation.charAt(0).toUpperCase() +
                 broadcast.orientation.slice(1)
               : "Landscape";
+          // Update title to "Advanced Settings"
+          const settingsTitle = document.getElementById(
+            "editAdvancedSettingsTitle"
+          );
+          if (settingsTitle)
+            settingsTitle.textContent = "Advanced Settings (Read-only)";
         } else {
-          advancedSettingsPreview.style.display = "none";
+          advancedSettingsPreview.style.display = "block"; // Show but with different content
+          // Update title to indicate original settings
+          const settingsTitle = document.getElementById(
+            "editAdvancedSettingsTitle"
+          );
+          if (settingsTitle)
+            settingsTitle.textContent = "Original Video Resolution (Read-only)";
+          document.getElementById("editPreviewBitrate").textContent =
+            broadcast.bitrate || "Default (2500k)";
+          document.getElementById("editPreviewFrameRate").textContent =
+            broadcast.frame_rate
+              ? `${broadcast.frame_rate} FPS`
+              : "Default (30 FPS)";
+          document.getElementById("editPreviewResolution").textContent =
+            broadcast.resolution || "Auto-detect";
+          document.getElementById("editPreviewOrientation").textContent =
+            broadcast.orientation
+              ? broadcast.orientation.charAt(0).toUpperCase() +
+                broadcast.orientation.slice(1)
+              : "Landscape";
+          document.getElementById("editPreviewOrientation").textContent =
+            "Landscape";
         }
       }
 

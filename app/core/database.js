@@ -1,9 +1,9 @@
-require('dotenv').config();
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-const fs = require('fs-extra');
+require("dotenv").config();
+const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
+const fs = require("fs-extra");
 
-const dbPath = process.env.DB_PATH || './storage/database/floopystream.db';
+const dbPath = process.env.DB_PATH || "./storage/database/floopystream.db";
 const dbDirectory = path.dirname(dbPath);
 
 // Ensure database directory exists
@@ -12,14 +12,14 @@ fs.ensureDirSync(dbDirectory);
 // Initialize database connection
 const dbConnection = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    console.error('Failed to connect to database:', err.message);
+    console.error("Failed to connect to database:", err.message);
     process.exit(1);
   }
-  console.log('✓ Database connection established');
+  console.log("✓ Database connection established");
 });
 
 // Enable foreign keys
-dbConnection.run('PRAGMA foreign_keys = ON');
+dbConnection.run("PRAGMA foreign_keys = ON");
 
 /**
  * Initialize database schema
@@ -28,7 +28,8 @@ function initializeSchema() {
   return new Promise((resolve, reject) => {
     dbConnection.serialize(() => {
       // Accounts table (replaces Users)
-      dbConnection.run(`
+      dbConnection.run(
+        `
         CREATE TABLE IF NOT EXISTS accounts (
           account_id INTEGER PRIMARY KEY AUTOINCREMENT,
           account_uuid TEXT UNIQUE NOT NULL,
@@ -42,15 +43,18 @@ function initializeSchema() {
           created_at TEXT DEFAULT CURRENT_TIMESTAMP,
           updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
-      `, (err) => {
-        if (err) {
-          console.error('Error creating accounts table:', err);
-          reject(err);
+      `,
+        (err) => {
+          if (err) {
+            console.error("Error creating accounts table:", err);
+            reject(err);
+          }
         }
-      });
+      );
 
       // Content table (replaces Videos)
-      dbConnection.run(`
+      dbConnection.run(
+        `
         CREATE TABLE IF NOT EXISTS content (
           content_id INTEGER PRIMARY KEY AUTOINCREMENT,
           content_uuid TEXT UNIQUE NOT NULL,
@@ -67,17 +71,20 @@ function initializeSchema() {
           upload_date TEXT DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
         )
-      `, (err) => {
-        if (err) {
-          console.error('Error creating content table:', err);
-          reject(err);
+      `,
+        (err) => {
+          if (err) {
+            console.error("Error creating content table:", err);
+            reject(err);
+          }
         }
-      });
+      );
 
       // Broadcasts table (replaces Streams)
       // Note: content_id can reference either content.content_id or playlists.playlist_id
       // depending on content_type. FK constraint removed to allow this flexibility.
-      dbConnection.run(`
+      dbConnection.run(
+        `
         CREATE TABLE IF NOT EXISTS broadcasts (
           broadcast_id INTEGER PRIMARY KEY AUTOINCREMENT,
           broadcast_uuid TEXT UNIQUE NOT NULL,
@@ -89,22 +96,28 @@ function initializeSchema() {
           destination_url TEXT NOT NULL,
           stream_key TEXT,
           broadcast_status TEXT DEFAULT 'scheduled',
+          loopvideo INTEGER DEFAULT 1,
           scheduled_time TEXT,
+          duration_timeout INTEGER,
+          advanced_settings TEXT,
           started_at TEXT,
           ended_at TEXT,
           error_message TEXT,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
         )
-      `, (err) => {
-        if (err) {
-          console.error('Error creating broadcasts table:', err);
-          reject(err);
+      `,
+        (err) => {
+          if (err) {
+            console.error("Error creating broadcasts table:", err);
+            reject(err);
+          }
         }
-      });
+      );
 
       // Playlists table
-      dbConnection.run(`
+      dbConnection.run(
+        `
         CREATE TABLE IF NOT EXISTS playlists (
           playlist_id INTEGER PRIMARY KEY AUTOINCREMENT,
           playlist_uuid TEXT UNIQUE NOT NULL,
@@ -116,15 +129,18 @@ function initializeSchema() {
           updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
         )
-      `, (err) => {
-        if (err) {
-          console.error('Error creating playlists table:', err);
-          reject(err);
+      `,
+        (err) => {
+          if (err) {
+            console.error("Error creating playlists table:", err);
+            reject(err);
+          }
         }
-      });
+      );
 
       // Playlist Items table (junction table for playlist-content relationship)
-      dbConnection.run(`
+      dbConnection.run(
+        `
         CREATE TABLE IF NOT EXISTS playlist_items (
           item_id INTEGER PRIMARY KEY AUTOINCREMENT,
           item_uuid TEXT UNIQUE NOT NULL,
@@ -136,32 +152,35 @@ function initializeSchema() {
           FOREIGN KEY (content_id) REFERENCES content(content_id) ON DELETE CASCADE,
           UNIQUE(playlist_id, content_id)
         )
-      `, async (err) => {
-        if (err) {
-          console.error('Error creating playlist_items table:', err);
-          reject(err);
-        } else {
-          console.log('✓ Database schema initialized');
-          
-          // Run migrations
-          try {
-            const Broadcast = require('../models/Broadcast');
-            
-            // Cleanup orphaned active broadcasts from previous session
-            await Broadcast.cleanupOrphanedBroadcasts();
-            
-            // Fix active broadcasts with NULL started_at
-            await Broadcast.fixActiveStartedAt();
-          } catch (migrationError) {
-            console.error('⚠ Migration error:', migrationError.message);
+      `,
+        async (err) => {
+          if (err) {
+            console.error("Error creating playlist_items table:", err);
+            reject(err);
+          } else {
+            console.log("✓ Database schema initialized");
+
+            // Run migrations
+            try {
+              const Broadcast = require("../models/Broadcast");
+
+              // Cleanup orphaned active broadcasts from previous session
+              await Broadcast.cleanupOrphanedBroadcasts();
+
+              // Fix active broadcasts with NULL started_at
+              await Broadcast.fixActiveStartedAt();
+            } catch (migrationError) {
+              console.error("⚠ Migration error:", migrationError.message);
+            }
+
+            resolve();
           }
-          
-          resolve();
         }
-      });
+      );
 
       // Google Drive tokens table
-      dbConnection.run(`
+      dbConnection.run(
+        `
         CREATE TABLE IF NOT EXISTS google_drive_tokens (
           token_id INTEGER PRIMARY KEY AUTOINCREMENT,
           token_uuid TEXT UNIQUE NOT NULL,
@@ -172,93 +191,196 @@ function initializeSchema() {
           created_at TEXT DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
         )
-      `, (err) => {
-        if (err) {
-          console.error('Error creating google_drive_tokens table:', err);
-          reject(err);
+      `,
+        (err) => {
+          if (err) {
+            console.error("Error creating google_drive_tokens table:", err);
+            reject(err);
+          }
         }
-      });
+      );
 
       // Migration: Add broadcast_name and Advanced Settings columns if they don't exist
       dbConnection.all("PRAGMA table_info(broadcasts)", (err, columns) => {
         if (err) {
-          console.error('Error checking broadcasts table:', err);
+          console.error("Error checking broadcasts table:", err);
           return;
         }
-        
-        const hasBroadcastName = columns.some(col => col.name === 'broadcast_name');
-        const hasBitrate = columns.some(col => col.name === 'bitrate');
-        const hasFrameRate = columns.some(col => col.name === 'frame_rate');
-        const hasResolution = columns.some(col => col.name === 'resolution');
-        const hasOrientation = columns.some(col => col.name === 'orientation');
-        
+
+        const hasBroadcastName = columns.some(
+          (col) => col.name === "broadcast_name"
+        );
+        const hasBitrate = columns.some((col) => col.name === "bitrate");
+        const hasFrameRate = columns.some((col) => col.name === "frame_rate");
+        const hasResolution = columns.some((col) => col.name === "resolution");
+        const hasOrientation = columns.some(
+          (col) => col.name === "orientation"
+        );
+        const hasAdvancedSettings = columns.some(
+          (col) => col.name === "advanced_settings"
+        );
+
         if (!hasBroadcastName) {
-          dbConnection.run(`ALTER TABLE broadcasts ADD COLUMN broadcast_name TEXT`, (err) => {
-            if (err) {
-              console.error('Error adding broadcast_name column:', err);
-            } else {
-              console.log('✓ Added broadcast_name column to broadcasts table');
+          dbConnection.run(
+            `ALTER TABLE broadcasts ADD COLUMN broadcast_name TEXT`,
+            (err) => {
+              if (err) {
+                console.error("Error adding broadcast_name column:", err);
+              } else {
+                console.log(
+                  "✓ Added broadcast_name column to broadcasts table"
+                );
+              }
             }
-          });
+          );
         }
-        
+
         if (!hasBitrate) {
-          dbConnection.run(`ALTER TABLE broadcasts ADD COLUMN bitrate TEXT`, (err) => {
-            if (err) {
-              console.error('Error adding bitrate column:', err);
-            } else {
-              console.log('✓ Added bitrate column to broadcasts table');
+          dbConnection.run(
+            `ALTER TABLE broadcasts ADD COLUMN bitrate TEXT`,
+            (err) => {
+              if (err) {
+                console.error("Error adding bitrate column:", err);
+              } else {
+                console.log("✓ Added bitrate column to broadcasts table");
+              }
             }
-          });
+          );
         }
-        
+
         if (!hasFrameRate) {
-          dbConnection.run(`ALTER TABLE broadcasts ADD COLUMN frame_rate TEXT`, (err) => {
-            if (err) {
-              console.error('Error adding frame_rate column:', err);
-            } else {
-              console.log('✓ Added frame_rate column to broadcasts table');
+          dbConnection.run(
+            `ALTER TABLE broadcasts ADD COLUMN frame_rate TEXT`,
+            (err) => {
+              if (err) {
+                console.error("Error adding frame_rate column:", err);
+              } else {
+                console.log("✓ Added frame_rate column to broadcasts table");
+              }
             }
-          });
+          );
         }
-        
+
         if (!hasResolution) {
-          dbConnection.run(`ALTER TABLE broadcasts ADD COLUMN resolution TEXT`, (err) => {
-            if (err) {
-              console.error('Error adding resolution column:', err);
-            } else {
-              console.log('✓ Added resolution column to broadcasts table');
+          dbConnection.run(
+            `ALTER TABLE broadcasts ADD COLUMN resolution TEXT`,
+            (err) => {
+              if (err) {
+                console.error("Error adding resolution column:", err);
+              } else {
+                console.log("✓ Added resolution column to broadcasts table");
+              }
             }
-          });
+          );
         }
-        
-        if (!hasOrientation) {
-          dbConnection.run(`ALTER TABLE broadcasts ADD COLUMN orientation TEXT`, (err) => {
-            if (err) {
-              console.error('Error adding orientation column:', err);
-            } else {
-              console.log('✓ Added orientation column to broadcasts table');
+
+        if (!hasAdvancedSettings) {
+          dbConnection.run(
+            `ALTER TABLE broadcasts ADD COLUMN advanced_settings TEXT`,
+            (err) => {
+              if (err) {
+                console.error("Error adding advanced_settings column:", err);
+              } else {
+                console.log(
+                  "✓ Added advanced_settings column to broadcasts table"
+                );
+              }
             }
-          });
+          );
+        }
+
+        if (!hasOrientation) {
+          dbConnection.run(
+            `ALTER TABLE broadcasts ADD COLUMN orientation TEXT`,
+            (err) => {
+              if (err) {
+                console.error("Error adding orientation column:", err);
+              } else {
+                console.log("✓ Added orientation column to broadcasts table");
+              }
+            }
+          );
         }
       });
 
       // Migration: Add resolution column to content table if it doesn't exist
       dbConnection.all("PRAGMA table_info(content)", (err, columns) => {
         if (err) {
-          console.error('Error checking content table:', err);
+          console.error("Error checking content table:", err);
           return;
         }
-        
-        const hasResolution = columns.some(col => col.name === 'resolution');
+
+        const hasResolution = columns.some((col) => col.name === "resolution");
         if (!hasResolution) {
-          dbConnection.run(`ALTER TABLE content ADD COLUMN resolution TEXT`, (err) => {
-            if (err) {
-              console.error('Error adding resolution column:', err);
-            } else {
-              console.log('✓ Added resolution column to content table');
+          dbConnection.run(
+            `ALTER TABLE content ADD COLUMN resolution TEXT`,
+            (err) => {
+              if (err) {
+                console.error("Error adding resolution column:", err);
+              } else {
+                console.log("✓ Added resolution column to content table");
+              }
             }
-          });
+          );
+        }
+      });
+
+      // Migration: Add loopvideo column to broadcasts table if it doesn't exist
+      dbConnection.all("PRAGMA table_info(broadcasts)", (err, columns) => {
+        if (err) {
+          console.error("Error checking broadcasts table for loopvideo:", err);
+          return;
+        }
+
+        const hasLoopvideo = columns.some((col) => col.name === "loopvideo");
+        const hasAdvancedSettings = columns.some(
+          (col) => col.name === "advanced_settings"
+        );
+        const hasDurationTimeout = columns.some(
+          (col) => col.name === "duration_timeout"
+        );
+
+        if (!hasLoopvideo) {
+          dbConnection.run(
+            `ALTER TABLE broadcasts ADD COLUMN loopvideo INTEGER DEFAULT 1`,
+            (err) => {
+              if (err) {
+                console.error("Error adding loopvideo column:", err);
+              } else {
+                console.log("✓ Added loopvideo column to broadcasts table");
+              }
+            }
+          );
+        }
+
+        if (!hasAdvancedSettings) {
+          dbConnection.run(
+            `ALTER TABLE broadcasts ADD COLUMN advanced_settings TEXT`,
+            (err) => {
+              if (err) {
+                console.error("Error adding advanced_settings column:", err);
+              } else {
+                console.log(
+                  "✓ Added advanced_settings column to broadcasts table"
+                );
+              }
+            }
+          );
+        }
+
+        if (!hasDurationTimeout) {
+          dbConnection.run(
+            `ALTER TABLE broadcasts ADD COLUMN duration_timeout INTEGER`,
+            (err) => {
+              if (err) {
+                console.error("Error adding duration_timeout column:", err);
+              } else {
+                console.log(
+                  "✓ Added duration_timeout column to broadcasts table"
+                );
+              }
+            }
+          );
         }
       });
     });
@@ -270,7 +392,7 @@ function initializeSchema() {
  */
 function verifyAccountsExist() {
   return new Promise((resolve, reject) => {
-    dbConnection.get('SELECT COUNT(*) as total FROM accounts', (err, row) => {
+    dbConnection.get("SELECT COUNT(*) as total FROM accounts", (err, row) => {
       if (err) {
         reject(err);
       } else {
@@ -285,7 +407,7 @@ function verifyAccountsExist() {
  */
 function executeQuery(sql, params = []) {
   return new Promise((resolve, reject) => {
-    dbConnection.run(sql, params, function(err) {
+    dbConnection.run(sql, params, function (err) {
       if (err) {
         reject(err);
       } else {
@@ -334,7 +456,7 @@ function closeConnection() {
       if (err) {
         reject(err);
       } else {
-        console.log('✓ Database connection closed');
+        console.log("✓ Database connection closed");
         resolve();
       }
     });
@@ -342,8 +464,8 @@ function closeConnection() {
 }
 
 // Initialize schema on load
-initializeSchema().catch(err => {
-  console.error('Failed to initialize database schema:', err);
+initializeSchema().catch((err) => {
+  console.error("Failed to initialize database schema:", err);
   process.exit(1);
 });
 
@@ -354,5 +476,5 @@ module.exports = {
   executeQuery,
   fetchOne,
   fetchAll,
-  closeConnection
+  closeConnection,
 };
