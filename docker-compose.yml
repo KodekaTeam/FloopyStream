@@ -55,9 +55,9 @@ services:
         limits:
           cpus: "${APP_CPU_LIMIT:-2}"
           memory: "${APP_MEMORY_LIMIT:-2G}"
-        reservations:
-          cpus: "${APP_CPU_RESERVE:-0.5}"
-          memory: "${APP_MEMORY_RESERVE:-512M}"
+        # reservations:
+        #   cpus: "${APP_CPU_RESERVE:-0.5}"
+        #   memory: "${APP_MEMORY_RESERVE:-512M}"
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:6060"]

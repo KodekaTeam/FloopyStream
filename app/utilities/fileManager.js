@@ -148,6 +148,20 @@ async function calculateDirectorySize(directoryPath) {
   return totalSize;
 }
 
+
+/**
+ * Generate unique filename (timestamp + random)
+ */
+function getUniqueFilename(originalFilename) {
+  const timestamp = Date.now();
+  const random = Math.floor(Math.random() * 1000000);
+  const ext = path.extname(originalFilename);
+  const basename = path.basename(originalFilename, ext)
+    .replace(/[^a-z0-9]/gi, '-')
+    .toLowerCase();
+  return `${basename}-${timestamp}-${random}${ext}`;
+}
+
 module.exports = {
   createRequiredDirectories,
   formatFileSize,
@@ -155,5 +169,6 @@ module.exports = {
   removeFile,
   relocateFile,
   duplicateFile,
-  calculateDirectorySize
+  calculateDirectorySize,
+  getUniqueFilename
 };
