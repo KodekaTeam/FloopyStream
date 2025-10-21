@@ -294,73 +294,26 @@ router.post('/drive/import-url', requireAuth, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Google Drive URL is required' });
     }
     
-    // Extract file ID from various Google Drive URL formats
+    const { extractFileId, downloadFile } = require('../../utilities/gdriveDownloader');
+
     let fileId;
-    const patterns = [
-      /\/file\/d\/([a-zA-Z0-9_-]+)/,
-      /id=([a-zA-Z0-9_-]+)/,
-      /\/open\?id=([a-zA-Z0-9_-]+)/
-    ];
-    
-    for (const pattern of patterns) {
-      const match = driveUrl.match(pattern);
-      if (match) {
-        fileId = match[1];
-        break;
-      }
+    try {
+      fileId = extractFileId(driveUrl);
+    } catch (err) {
+      return res.status(400).json({ success: false, message: 'Invalid Google Drive URL. Please use a valid sharing link.' });
     }
-    
-    if (!fileId) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Invalid Google Drive URL. Please use a valid sharing link.' 
-      });
-    }
-    
-    // Download file from Google Drive using direct download URL
-    const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-    
+
     // Create temp filename
     const tempFilename = `drive_${Date.now()}_${fileId}.mp4`;
     const tempPath = path.join(__dirname, '../../storage/uploads', tempFilename);
-    
-    // Ensure directory exists
-    fs.mkdirSync(path.dirname(tempPath), { recursive: true });
-    
-    // Download file
-    const response = await axios({
-      method: 'GET',
-      url: downloadUrl,
-      responseType: 'stream',
-      maxRedirects: 5
-    });
-    
-    const writer = fs.createWriteStream(tempPath);
-    response.data.pipe(writer);
-    
-    await new Promise((resolve, reject) => {
-      writer.on('finish', resolve);
-      writer.on('error', reject);
-    });
-    
-    // Quick check: ensure downloaded file is not an HTML confirmation page
-    try {
-      const fd = fs.openSync(tempPath, 'r');
-      const sampleBuf = Buffer.alloc(1024);
-      const bytesRead = fs.readSync(fd, sampleBuf, 0, 1024, 0);
-      fs.closeSync(fd);
-      const sampleText = sampleBuf.slice(0, bytesRead).toString('utf8').toLowerCase();
 
-      if (sampleText.includes('<html') || sampleText.includes('doctype html') || sampleText.includes('google') && sampleText.includes('confirm')) {
-        // Remove the invalid download
-        try { fs.unlinkSync(tempPath); } catch (e) { /* ignore */ }
-        return res.status(400).json({
-          success: false,
-          message: 'Failed to download file from Google Drive. The link may require permission or a download confirmation page. Make sure the file is shared "Anyone with the link" or use the Google Drive integration (authenticated).' 
-        });
-      }
+    try {
+      await downloadFile(fileId, tempPath, (progress) => {
+        // optional logging
+      });
     } catch (err) {
-      console.warn('Could not sample downloaded file for validation:', err.message);
+      console.error('Drive download failed:', err.message || err);
+      return res.status(400).json({ success: false, message: err.message || 'Failed to download file from Google Drive' });
     }
     
     // Get file stats
