@@ -412,7 +412,7 @@ document.getElementById('importDriveForm')?.addEventListener('submit', async (e)
   importBtn.querySelector('span').textContent = 'Importing...';
   
   try {
-    const response = await fetch('/api/drive/import-url', {
+    const response = await fetch('/api/content/drive/import-url', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

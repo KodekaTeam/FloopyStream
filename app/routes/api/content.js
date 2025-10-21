@@ -31,14 +31,24 @@ router.post('/upload', requireAuth, apiLimiter, videoUploader, handleUploadError
     }
 
     const { title, description } = req.body;
-    
+
+    // Timing / debug logs to diagnose upload/post-processing slowness
+    const uploadHandlerStart = Date.now();
+    console.log(`[upload] handler invoked for user=${req.session && req.session.username ? req.session.username : 'unknown'} file=${req.file.originalname} size=${req.file.size}`);
+
     // Extract media information
+    const t1 = Date.now();
     const mediaInfo = await extractMediaInfo(req.file.path);
-    
+    const t2 = Date.now();
+    console.log(`[upload] extractMediaInfo took ${t2 - t1} ms for file=${req.file.filename}`);
+
     // Generate thumbnail
+    const thumbStart = Date.now();
     const thumbnailFilename = `thumb_${path.parse(req.file.filename).name}.jpg`;
     const thumbnailPath = path.join(process.env.THUMBNAIL_DIR || './storage/thumbnails', thumbnailFilename);
     await createThumbnail(req.file.path, thumbnailPath);
+    const thumbEnd = Date.now();
+    console.log(`[upload] createThumbnail took ${thumbEnd - thumbStart} ms for file=${req.file.filename}`);
 
     // Calculate resolution
     const resolution = mediaInfo.width && mediaInfo.height 
@@ -332,6 +342,26 @@ router.post('/drive/import-url', requireAuth, async (req, res) => {
       writer.on('finish', resolve);
       writer.on('error', reject);
     });
+    
+    // Quick check: ensure downloaded file is not an HTML confirmation page
+    try {
+      const fd = fs.openSync(tempPath, 'r');
+      const sampleBuf = Buffer.alloc(1024);
+      const bytesRead = fs.readSync(fd, sampleBuf, 0, 1024, 0);
+      fs.closeSync(fd);
+      const sampleText = sampleBuf.slice(0, bytesRead).toString('utf8').toLowerCase();
+
+      if (sampleText.includes('<html') || sampleText.includes('doctype html') || sampleText.includes('google') && sampleText.includes('confirm')) {
+        // Remove the invalid download
+        try { fs.unlinkSync(tempPath); } catch (e) { /* ignore */ }
+        return res.status(400).json({
+          success: false,
+          message: 'Failed to download file from Google Drive. The link may require permission or a download confirmation page. Make sure the file is shared "Anyone with the link" or use the Google Drive integration (authenticated).' 
+        });
+      }
+    } catch (err) {
+      console.warn('Could not sample downloaded file for validation:', err.message);
+    }
     
     // Get file stats
     const stats = fs.statSync(tempPath);
