@@ -68,7 +68,8 @@ router.get("/content", requireAuth, async (req, res) => {
       contentList: paginatedContent,
       totalItems: totalItems,
       totalPages: totalPages,
-      currentPage: currentPage,
+      currentPage: "content",
+      pageNumber: currentPage,
       pageSection: "content",
     });
   } catch (error) {
