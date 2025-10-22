@@ -6,6 +6,8 @@ const path = require('path');
 const fs = require('fs');
 const session = require('express-session');
 const engine = require('ejs-mate');
+const bodyParser = require('body-parser');
+const multer = require('multer');
 
 // Import utilities and services
 const { createRequiredDirectories } = require('./utilities/fileManager');
@@ -23,6 +25,15 @@ const { formatTimestamp, getTimezoneInfo, parseTimestampToDate } = require('./ut
 // Initialize Express app
 const app = express();
 const port = process.env.PORT || 8080;
+
+// kalau pakai multer / form-data
+const upload = multer({
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200 MB
+});
+
+// untuk form upload besar
+app.use(bodyParser.json({ limit: '200mb' }));
+app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
 
 // Create required directories FIRST (before importing routes that use database)
 createRequiredDirectories();
@@ -65,8 +76,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('trust proxy', 1);
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/storage', express.static(path.join(__dirname, 'storage')));
 
