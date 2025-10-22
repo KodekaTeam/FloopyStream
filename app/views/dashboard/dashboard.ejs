@@ -262,8 +262,8 @@
                         <p class="text-xs text-gray-500">
                           <% if (broadcast.resolution) { %> <%=
                           broadcast.resolution %> • <%= broadcast.bitrate ||
-                          'N/A' %> kbps • <%= broadcast.frame_rate || 30 %> FPS
-                          <% } else { %> 1920×1080 • 2500 kbps • 30 FPS <% } %>
+                          'N/A' %> • <%= broadcast.frame_rate || 30 %> FPS <% }
+                          else { %> 1920×1080 • 2500 kbps • 30 FPS <% } %>
                         </p>
                       </div>
                     </div>
@@ -622,6 +622,14 @@
                 <span>•</span>
                 <span> <%= broadcast.resolution || '1920×1080' %> </span>
                 <% } %>
+                <span>•</span>
+                <% if (broadcast.bitrate) { %>
+                <span> <%= broadcast.bitrate || '-' %> </span>
+                <% } %>
+                <span>•</span>
+                <% if (broadcast.frame_rate) { %>
+                <span> <%= broadcast.frame_rate || '-' %>fps</span>
+                <% } %>
               </div>
 
               <div
@@ -630,8 +638,12 @@
                 <div class="flex items-center gap-1">
                   <i class="ti ti-clock"></i>
                   <span>
-                    <%= broadcast.created_at ? new
-                    Date(broadcast.created_at).toLocaleDateString() : '--' %>
+                    <!-- <%= broadcast.created_at ? new
+                    Date(broadcast.created_at).toLocaleDateString() : '--' %> -->
+                    <%= broadcast.created_at ? (typeof formatTimestamp ===
+                    'function' ? formatTimestamp(broadcast.created_at,
+                    'datetime') : new
+                    Date(broadcast.created_at).toLocaleString()) : '--' %>
                   </span>
                 </div>
                 <% if (broadcast.duration_seconds) { %>
