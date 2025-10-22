@@ -183,7 +183,7 @@ app.use(routes);
 // START SERVER
 // ============================================
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   const { getTimezoneInfo } = require('./utils/datetime');
   const tzInfo = getTimezoneInfo();
   
@@ -205,6 +205,21 @@ app.listen(port, () => {
     timezone: tzInfo.timezone 
   });
 });
+
+// Increase Node.js HTTP server timeouts so long uploads are not cut off by
+// Node's defaults (headersTimeout defaults to 60000 ms). These values are
+// set slightly larger than the per-route upload timeouts configured above.
+try {
+  // Keep sockets alive a bit longer
+  server.keepAliveTimeout = 65 * 1000; // 65 seconds
+  // Allow headers and entire request processing for up to 31 minutes
+  server.headersTimeout = 31 * 60 * 1000; // 31 minutes
+  // Set socket timeout to 31 minutes as a safety net
+  server.setTimeout(31 * 60 * 1000);
+  console.log('✓ Server timeouts adjusted for large uploads');
+} catch (err) {
+  console.warn('⚠ Failed to adjust server timeouts:', err.message);
+}
 
 // Graceful shutdown
 process.on('SIGINT', () => {
