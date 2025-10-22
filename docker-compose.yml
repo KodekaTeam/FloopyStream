@@ -49,15 +49,19 @@ services:
     restart: unless-stopped
     networks:
       - floopystream-network
-    # Resource limits and reservations
-    deploy:
-      resources:
-        limits:
-          cpus: "${APP_CPU_LIMIT:-2}"
-          memory: "${APP_MEMORY_LIMIT:-2G}"
-        # reservations:
-        #   cpus: "${APP_CPU_RESERVE:-0.5}"
-        #   memory: "${APP_MEMORY_RESERVE:-512M}"
+    # Resource limits and reservations for docker swarm
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "${APP_CPU_LIMIT:-2}"
+    #       memory: "${APP_MEMORY_LIMIT:-2G}"
+    #     reservations:
+    #       cpus: "${APP_CPU_RESERVE:-0.5}"
+    #       memory: "${APP_MEMORY_RESERVE:-512M}"
+
+    # Memory limits for ffmpeg streaming (dynamically configurable) for non-swarm
+    mem_limit: "${APP_MEMORY_LIMIT:-4G}"
+    memswap_limit: "${APP_MEMORY_LIMIT:-4G}"
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:6060"]
