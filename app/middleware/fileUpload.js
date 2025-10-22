@@ -8,31 +8,32 @@ const { v4: uuidv4 } = require('uuid');
  * Handles file uploads using multer
  */
 
-const { getUniqueFilename } = require('../utilities/fileManager');
-
-// Configure storage (sync, folder sudah dibuat saat server start)
+// Configure storage
 const fileStorage = multer.diskStorage({
   destination: (req, file, callback) => {
     const uploadDir = process.env.UPLOAD_DIR || './storage/uploads';
-    callback(null, uploadDir);
+    // ensureDir returns a promise; call the callback when done or on error
+    fs.ensureDir(uploadDir)
+      .then(() => callback(null, uploadDir))
+      .catch(err => callback(err));
   },
   filename: (req, file, callback) => {
-    const filename = getUniqueFilename(file.originalname);
+    const uniqueId = uuidv4();
+    const extension = path.extname(file.originalname);
+    const filename = `${uniqueId}${extension}`;
     callback(null, filename);
   }
 });
 
-// File filter for video files (cek mimetype dan ekstensi)
+// File filter for video files
 const videoFileFilter = (req, file, callback) => {
-  const allowedMimes = [
-    'video/mp4', 'video/avi', 'video/quicktime', 'video/mkv', 'video/flv', 'video/wmv', 'video/webm'
-  ];
-  const allowedExts = ['.mp4', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.webm'];
-  const ext = path.extname(file.originalname).toLowerCase();
-  if (allowedMimes.includes(file.mimetype) || allowedExts.includes(ext)) {
+  const allowedFormats = (process.env.ALLOWED_FORMATS || 'mp4,avi,mov,mkv,flv,wmv,webm').split(',');
+  const extension = path.extname(file.originalname).toLowerCase().replace('.', '');
+  
+  if (allowedFormats.includes(extension)) {
     callback(null, true);
   } else {
-    callback(new Error('Invalid file format. Allowed formats: MP4, AVI, MOV, MKV, FLV, WMV, WEBM'), false);
+    callback(new Error(`Invalid file format. Allowed formats: ${allowedFormats.join(', ')}`), false);
   }
 };
 
@@ -51,10 +52,14 @@ const videoUploader = multer({
 const profilePictureStorage = multer.diskStorage({
   destination: (req, file, callback) => {
     const uploadDir = path.join(process.env.UPLOAD_DIR || './storage/uploads', 'profiles');
-    callback(null, uploadDir);
+    fs.ensureDir(uploadDir)
+      .then(() => callback(null, uploadDir))
+      .catch(err => callback(err));
   },
   filename: (req, file, callback) => {
-    const filename = 'profile_' + getUniqueFilename(file.originalname);
+    const uniqueId = uuidv4();
+    const extension = path.extname(file.originalname);
+    const filename = `profile_${uniqueId}${extension}`;
     callback(null, filename);
   }
 });
