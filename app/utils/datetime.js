@@ -152,9 +152,96 @@ function getTimezoneOffset(timezone) {
   }
 }
 
+/**
+ * Parse a timestamp string (e.g. 'YYYY-MM-DD HH:MM:SS' or ISO) assuming it's in the
+ * configured timezone and return a Date object in UTC representing that moment.
+ * If the input is already a Date or an ISO string that the JS Date parser understands
+ * it will be returned as-is.
+ * @param {string|Date|number} timestamp
+ * @returns {Date}
+ */
+function parseTimestampToDate(timestamp) {
+  const timezone = process.env.TIMEZONE || 'UTC';
+
+  if (!timestamp) return new Date(NaN);
+  if (timestamp instanceof Date) return timestamp;
+  // If it's a number (epoch ms), return Date
+  if (typeof timestamp === 'number') return new Date(timestamp);
+
+  // Try native parser first (ISO strings, etc.)
+  const native = new Date(timestamp);
+  if (!isNaN(native.getTime())) return native;
+
+  // Support common 'YYYY-MM-DD HH:MM:SS' format
+  const m = String(timestamp).trim().match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):?(\d{2})?$/);
+  if (m) {
+    const [, y, mo, d, hh, mm, ss] = m;
+    // Create a UTC date for the same numeric components
+    const utcDate = new Date(Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(hh), Number(mm), Number(ss || '0')));
+
+    // Determine timezone offset for the target timezone at this moment
+    const offsetStr = getTimezoneOffset(timezone); // like +07:00
+    const sign = offsetStr[0] === '-' ? -1 : 1;
+    const [oh, om] = offsetStr.slice(1).split(':').map(n => Number(n) || 0);
+    const offsetMinutes = sign * (oh * 60 + om);
+
+    // Convert the local time in target timezone to UTC epoch: epoch = utcDate - offsetMinutes
+    const epoch = utcDate.getTime() - offsetMinutes * 60 * 1000;
+    return new Date(epoch);
+  }
+
+  // Fallback to native parser result (may be invalid)
+  return native;
+}
+
+/**
+ * Format an input timestamp (Date/ISO/string) to DB-friendly 'YYYY-MM-DD HH:MM:SS'
+ * in the configured timezone.
+ * @param {string|Date|number} timestamp
+ * @returns {string}
+ */
+function formatForDb(timestamp) {
+  try {
+    const timezone = process.env.TIMEZONE || 'UTC';
+    const date = timestamp instanceof Date ? timestamp : parseTimestampToDate(timestamp);
+    // Use formatter with timezone to get components
+    const options = {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    };
+
+    const parts = new Intl.DateTimeFormat('en-GB', options).formatToParts(date);
+    const get = t => parts.find(p => p.type === t)?.value || '00';
+
+    const year = get('year');
+    const month = get('month');
+    const day = get('day');
+    const hour = get('hour');
+    const minute = get('minute');
+    const second = get('second');
+
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+  } catch (err) {
+    return getCurrentTimestamp();
+  }
+}
+
 module.exports = {
   getCurrentTimestamp,
   formatTimestamp,
   getTimezoneInfo,
-  getTimezoneOffset
+  getTimezoneOffset,
+  parseTimestampToDate,
+  formatForDb
 };
+
+
+
+
+
