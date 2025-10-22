@@ -123,12 +123,10 @@
               </div>
             </td>
             <td class="px-6 py-4 text-gray-300">
-              <%= broadcast.created_at ? new
-              Date(broadcast.created_at).toLocaleString() : '--' %>
+              <%= broadcast.created_at ? (typeof formatTimestamp === 'function' ? formatTimestamp(broadcast.created_at, 'datetime') : new Date(broadcast.created_at).toLocaleString()) : '--' %>
             </td>
             <td class="px-6 py-4 text-gray-300">
-              <%= broadcast.scheduled_time ? new
-              Date(broadcast.scheduled_time).toLocaleString() : '--' %>
+              <%= broadcast.scheduled_time ? (typeof formatTimestamp === 'function' ? formatTimestamp(broadcast.scheduled_time, 'datetime') : new Date(broadcast.scheduled_time).toLocaleString()) : '--' %>
             </td>
             <td class="px-6 py-4">
               <% if (broadcast.broadcast_status === 'active') { %>

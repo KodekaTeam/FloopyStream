@@ -248,11 +248,14 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 text-gray-300">
-                  <%= new Date(broadcast.created_at).toLocaleString() %>
+                  <%= typeof formatTimestamp === 'function' ?
+                  formatTimestamp(broadcast.created_at, 'datetime') : (new
+                  Date(broadcast.created_at).toLocaleString()) %>
                 </td>
                 <td class="px-6 py-4 text-gray-300">
-                  <%= broadcast.updated_at ? new
-                  Date(broadcast.updated_at).toLocaleString() : '-' %>
+                  <%= broadcast.updated_at ? (typeof formatTimestamp ===
+                  'function' ? formatTimestamp(broadcast.updated_at, 'datetime')
+                  : new Date(broadcast.updated_at).toLocaleString()) : '-' %>
                 </td>
                 <td class="px-6 py-4 text-gray-300">
                   <%= broadcast.duration_seconds ?

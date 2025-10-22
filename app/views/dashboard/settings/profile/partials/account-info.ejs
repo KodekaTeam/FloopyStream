@@ -18,7 +18,9 @@
         </div>
         <p class="text-white font-medium text-lg"><%= session.username %></p>
         <p class="text-xs text-gray-400">
-          Member since <%= new Date(account.created_at).toLocaleDateString() %>
+          Member since <%= typeof formatTimestamp === 'function' ?
+          formatTimestamp(account.created_at, 'date') : new
+          Date(account.created_at).toLocaleDateString() %>
         </p>
         <% if (session.accountRole === 'admin') { %>
         <span
@@ -55,7 +57,9 @@
         <div class="py-2">
           <span class="text-xs text-gray-400">Created</span>
           <p class="text-white text-sm mt-1">
-            <%= new Date(account.created_at).toLocaleString() %>
+            <%= typeof formatTimestamp === 'function' ?
+            formatTimestamp(account.created_at, 'datetime') : new
+            Date(account.created_at).toLocaleString() %>
           </p>
         </div>
       </div>

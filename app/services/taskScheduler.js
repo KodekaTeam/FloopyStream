@@ -1,11 +1,8 @@
-const path = require("path");
-const { logInfo } = require("./activityLogger");
-const Broadcast = require("../models/Broadcast");
-const {
-  startLiveBroadcast,
-  startPlaylistBroadcast,
-} = require("./broadcastEngine");
-const Content = require("../models/Content");
+const path = require('path');
+const { logInfo } = require('./activityLogger');
+const Broadcast = require('../models/Broadcast');
+const { startLiveBroadcast, startPlaylistBroadcast } = require('./broadcastEngine');
+const Content = require('../models/Content');
 
 /**
  * Task Scheduler Service
@@ -21,39 +18,36 @@ const scheduledTasks = new Map();
 async function checkScheduledBroadcasts() {
   try {
     const scheduledBroadcasts = await Broadcast.getScheduledBroadcasts();
-    const now = new Date();
+    const now = Date.now();
 
     for (const broadcast of scheduledBroadcasts) {
-      const scheduledTime = new Date(broadcast.scheduled_time);
+      const scheduledTimeDate = require('../utils/datetime').parseTimestampToDate(broadcast.scheduled_time);
+      const scheduledTime = scheduledTimeDate.getTime();
 
       // Check if it's time to start (within 1 minute window)
-      if (scheduledTime <= now && now - scheduledTime < 60000) {
-        await logInfo("Starting scheduled broadcast", {
+      if (scheduledTime <= now && (now - scheduledTime) < 60000) {
+        await logInfo('Starting scheduled broadcast', { 
           broadcastId: broadcast.broadcast_id,
           platform: broadcast.platform_name,
-          contentType: broadcast.content_type,
+          contentType: broadcast.content_type 
         });
 
         try {
           // Check content type
-          if (broadcast.content_type === "playlist") {
+          if (broadcast.content_type === 'playlist') {
             // Get playlist with videos
-            const Playlist = require("../models/Playlist");
-            const playlist = await Playlist.findByIdWithVideos(
-              broadcast.content_id
-            );
-
+            const Playlist = require('../models/Playlist');
+            const playlist = await Playlist.findByIdWithVideos(broadcast.content_id);
+            
             if (!playlist || !playlist.videos || playlist.videos.length === 0) {
-              throw new Error(
-                "Playlist not found or empty for scheduled broadcast"
-              );
+              throw new Error('Playlist not found or empty for scheduled broadcast');
             }
-
-            await logInfo("Starting scheduled playlist broadcast", {
+            
+            await logInfo('Starting scheduled playlist broadcast', {
               broadcastId: broadcast.broadcast_id,
               playlistId: broadcast.content_id,
               videoCount: playlist.videos.length,
-              playbackMode: playlist.playback_mode,
+              playbackMode: playlist.playback_mode
             });
 
             // Start playlist broadcast with Advanced Settings
@@ -63,64 +57,47 @@ async function checkScheduledBroadcasts() {
               broadcast.destination_url,
               broadcast.stream_key,
               false, // shuffle
-              true, // loop
+              true,  // loop
               {
                 bitrate: broadcast.bitrate,
                 frame_rate: broadcast.frame_rate,
                 resolution: broadcast.resolution,
-                orientation: broadcast.orientation,
+                orientation: broadcast.orientation
               }
             );
           } else {
             // Get regular content
             const content = await Content.findById(broadcast.content_id);
-
+            
             if (!content) {
-              throw new Error("Content not found for scheduled broadcast");
+              throw new Error('Content not found for scheduled broadcast');
             }
 
             // Handle filepath - prefer converted 'stream_<filename>' if present
-            const fs = require("fs");
+            const fs = require('fs');
             const originalFilename = content.filepath;
             const convertedFilename = `stream_${originalFilename}`;
 
-            const candidateConverted = path.join(
-              __dirname,
-              "..",
-              "storage",
-              "uploads",
-              convertedFilename
-            );
-            const candidateOriginal = path.join(
-              __dirname,
-              "..",
-              "storage",
-              "uploads",
-              originalFilename
-            );
+            const candidateConverted = path.join(__dirname, '..', 'storage', 'uploads', convertedFilename);
+            const candidateOriginal = path.join(__dirname, '..', 'storage', 'uploads', originalFilename);
 
             let videoPath;
             if (fs.existsSync(candidateConverted)) {
               videoPath = candidateConverted;
-              console.log(
-                `Using converted streaming file for scheduled broadcast: ${convertedFilename}`
-              );
+              console.log(`Using converted streaming file for scheduled broadcast: ${convertedFilename}`);
             } else if (fs.existsSync(candidateOriginal)) {
               videoPath = candidateOriginal;
-            } else if (
-              originalFilename.startsWith("storage/uploads/") ||
-              originalFilename.startsWith("storage\\uploads\\")
-            ) {
-              videoPath = path.join(__dirname, "..", originalFilename);
+            } else if (originalFilename.startsWith('storage/uploads/') || originalFilename.startsWith('storage\\uploads\\')) {
+              videoPath = path.join(__dirname, '..', originalFilename);
             } else {
               videoPath = candidateOriginal;
             }
 
-            await logInfo("Starting scheduled content broadcast", {
+            await logInfo('Starting scheduled content broadcast', {
               broadcastId: broadcast.broadcast_id,
               contentId: broadcast.content_id,
               contentTitle: content.title,
-              videoPath: videoPath,
+              videoPath: videoPath
             });
 
             // Start single video broadcast with Advanced Settings
@@ -134,26 +111,26 @@ async function checkScheduledBroadcasts() {
                 bitrate: broadcast.bitrate,
                 frame_rate: broadcast.frame_rate,
                 resolution: broadcast.resolution,
-                orientation: broadcast.orientation,
+                orientation: broadcast.orientation
               }
             );
           }
 
-          await logInfo("Scheduled broadcast started", {
-            broadcastId: broadcast.broadcast_id,
+          await logInfo('Scheduled broadcast started', { 
+            broadcastId: broadcast.broadcast_id 
           });
         } catch (error) {
           await Broadcast.updateStatus(
-            broadcast.broadcast_id,
-            "failed",
+            broadcast.broadcast_id, 
+            'failed', 
             `Scheduler error: ${error.message}`
           );
-          console.error("Error starting scheduled broadcast:", error);
+          console.error('Error starting scheduled broadcast:', error);
         }
       }
     }
   } catch (error) {
-    console.error("Error checking scheduled broadcasts:", error.message);
+    console.error('Error checking scheduled broadcasts:', error.message);
   }
 }
 
@@ -162,12 +139,12 @@ async function checkScheduledBroadcasts() {
  */
 function startScheduler(intervalSeconds = 30) {
   if (schedulerInterval) {
-    console.log("Scheduler is already running");
+    console.log('Scheduler is already running');
     return;
   }
 
   console.log(`✓ Task scheduler started (interval: ${intervalSeconds}s)`);
-
+  
   // Initial check
   checkScheduledBroadcasts();
 
@@ -176,7 +153,7 @@ function startScheduler(intervalSeconds = 30) {
     checkScheduledBroadcasts();
   }, intervalSeconds * 1000);
 
-  logInfo("Task scheduler started", { interval: intervalSeconds });
+  logInfo('Task scheduler started', { interval: intervalSeconds });
 }
 
 /**
@@ -186,8 +163,8 @@ function stopScheduler() {
   if (schedulerInterval) {
     clearInterval(schedulerInterval);
     schedulerInterval = null;
-    console.log("✓ Task scheduler stopped");
-    logInfo("Task scheduler stopped");
+    console.log('✓ Task scheduler stopped');
+    logInfo('Task scheduler stopped');
   }
 }
 
@@ -196,7 +173,7 @@ function stopScheduler() {
  */
 function scheduleTask(taskId, executeAt, callback) {
   const now = Date.now();
-  const executeTime = new Date(executeAt).getTime();
+  const executeTime = require('../utils/datetime').parseTimestampToDate(executeAt).getTime();
   const delay = executeTime - now;
 
   if (delay <= 0) {
@@ -211,7 +188,7 @@ function scheduleTask(taskId, executeAt, callback) {
   }, delay);
 
   scheduledTasks.set(taskId, timeoutId);
-
+  
   console.log(`Task scheduled: ${taskId} at ${executeAt}`);
 }
 
@@ -220,14 +197,14 @@ function scheduleTask(taskId, executeAt, callback) {
  */
 function cancelTask(taskId) {
   const timeoutId = scheduledTasks.get(taskId);
-
+  
   if (timeoutId) {
     clearTimeout(timeoutId);
     scheduledTasks.delete(taskId);
     console.log(`Task cancelled: ${taskId}`);
     return true;
   }
-
+  
   return false;
 }
 
@@ -243,19 +220,19 @@ function getScheduledTaskCount() {
  */
 function cleanup() {
   stopScheduler();
-
+  
   // Clear all scheduled tasks
   for (const [taskId, timeoutId] of scheduledTasks) {
     clearTimeout(timeoutId);
   }
   scheduledTasks.clear();
-
-  console.log("✓ Scheduler cleanup completed");
+  
+  console.log('✓ Scheduler cleanup completed');
 }
 
 // Cleanup on process termination
-process.on("SIGINT", cleanup);
-process.on("SIGTERM", cleanup);
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
 
 module.exports = {
   startScheduler,
@@ -263,5 +240,5 @@ module.exports = {
   checkScheduledBroadcasts,
   scheduleTask,
   cancelTask,
-  getScheduledTaskCount,
+  getScheduledTaskCount
 };

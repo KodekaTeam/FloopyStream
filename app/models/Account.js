@@ -1,5 +1,5 @@
-const { executeQuery, fetchOne, fetchAll } = require('../core/database');
-const bcrypt = require('bcrypt');
+const { executeQuery, fetchOne, fetchAll } = require("../core/database");
+const bcrypt = require("bcrypt");
 
 /**
  * Account Model - manages user accounts
@@ -10,24 +10,30 @@ class Account {
    */
   static async createNew(username, email, password, displayName = null) {
     const passwordHash = await bcrypt.hash(password, 10);
-    const { v4: uuidv4 } = require('uuid');
-    
+    const { v4: uuidv4 } = require("uuid");
+
     // Check if this is the first user - make them admin
     const count = await this.getAccountCount();
-    const role = count === 0 ? 'admin' : 'member';
-    
+    const role = count === 0 ? "admin" : "member";
+
+    const { formatForDb, getCurrentTimestamp } = require("../utils/datetime");
+
+    const now = getCurrentTimestamp();
+
     const sql = `
-      INSERT INTO accounts (account_uuid, username, email, password_hash, display_name, account_role)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO accounts (account_uuid, username, email, password_hash, display_name, account_role, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    
+
     const result = await executeQuery(sql, [
       uuidv4(),
-      username, 
-      email, 
-      passwordHash, 
+      username,
+      email,
+      passwordHash,
       displayName || username,
-      role
+      role,
+      now,
+      now,
     ]);
     return result.lastID;
   }
@@ -36,7 +42,7 @@ class Account {
    * Find account by username
    */
   static async findByUsername(username) {
-    const sql = 'SELECT * FROM accounts WHERE username = ?';
+    const sql = "SELECT * FROM accounts WHERE username = ?";
     return await fetchOne(sql, [username]);
   }
 
@@ -44,7 +50,7 @@ class Account {
    * Find account by email
    */
   static async findByEmail(email) {
-    const sql = 'SELECT * FROM accounts WHERE email = ?';
+    const sql = "SELECT * FROM accounts WHERE email = ?";
     return await fetchOne(sql, [email]);
   }
 
@@ -52,7 +58,7 @@ class Account {
    * Find account by ID
    */
   static async findById(accountId) {
-    const sql = 'SELECT * FROM accounts WHERE account_id = ?';
+    const sql = "SELECT * FROM accounts WHERE account_id = ?";
     return await fetchOne(sql, [accountId]);
   }
 
@@ -67,7 +73,7 @@ class Account {
    * Update account profile
    */
   static async updateProfile(accountId, updates) {
-    const allowedFields = ['display_name', 'profile_picture', 'email'];
+    const allowedFields = ["display_name", "profile_picture", "email"];
     const fields = [];
     const values = [];
 
@@ -79,13 +85,17 @@ class Account {
     }
 
     if (fields.length === 0) {
-      throw new Error('No valid fields to update');
+      throw new Error("No valid fields to update");
     }
 
-    fields.push('updated_at = CURRENT_TIMESTAMP');
+    const { getCurrentTimestamp } = require("../utils/datetime");
+    fields.push("updated_at = ?");
     values.push(accountId);
 
-    const sql = `UPDATE accounts SET ${fields.join(', ')} WHERE account_id = ?`;
+    // Insert current timestamp
+    values.splice(values.length - 1, 0, getCurrentTimestamp());
+
+    const sql = `UPDATE accounts SET ${fields.join(", ")} WHERE account_id = ?`;
     return await executeQuery(sql, values);
   }
 
@@ -94,12 +104,17 @@ class Account {
    */
   static async updatePassword(accountId, newPassword) {
     const passwordHash = await bcrypt.hash(newPassword, 10);
+    const { getCurrentTimestamp } = require("../utils/datetime");
     const sql = `
       UPDATE accounts 
-      SET password_hash = ?, updated_at = CURRENT_TIMESTAMP 
+      SET password_hash = ?, updated_at = ? 
       WHERE account_id = ?
     `;
-    return await executeQuery(sql, [passwordHash, accountId]);
+    return await executeQuery(sql, [
+      passwordHash,
+      getCurrentTimestamp(),
+      accountId,
+    ]);
   }
 
   /**
@@ -120,7 +135,7 @@ class Account {
    * Delete account
    */
   static async deleteAccount(accountId) {
-    const sql = 'DELETE FROM accounts WHERE account_id = ?';
+    const sql = "DELETE FROM accounts WHERE account_id = ?";
     return await executeQuery(sql, [accountId]);
   }
 
@@ -128,27 +143,35 @@ class Account {
    * Toggle account status
    */
   static async toggleStatus(accountId, isActive) {
-    const sql = 'UPDATE accounts SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE account_id = ?';
-    return await executeQuery(sql, [isActive ? 1 : 0, accountId]);
+    const { getCurrentTimestamp } = require("../utils/datetime");
+    const sql =
+      "UPDATE accounts SET is_active = ?, updated_at = ? WHERE account_id = ?";
+    return await executeQuery(sql, [
+      isActive ? 1 : 0,
+      getCurrentTimestamp(),
+      accountId,
+    ]);
   }
 
   /**
    * Update account role
    */
   static async updateRole(accountId, role) {
-    const validRoles = ['admin', 'member'];
+    const validRoles = ["admin", "member"];
     if (!validRoles.includes(role)) {
-      throw new Error('Invalid role. Must be admin or member');
+      throw new Error("Invalid role. Must be admin or member");
     }
-    const sql = 'UPDATE accounts SET account_role = ?, updated_at = CURRENT_TIMESTAMP WHERE account_id = ?';
-    return await executeQuery(sql, [role, accountId]);
+    const { getCurrentTimestamp } = require("../utils/datetime");
+    const sql =
+      "UPDATE accounts SET account_role = ?, updated_at = ? WHERE account_id = ?";
+    return await executeQuery(sql, [role, getCurrentTimestamp(), accountId]);
   }
 
   /**
    * Get account count
    */
   static async getAccountCount() {
-    const sql = 'SELECT COUNT(*) as count FROM accounts';
+    const sql = "SELECT COUNT(*) as count FROM accounts";
     const result = await fetchOne(sql);
     return result.count;
   }
@@ -156,23 +179,30 @@ class Account {
   /**
    * Create new account with full details (for admin)
    */
-  static async createNewWithRole(username, email, password, displayName, role = 'member', isActive = true) {
+  static async createNewWithRole(
+    username,
+    email,
+    password,
+    displayName,
+    role = "member",
+    isActive = true
+  ) {
     const passwordHash = await bcrypt.hash(password, 10);
-    const { v4: uuidv4 } = require('uuid');
-    
+    const { v4: uuidv4 } = require("uuid");
+
     const sql = `
       INSERT INTO accounts (account_uuid, username, email, password_hash, display_name, account_role, is_active)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    
+
     const result = await executeQuery(sql, [
       uuidv4(),
-      username, 
-      email, 
-      passwordHash, 
+      username,
+      email,
+      passwordHash,
       displayName || username,
       role,
-      isActive ? 1 : 0
+      isActive ? 1 : 0,
     ]);
     return result.lastID;
   }

@@ -338,14 +338,17 @@
                   >Schedule Settings</label
                 >
                 <span class="text-xs text-gray-500 hidden sm:inline"
-                  >Server time: <%= new Date().toLocaleString('en-US', {
-                  timeZone: process.env.TIMEZONE || 'UTC' }).replace(',', '')
-                  %></span
+                  >Server time: <%= typeof formatTimestamp === 'function' ?
+                  formatTimestamp(new Date(), 'datetime') : (new
+                  Date().toLocaleString('en-US', { timeZone:
+                  process.env.TIMEZONE || 'UTC' }).replace(',', '')) %></span
                 >
               </div>
               <span class="text-xs text-gray-500 block sm:hidden"
-                >Server time: <%= new Date().toLocaleString('en-US', { timeZone:
-                process.env.TIMEZONE || 'UTC' }).replace(',', '') %></span
+                >Server time: <%= typeof formatTimestamp === 'function' ?
+                formatTimestamp(new Date(), 'datetime') : (new
+                Date().toLocaleString('en-US', { timeZone: process.env.TIMEZONE
+                || 'UTC' }).replace(',', '')) %></span
               >
             </div>
 
@@ -378,7 +381,7 @@
                     type="datetime-local"
                     name="scheduledTime"
                     class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    min="<%= new Date().toISOString().slice(0,16) %>"
+                    min="<%= (function(){ try { const d = new Date(); return d.toISOString().slice(0,16); } catch(e){ return ''; } })() %>"
                   />
                 </div>
 

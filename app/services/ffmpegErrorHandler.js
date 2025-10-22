@@ -76,11 +76,12 @@ class FFmpegErrorHandler {
         .on('stderr', (stderrLine) => {
           // Monitor for specific error patterns
           if (this.isSignificantError(stderrLine)) {
-            logError('FFmpeg stderr warning', { 
-              description, 
-              stderr: stderrLine,
-              timestamp: new Date().toISOString()
-            });
+              const { getCurrentTimestamp } = require('../utils/datetime');
+              logError('FFmpeg stderr warning', { 
+                description, 
+                stderr: stderrLine,
+                timestamp: getCurrentTimestamp()
+              });
           }
         });
 

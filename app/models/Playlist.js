@@ -1,4 +1,4 @@
-const { executeQuery, fetchOne, fetchAll } = require('../core/database');
+const { executeQuery, fetchOne, fetchAll } = require("../core/database");
 
 /**
  * Playlist Model
@@ -9,13 +9,28 @@ class Playlist {
   /**
    * Create a new playlist
    */
-  static async createNew(accountId, playlistName, description = null, playbackMode = 'sequential') {
+  static async createNew(
+    accountId,
+    playlistName,
+    description = null,
+    playbackMode = "sequential"
+  ) {
+    const { getCurrentTimestamp } = require("../utils/datetime");
+    const now = getCurrentTimestamp();
+
     const query = `
-      INSERT INTO playlists (account_id, playlist_name, description, playback_mode)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO playlists (account_id, playlist_name, description, playback_mode, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
-    
-    const result = await executeQuery(query, [accountId, playlistName, description, playbackMode]);
+
+    const result = await executeQuery(query, [
+      accountId,
+      playlistName,
+      description,
+      playbackMode,
+      now,
+      now,
+    ]);
     return result.lastID;
   }
 
@@ -27,7 +42,7 @@ class Playlist {
       SELECT * FROM playlists
       WHERE playlist_id = ?
     `;
-    
+
     return await fetchOne(query, [playlistId]);
   }
 
@@ -41,7 +56,7 @@ class Playlist {
 
     const videos = await this.getVideos(playlistId);
     playlist.videos = videos;
-    
+
     return playlist;
   }
 
@@ -62,21 +77,34 @@ class Playlist {
       ORDER BY p.created_at DESC
       LIMIT ?
     `;
-    
+
     return await fetchAll(query, [accountId, limit]);
   }
 
   /**
    * Update playlist details
    */
-  static async updateDetails(playlistId, playlistName, description, playbackMode = 'sequential') {
+  static async updateDetails(
+    playlistId,
+    playlistName,
+    description,
+    playbackMode = "sequential"
+  ) {
+    const { getCurrentTimestamp } = require("../utils/datetime");
+    const now = getCurrentTimestamp();
     const query = `
       UPDATE playlists
-      SET playlist_name = ?, description = ?, playback_mode = ?, updated_at = CURRENT_TIMESTAMP
+      SET playlist_name = ?, description = ?, playback_mode = ?, updated_at = ?
       WHERE playlist_id = ?
     `;
-    
-    return await executeQuery(query, [playlistName, description, playbackMode, playlistId]);
+
+    return await executeQuery(query, [
+      playlistName,
+      description,
+      playbackMode,
+      now,
+      playlistId,
+    ]);
   }
 
   /**
@@ -84,10 +112,12 @@ class Playlist {
    */
   static async remove(playlistId) {
     // First delete all playlist items
-    await executeQuery('DELETE FROM playlist_items WHERE playlist_id = ?', [playlistId]);
-    
+    await executeQuery("DELETE FROM playlist_items WHERE playlist_id = ?", [
+      playlistId,
+    ]);
+
     // Then delete the playlist
-    const query = 'DELETE FROM playlists WHERE playlist_id = ?';
+    const query = "DELETE FROM playlists WHERE playlist_id = ?";
     return await executeQuery(query, [playlistId]);
   }
 
@@ -97,24 +127,31 @@ class Playlist {
   static async addVideo(playlistId, contentId, orderIndex = null) {
     // If no order specified, add to end
     if (orderIndex === null) {
-      const countQuery = 'SELECT COUNT(*) as count FROM playlist_items WHERE playlist_id = ?';
+      const countQuery =
+        "SELECT COUNT(*) as count FROM playlist_items WHERE playlist_id = ?";
       const result = await fetchOne(countQuery, [playlistId]);
       orderIndex = result.count;
     }
 
     const query = `
-      INSERT INTO playlist_items (playlist_id, content_id, order_index)
-      VALUES (?, ?, ?)
+      INSERT INTO playlist_items (playlist_id, content_id, order_index, added_at)
+      VALUES (?, ?, ?, ?)
     `;
-    
-    return await executeQuery(query, [playlistId, contentId, orderIndex]);
+    const { getCurrentTimestamp } = require("../utils/datetime");
+    return await executeQuery(query, [
+      playlistId,
+      contentId,
+      orderIndex,
+      getCurrentTimestamp(),
+    ]);
   }
 
   /**
    * Remove video from playlist
    */
   static async removeVideo(playlistId, contentId) {
-    const query = 'DELETE FROM playlist_items WHERE playlist_id = ? AND content_id = ?';
+    const query =
+      "DELETE FROM playlist_items WHERE playlist_id = ? AND content_id = ?";
     return await executeQuery(query, [playlistId, contentId]);
   }
 
@@ -138,7 +175,7 @@ class Playlist {
       WHERE pi.playlist_id = ?
       ORDER BY pi.order_index ASC
     `;
-    
+
     return await fetchAll(query, [playlistId]);
   }
 
@@ -153,9 +190,13 @@ class Playlist {
         SET order_index = ?
         WHERE playlist_id = ? AND content_id = ?
       `;
-      await executeQuery(query, [item.order_index, playlistId, item.content_id]);
+      await executeQuery(query, [
+        item.order_index,
+        playlistId,
+        item.content_id,
+      ]);
     }
-    
+
     return true;
   }
 
@@ -165,18 +206,20 @@ class Playlist {
   static async moveVideo(playlistId, contentId, direction) {
     // Get all videos in order
     const videos = await this.getVideos(playlistId);
-    
+
     // Find current video index
-    const currentIndex = videos.findIndex(v => v.content_id === parseInt(contentId));
+    const currentIndex = videos.findIndex(
+      (v) => v.content_id === parseInt(contentId)
+    );
     if (currentIndex === -1) {
-      throw new Error('Video not found in playlist');
+      throw new Error("Video not found in playlist");
     }
 
     // Calculate new index
     let newIndex = currentIndex;
-    if (direction === 'up' && currentIndex > 0) {
+    if (direction === "up" && currentIndex > 0) {
       newIndex = currentIndex - 1;
-    } else if (direction === 'down' && currentIndex < videos.length - 1) {
+    } else if (direction === "down" && currentIndex < videos.length - 1) {
       newIndex = currentIndex + 1;
     } else {
       return false; // Can't move further
@@ -185,18 +228,18 @@ class Playlist {
     // Swap order_index values
     const currentVideo = videos[currentIndex];
     const targetVideo = videos[newIndex];
-    
+
     const tempOrder = currentVideo.order_index;
-    
+
     // Update current video
     await executeQuery(
-      'UPDATE playlist_items SET order_index = ? WHERE playlist_id = ? AND content_id = ?',
+      "UPDATE playlist_items SET order_index = ? WHERE playlist_id = ? AND content_id = ?",
       [targetVideo.order_index, playlistId, currentVideo.content_id]
     );
-    
+
     // Update target video
     await executeQuery(
-      'UPDATE playlist_items SET order_index = ? WHERE playlist_id = ? AND content_id = ?',
+      "UPDATE playlist_items SET order_index = ? WHERE playlist_id = ? AND content_id = ?",
       [tempOrder, playlistId, targetVideo.content_id]
     );
 
@@ -212,7 +255,7 @@ class Playlist {
       FROM playlist_items
       WHERE playlist_id = ? AND content_id = ?
     `;
-    
+
     const result = await fetchOne(query, [playlistId, contentId]);
     return result.count > 0;
   }
@@ -225,7 +268,11 @@ class Playlist {
     if (!original) return null;
 
     const name = newName || `${original.playlist_name} (Copy)`;
-    const newPlaylistId = await this.createNew(accountId, name, original.description);
+    const newPlaylistId = await this.createNew(
+      accountId,
+      name,
+      original.description
+    );
 
     // Copy all videos
     const videos = await this.getVideos(playlistId);

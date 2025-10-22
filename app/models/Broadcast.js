@@ -1,5 +1,6 @@
 const { executeQuery, fetchOne, fetchAll } = require("../core/database");
 const { v4: uuidv4 } = require("uuid");
+const { formatForDb } = require("../utils/datetime");
 
 /**
  * Broadcast Model - manages live broadcasts/streams
@@ -35,9 +36,9 @@ class Broadcast {
       INSERT INTO broadcasts (
         broadcast_uuid, account_id, content_id, content_type, platform_name,
         destination_url, stream_key, scheduled_time, broadcast_name, broadcast_status,
-        bitrate, frame_rate, resolution, orientation, advanced_settings, loopvideo, duration_timeout
+        bitrate, frame_rate, resolution, orientation, advanced_settings, loopvideo, duration_timeout, created_at, updated_at, started_at, ended_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const params = [
@@ -48,7 +49,9 @@ class Broadcast {
       broadcastData.platformName,
       broadcastData.destinationUrl,
       broadcastData.streamKey || null,
-      broadcastData.scheduledTime || null,
+      broadcastData.scheduledTime
+        ? formatForDb(broadcastData.scheduledTime)
+        : null,
       broadcastName,
       initialStatus,
       broadcastData.bitrate || null,
@@ -64,6 +67,10 @@ class Broadcast {
           : 0
         : 1,
       broadcastData.durationTimeout || null,
+      formatForDb(new Date()),
+      formatForDb(new Date()),
+      formatForDb(new Date()),
+      formatForDb(new Date()),
     ];
 
     const result = await executeQuery(sql, params);

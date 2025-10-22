@@ -11,12 +11,14 @@ class Content {
   static async createEntry(accountId, contentData) {
     const contentUuid = uuidv4();
     
+    const { getCurrentTimestamp } = require('../utils/datetime');
+
     const sql = `
       INSERT INTO content (
         content_uuid, account_id, title, description, filename, 
-        filepath, filesize, mimetype, duration_seconds, thumbnail_path, resolution
+        filepath, filesize, mimetype, duration_seconds, thumbnail_path, resolution, upload_date
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     const params = [
@@ -30,7 +32,8 @@ class Content {
       contentData.mimetype || null,
       contentData.durationSeconds || null,
       contentData.thumbnailPath || null,
-      contentData.resolution || null
+      contentData.resolution || null,
+      getCurrentTimestamp()
     ];
     
     const result = await executeQuery(sql, params);
