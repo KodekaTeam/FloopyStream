@@ -8,7 +8,7 @@ class Content {
   /**
    * Create new content entry
    */
-  static async createEntry(accountId, contentData) {
+  static async createEntry(accountId, contentData, status = 'ready') {
     const contentUuid = uuidv4();
     
     const { getCurrentTimestamp } = require('../utils/datetime');
@@ -16,9 +16,9 @@ class Content {
     const sql = `
       INSERT INTO content (
         content_uuid, account_id, title, description, filename, 
-        filepath, filesize, mimetype, duration_seconds, thumbnail_path, resolution, upload_date
+        filepath, filesize, mimetype, duration_seconds, thumbnail_path, resolution, status, upload_date
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     
     const params = [
@@ -33,6 +33,7 @@ class Content {
       contentData.durationSeconds || null,
       contentData.thumbnailPath || null,
       contentData.resolution || null,
+      status,
       getCurrentTimestamp()
     ];
     
@@ -41,8 +42,7 @@ class Content {
     console.log('Content created:', {
       contentId: result.lastID,
       title: contentData.title,
-      resolution: contentData.resolution,
-      thumbnail: contentData.thumbnailPath
+      status: status
     });
     
     return { contentId: result.lastID, contentUuid };

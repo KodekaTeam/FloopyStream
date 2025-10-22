@@ -18,6 +18,7 @@ const {
 } = require("../../utilities/mediaProcessor");
 const { logInfo, logError } = require("../../services/activityLogger");
 const { executeQuery } = require("../../core/database");
+const MediaProcessingService = require("../../services/mediaProcessingService");
 
 // Rate limiting for uploads
 const apiLimiter = rateLimit({
@@ -69,26 +70,7 @@ router.post(
 
       const { title, description } = req.body;
 
-      // Extract media information
-      const mediaInfo = await extractMediaInfo(req.file.path);
-
-      // Generate thumbnail
-      const thumbnailFilename = `thumb_${
-        path.parse(req.file.filename).name
-      }.jpg`;
-      const thumbnailPath = path.join(
-        process.env.THUMBNAIL_DIR || "./storage/thumbnails",
-        thumbnailFilename
-      );
-      await createThumbnail(req.file.path, thumbnailPath);
-
-      // Calculate resolution
-      const resolution =
-        mediaInfo.width && mediaInfo.height
-          ? `${mediaInfo.width}×${mediaInfo.height}`
-          : null;
-
-      // Create content entry
+      // Create content entry immediately with basic info
       const contentData = {
         title: title || req.file.originalname,
         description: description || null,
@@ -96,15 +78,20 @@ router.post(
         filepath: req.file.filename, // Store only filename, not full path
         filesize: req.file.size,
         mimetype: req.file.mimetype,
-        durationSeconds: mediaInfo.durationSeconds,
-        thumbnailPath: thumbnailFilename, // Store only filename (e.g., thumb_xxx.jpg)
-        resolution: resolution,
+        durationSeconds: null, // Will be updated in background
+        thumbnailPath: null, // Will be updated in background
+        resolution: null, // Will be updated in background
       };
 
       const result = await Content.createEntry(
         req.session.accountId,
-        contentData
+        contentData,
+        'processing'
       );
+
+      // Queue background processing
+      const fullFilePath = req.file.path;
+      MediaProcessingService.queueProcessing(result.contentId, fullFilePath);
 
       await logInfo("Content uploaded", {
         contentId: result.contentId,
@@ -114,7 +101,7 @@ router.post(
 
       res.json({
         success: true,
-        message: "Content uploaded successfully",
+        message: "Content uploaded successfully. Processing in background.",
         contentId: result.contentId,
       });
     } catch (error) {
@@ -323,6 +310,7 @@ router.get("/selector/all", requireAuth, async (req, res) => {
         resolution: content.resolution || "1280×720",
         duration: formattedDuration,
         filepath: content.filepath,
+        status: content.status || "ready",
         type: "content",
       };
     });
@@ -439,7 +427,7 @@ router.post("/drive/import-url", requireAuth, async (req, res) => {
       resolution: resolution,
     };
 
-    await Content.createEntry(req.session.accountId, contentData);
+    await Content.createEntry(req.session.accountId, contentData, 'ready');
 
     await logInfo("Content imported from Drive URL", {
       username: req.session.username,
