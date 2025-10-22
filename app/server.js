@@ -1,24 +1,28 @@
-require('dotenv').config();
-require('./services/activityLogger');
+require("dotenv").config();
+require("./services/activityLogger");
 
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const session = require('express-session');
-const engine = require('ejs-mate');
+const express = require("express");
+const path = require("path");
+const fs = require("fs");
+const session = require("express-session");
+const engine = require("ejs-mate");
 
 // Import utilities and services
-const { createRequiredDirectories } = require('./utilities/fileManager');
-const { initializeDriveClient } = require('./utilities/cloudStorage');
-const { startMonitoring } = require('./services/performanceMonitor');
-const { startScheduler } = require('./services/taskScheduler');
-const { logInfo, logError } = require('./services/activityLogger');
-const rateLimit = require('express-rate-limit');
+const { createRequiredDirectories } = require("./utilities/fileManager");
+const { initializeDriveClient } = require("./utilities/cloudStorage");
+const { startMonitoring } = require("./services/performanceMonitor");
+const { startScheduler } = require("./services/taskScheduler");
+const { logInfo, logError } = require("./services/activityLogger");
+const rateLimit = require("express-rate-limit");
 
 // Import utilities
-const { formatDuration } = require('./utilities/mediaProcessor');
-const { formatFileSize } = require('./utilities/fileManager');
-const { formatTimestamp, getTimezoneInfo, parseTimestampToDate } = require('./utils/datetime');
+const { formatDuration } = require("./utilities/mediaProcessor");
+const { formatFileSize } = require("./utilities/fileManager");
+const {
+  formatTimestamp,
+  getTimezoneInfo,
+  parseTimestampToDate,
+} = require("./utils/datetime");
 
 // Initialize Express app
 const app = express();
@@ -28,7 +32,7 @@ const port = process.env.PORT || 8080;
 createRequiredDirectories();
 
 // Import routes (these may require database, so directories must exist first)
-const routes = require('./routes');
+const routes = require("./routes");
 
 // Clean up old mediaflow.db files (if they exist) - migrate to floopystream.db
 // try {
@@ -45,33 +49,33 @@ const routes = require('./routes');
 initializeDriveClient();
 
 // Error handling
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('=== UNHANDLED REJECTION ===');
-  console.error('Promise:', promise);
-  console.error('Reason:', reason);
-  logError('Unhandled rejection', { reason: String(reason) });
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("=== UNHANDLED REJECTION ===");
+  console.error("Promise:", promise);
+  console.error("Reason:", reason);
+  logError("Unhandled rejection", { reason: String(reason) });
 });
 
-process.on('uncaughtException', (error) => {
-  console.error('=== UNCAUGHT EXCEPTION ===');
-  console.error('Error:', error);
-  logError('Uncaught exception', { error: error.message, stack: error.stack });
+process.on("uncaughtException", (error) => {
+  console.error("=== UNCAUGHT EXCEPTION ===");
+  console.error("Error:", error);
+  logError("Uncaught exception", { error: error.message, stack: error.stack });
 });
 
 // Configure view engine
-app.engine('ejs', engine);
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.set('trust proxy', 1);
+app.engine("ejs", engine);
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.set("trust proxy", 1);
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/storage', express.static(path.join(__dirname, 'storage')));
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/storage", express.static(path.join(__dirname, "storage")));
 
 // Timeout middleware for upload routes
-app.use('/api/content/upload', (req, res, next) => {
+app.use("/api/content/upload", (req, res, next) => {
   // Increase timeout for upload requests (30 minutes)
   req.setTimeout(30 * 60 * 1000); // 30 minutes
   res.setTimeout(30 * 60 * 1000); // 30 minutes
@@ -80,15 +84,16 @@ app.use('/api/content/upload', (req, res, next) => {
 
 // Session configuration
 // Determine cookie security based on actual environment
-const isProduction = process.env.NODE_ENV === 'production';
-const isSecureEnv = process.env.APP_URL && process.env.APP_URL.startsWith('https://');
+const isProduction = process.env.NODE_ENV === "production";
+const isSecureEnv =
+  process.env.APP_URL && process.env.APP_URL.startsWith("https://");
 
 // Database directory - resolve to absolute path
 let dbDir;
 if (process.env.DB_PATH) {
   dbDir = path.dirname(process.env.DB_PATH);
 } else {
-  dbDir = path.join(__dirname, 'storage', 'database');
+  dbDir = path.join(__dirname, "storage", "database");
 }
 
 // Ensure it's an absolute path
@@ -100,64 +105,66 @@ if (!path.isAbsolute(dbDir)) {
 try {
   if (!fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, { recursive: true, mode: 0o755 });
-    console.log('✓ Created session directory:', dbDir);
+    console.log("✓ Created session directory:", dbDir);
   } else {
-    console.log('✓ Session directory exists:', dbDir);
+    console.log("✓ Session directory exists:", dbDir);
   }
 } catch (error) {
-  console.error('✗ Failed to create session directory:', error.message);
-  console.error('  Path:', dbDir);
+  console.error("✗ Failed to create session directory:", error.message);
+  console.error("  Path:", dbDir);
 }
 
 // Test write permission
 try {
-  const testFile = path.join(dbDir, '.write-test');
-  fs.writeFileSync(testFile, 'test');
+  const testFile = path.join(dbDir, ".write-test");
+  fs.writeFileSync(testFile, "test");
   fs.unlinkSync(testFile);
-  console.log('✓ Session directory is writable');
+  console.log("✓ Session directory is writable");
 } catch (error) {
-  console.error('✗ Session directory not writable:', error.message);
+  console.error("✗ Session directory not writable:", error.message);
 }
 
 // Initialize session store with error handling
 let sessionStore;
 try {
   // Lazy load SQLiteStore AFTER directories are created
-  const SQLiteStore = require('connect-sqlite3')(session);
-  
+  const SQLiteStore = require("connect-sqlite3")(session);
+
   sessionStore = new SQLiteStore({
-    db: 'sessions.db',
+    db: "sessions.db",
     dir: dbDir,
-    table: 'sessions'
+    table: "sessions",
   });
-  console.log('✓ SQLite session store initialized');
+  console.log("✓ SQLite session store initialized");
 } catch (error) {
-  console.error('✗ Failed to create SQLite session store:', error.message);
-  console.log('⚠ Using memory store (sessions will not persist)');
+  console.error("✗ Failed to create SQLite session store:", error.message);
+  console.log("⚠ Using memory store (sessions will not persist)");
   sessionStore = new session.MemoryStore();
 }
 
-app.use(session({
-  store: sessionStore,
-  secret: process.env.SESSION_SECRET || 'change-this-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  name: 'floopystream.sid',
-  cookie: {
-    // In Docker, allow both HTTP and HTTPS by checking actual URL config
-    // Only force secure if we have an HTTPS URL configured
-    secure: isSecureEnv ? true : false,
-    httpOnly: true,
-    sameSite: 'lax', // Prevent CSRF
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
-}));
+app.use(
+  session({
+    store: sessionStore,
+    secret: process.env.SESSION_SECRET || "change-this-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    name: "floopystream.sid",
+    cookie: {
+      // In Docker, allow both HTTP and HTTPS by checking actual URL config
+      // Only force secure if we have an HTTPS URL configured
+      secure: isSecureEnv ? true : false,
+      httpOnly: true,
+      sameSite: "lax", // Prevent CSRF
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
 
 // Rate limiting
 const apiLimiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
-  message: 'Too many requests, please try again later'
+  message: "Too many requests, please try again later",
 });
 
 // Make session available to all views
@@ -169,7 +176,7 @@ app.use((req, res, next) => {
 // Helper functions for views
 app.locals.formatFileSize = formatFileSize;
 app.locals.formatDuration = formatDuration;
-app.locals.appName = process.env.APP_NAME || 'FLoopyStream';
+app.locals.appName = process.env.APP_NAME || "FLoopyStream";
 app.locals.formatTimestamp = formatTimestamp;
 app.locals.tzInfo = getTimezoneInfo();
 
@@ -183,38 +190,53 @@ app.use(routes);
 // START SERVER
 // ============================================
 
-app.listen(port, () => {
-  const { getTimezoneInfo } = require('./utils/datetime');
+const server = app.listen(port, () => {
+  const { getTimezoneInfo } = require("./utils/datetime");
   const tzInfo = getTimezoneInfo();
-  
-  console.log('='.repeat(50));
-  console.log(`🚀 ${process.env.APP_NAME || 'FLoopyStream'} is running`);
+
+  console.log("=".repeat(50));
+  console.log(`🚀 ${process.env.APP_NAME || "FLoopyStream"} is running`);
   console.log(`📡 Server: http://localhost:${port}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🕐 Timezone: ${tzInfo.timezone} (${tzInfo.offset})`);
-  console.log(`🕗 Server time: ${formatTimestamp(new Date(), 'datetime')}`);
-  console.log('='.repeat(50));
-  
+  console.log(`🕗 Server time: ${formatTimestamp(new Date(), "datetime")}`);
+  console.log("=".repeat(50));
+
   // Start monitoring and scheduler
   startMonitoring(5);
   startScheduler(30);
-  
-  logInfo('Application started', { 
-    port, 
-    env: process.env.NODE_ENV || 'development',
-    timezone: tzInfo.timezone 
+
+  logInfo("Application started", {
+    port,
+    env: process.env.NODE_ENV || "development",
+    timezone: tzInfo.timezone,
   });
 });
 
+// Increase Node.js HTTP server timeouts so long uploads are not cut off by
+// Node's defaults (headersTimeout defaults to 60000 ms). These values are
+// set slightly larger than the per-route upload timeouts configured above.
+try {
+  // Keep sockets alive a bit longer
+  server.keepAliveTimeout = 65 * 1000; // 65 seconds
+  // Allow headers and entire request processing for up to 31 minutes
+  server.headersTimeout = 31 * 60 * 1000; // 31 minutes
+  // Set socket timeout to 31 minutes as a safety net
+  server.setTimeout(31 * 60 * 1000);
+  console.log("✓ Server timeouts adjusted for large uploads");
+} catch (err) {
+  console.warn("⚠ Failed to adjust server timeouts:", err.message);
+}
+
 // Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('\n👋 Shutting down gracefully...');
-  logInfo('Application shutting down');
+process.on("SIGINT", () => {
+  console.log("\n👋 Shutting down gracefully...");
+  logInfo("Application shutting down");
   process.exit(0);
 });
 
-process.on('SIGTERM', () => {
-  console.log('\n👋 Shutting down gracefully...');
-  logInfo('Application shutting down');
+process.on("SIGTERM", () => {
+  console.log("\n👋 Shutting down gracefully...");
+  logInfo("Application shutting down");
   process.exit(0);
 });
