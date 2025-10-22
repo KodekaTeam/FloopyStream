@@ -25,84 +25,41 @@ const apiLimiter = rateLimit({
 // ============================================
 
 router.post('/upload', requireAuth, apiLimiter, videoUploader, handleUploadError, async (req, res) => {
-  const startTime = Date.now();
-  let uploadedFile = null;
-  let generatedThumbnail = null;
-
   try {
-    console.log(`[UPLOAD] Starting upload for user: ${req.session.username}`);
-
     // Handle aborted connections to cleanup partial files
     let aborted = false;
     req.on('aborted', async () => {
       aborted = true;
-      console.warn(`[UPLOAD] Request aborted by client for user: ${req.session.username}`);
+      console.warn('Upload request aborted by client');
       // If multer already saved a file, try to remove it
       try {
         if (req.file && req.file.path && fs.existsSync(req.file.path)) {
           fs.unlinkSync(req.file.path);
-          console.log(`[UPLOAD] Removed partial upload: ${req.file.path}`);
-        }
-        if (generatedThumbnail && fs.existsSync(generatedThumbnail)) {
-          fs.unlinkSync(generatedThumbnail);
-          console.log(`[UPLOAD] Removed partial thumbnail: ${generatedThumbnail}`);
+          console.log('Removed partial upload:', req.file.path);
         }
       } catch (e) {
-        console.error('[UPLOAD] Failed to remove partial files:', e.message);
+        console.error('Failed to remove partial upload:', e.message);
       }
     });
 
     if (!req.file) {
       // If request was aborted, return a 499-like response
       if (aborted) {
-        console.log(`[UPLOAD] Upload aborted for user: ${req.session.username}`);
         return res.status(499).json({ success: false, message: 'Client closed request' });
       }
 
-      console.log(`[UPLOAD] No file uploaded for user: ${req.session.username}`);
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
 
-    uploadedFile = req.file.path;
-    console.log(`[UPLOAD] File uploaded: ${req.file.originalname} (${req.file.size} bytes) for user: ${req.session.username}`);
-
     const { title, description } = req.body;
     
-    // Extract media information with timeout
-    console.log(`[UPLOAD] Extracting media info for: ${req.file.path}`);
-    let mediaInfo;
-    try {
-      mediaInfo = await extractMediaInfo(req.file.path);
-      console.log(`[UPLOAD] Media info extracted: ${mediaInfo.width}x${mediaInfo.height}, ${mediaInfo.durationSeconds}s`);
-    } catch (extractError) {
-      console.error(`[UPLOAD] Failed to extract media info: ${extractError.message}`);
-      await logError('Media info extraction failed', { 
-        error: extractError.message, 
-        file: req.file.originalname,
-        username: req.session.username 
-      });
-      throw new Error(`Failed to process video file: ${extractError.message}`);
-    }
+    // Extract media information
+    const mediaInfo = await extractMediaInfo(req.file.path);
     
-    // Generate thumbnail with timeout
+    // Generate thumbnail
     const thumbnailFilename = `thumb_${path.parse(req.file.filename).name}.jpg`;
     const thumbnailPath = path.join(process.env.THUMBNAIL_DIR || './storage/thumbnails', thumbnailFilename);
-    console.log(`[UPLOAD] Generating thumbnail: ${thumbnailPath}`);
-    
-    try {
-      generatedThumbnail = await createThumbnail(req.file.path, thumbnailPath);
-      console.log(`[UPLOAD] Thumbnail generated successfully`);
-    } catch (thumbError) {
-      console.error(`[UPLOAD] Failed to generate thumbnail: ${thumbError.message}`);
-      await logError('Thumbnail generation failed', { 
-        error: thumbError.message, 
-        file: req.file.originalname,
-        username: req.session.username 
-      });
-      // Continue without thumbnail - don't fail the upload
-      console.warn(`[UPLOAD] Continuing upload without thumbnail`);
-      generatedThumbnail = null;
-    }
+    await createThumbnail(req.file.path, thumbnailPath);
 
     // Calculate resolution
     const resolution = mediaInfo.width && mediaInfo.height 
@@ -118,21 +75,16 @@ router.post('/upload', requireAuth, apiLimiter, videoUploader, handleUploadError
       filesize: req.file.size,
       mimetype: req.file.mimetype,
       durationSeconds: mediaInfo.durationSeconds,
-      thumbnailPath: generatedThumbnail ? thumbnailFilename : null, // Store only filename (e.g., thumb_xxx.jpg)
+      thumbnailPath: thumbnailFilename, // Store only filename (e.g., thumb_xxx.jpg)
       resolution: resolution
     };
 
-    console.log(`[UPLOAD] Creating content entry in database`);
     const result = await Content.createEntry(req.session.accountId, contentData);
     
-    const processingTime = Date.now() - startTime;
-    console.log(`[UPLOAD] Upload completed successfully in ${processingTime}ms for user: ${req.session.username}`);
-
     await logInfo('Content uploaded', { 
       contentId: result.contentId,
       username: req.session.username,
-      filename: req.file.originalname,
-      processingTime: processingTime
+      filename: req.file.originalname
     });
 
     res.json({ 
@@ -141,46 +93,9 @@ router.post('/upload', requireAuth, apiLimiter, videoUploader, handleUploadError
       contentId: result.contentId
     });
   } catch (error) {
-    const processingTime = Date.now() - startTime;
-    console.error(`[UPLOAD] Upload failed after ${processingTime}ms for user: ${req.session.username}`, error);
-    
-    await logError('Content upload failed', { 
-      error: error.message, 
-      username: req.session.username,
-      processingTime: processingTime,
-      stack: error.stack
-    });
-
-    // Cleanup files on error
-    try {
-      if (uploadedFile && fs.existsSync(uploadedFile)) {
-        fs.unlinkSync(uploadedFile);
-        console.log(`[UPLOAD] Cleaned up uploaded file: ${uploadedFile}`);
-      }
-      if (generatedThumbnail && fs.existsSync(generatedThumbnail)) {
-        fs.unlinkSync(generatedThumbnail);
-        console.log(`[UPLOAD] Cleaned up thumbnail: ${generatedThumbnail}`);
-      }
-    } catch (cleanupError) {
-      console.error('[UPLOAD] Failed to cleanup files:', cleanupError.message);
-    }
-
-    // Determine appropriate error response
-    let statusCode = 500;
-    let errorMessage = 'Upload failed';
-
-    if (error.message.includes('timed out')) {
-      statusCode = 408; // Request Timeout
-      errorMessage = 'Upload timed out. Please try with a smaller file or check your connection.';
-    } else if (error.message.includes('Invalid file format')) {
-      statusCode = 400;
-      errorMessage = error.message;
-    } else if (error.message.includes('File size exceeds')) {
-      statusCode = 413; // Payload Too Large
-      errorMessage = error.message;
-    }
-
-    res.status(statusCode).json({ success: false, message: errorMessage });
+    console.error('Upload error:', error);
+    await logError('Content upload failed', { error: error.message });
+    res.status(500).json({ success: false, message: 'Upload failed' });
   }
 });
 
