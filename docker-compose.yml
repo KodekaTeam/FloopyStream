@@ -12,6 +12,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=6060
+      - TZ=Asia/Jakarta
       - TIMEZONE=Asia/Jakarta
       - SESSION_SECRET=${SESSION_SECRET:-your-super-secret-key-here-change-this}
       - DB_PATH=/app/storage/database/floopystream.db

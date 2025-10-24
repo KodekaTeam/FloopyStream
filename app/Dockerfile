@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     ca-certificates \
     ffmpeg \
+    tzdata \
     && rm -rf /var/lib/apt/lists/* \
     && ffmpeg -version | head -1 \
     && echo "✓ FFmpeg installed successfully"
