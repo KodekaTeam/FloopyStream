@@ -18,7 +18,6 @@ const {
 } = require("../../utilities/mediaProcessor");
 const { logInfo, logError } = require("../../services/activityLogger");
 const { executeQuery } = require("../../core/database");
-const MediaProcessingService = require("../../services/mediaProcessingService");
 
 // Rate limiting for uploads
 const apiLimiter = rateLimit({
@@ -44,18 +43,22 @@ router.post(
       req.on("aborted", async () => {
         aborted = true;
         console.warn("Upload request aborted by client");
-        // If multer already saved a file, try to remove it
+        // If multer already saved files, try to remove them
         try {
-          if (req.file && req.file.path && fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path);
-            console.log("Removed partial upload:", req.file.path);
+          if (req.files && Array.isArray(req.files)) {
+            for (const file of req.files) {
+              if (file && file.path && fs.existsSync(file.path)) {
+                fs.unlinkSync(file.path);
+                console.log("Removed partial upload:", file.path);
+              }
+            }
           }
         } catch (e) {
           console.error("Failed to remove partial upload:", e.message);
         }
       });
 
-      if (!req.file) {
+      if (!req.files || req.files.length === 0) {
         // If request was aborted, return a 499-like response
         if (aborted) {
           return res
@@ -65,44 +68,88 @@ router.post(
 
         return res
           .status(400)
-          .json({ success: false, message: "No file uploaded" });
+          .json({ success: false, message: "No files uploaded" });
       }
 
       const { title, description } = req.body;
+      const uploadedContents = [];
+      const errors = [];
 
-      // Create content entry immediately with basic info
-      const contentData = {
-        title: title || req.file.originalname,
-        description: description || null,
-        filename: req.file.filename,
-        filepath: req.file.filename, // Store only filename, not full path
-        filesize: req.file.size,
-        mimetype: req.file.mimetype,
-        durationSeconds: null, // Will be updated in background
-        thumbnailPath: null, // Will be updated in background
-        resolution: null, // Will be updated in background
-      };
+      // Process each uploaded file
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        try {
+          // Extract media information
+          const mediaInfo = await extractMediaInfo(file.path);
 
-      const result = await Content.createEntry(
-        req.session.accountId,
-        contentData,
-        'processing'
-      );
+          // Generate thumbnail
+          const thumbnailFilename = `thumb_${
+            path.parse(file.filename).name
+          }.jpg`;
+          const thumbnailPath = path.join(
+            process.env.THUMBNAIL_DIR || "./storage/thumbnails",
+            thumbnailFilename
+          );
+          await createThumbnail(file.path, thumbnailPath);
 
-      // Queue background processing
-      const fullFilePath = req.file.path;
-      MediaProcessingService.queueProcessing(result.contentId, fullFilePath);
+          // Calculate resolution
+          const resolution =
+            mediaInfo.width && mediaInfo.height
+              ? `${mediaInfo.width}×${mediaInfo.height}`
+              : null;
 
-      await logInfo("Content uploaded", {
-        contentId: result.contentId,
-        username: req.session.username,
-        filename: req.file.originalname,
-      });
+          // Create content entry
+          const contentData = {
+            title: title || file.originalname,
+            description: description || null,
+            filename: file.filename,
+            filepath: file.filename, // Store only filename, not full path
+            filesize: file.size,
+            mimetype: file.mimetype,
+            durationSeconds: mediaInfo.durationSeconds,
+            thumbnailPath: thumbnailFilename, // Store only filename (e.g., thumb_xxx.jpg)
+            resolution: resolution,
+          };
+
+          const result = await Content.createEntry(
+            req.session.accountId,
+            contentData
+          );
+
+          uploadedContents.push({
+            contentId: result.contentId,
+            filename: file.originalname,
+            title: contentData.title,
+          });
+
+          await logInfo("Content uploaded", {
+            contentId: result.contentId,
+            username: req.session.username,
+            filename: file.originalname,
+          });
+        } catch (error) {
+          console.error(`Error processing file ${file.originalname}:`, error);
+          errors.push({
+            filename: file.originalname,
+            error: error.message,
+          });
+          await logError("Content upload failed for file", {
+            filename: file.originalname,
+            error: error.message,
+          });
+        }
+      }
 
       res.json({
-        success: true,
-        message: "Content uploaded successfully. Processing in background.",
-        contentId: result.contentId,
+        success: uploadedContents.length > 0,
+        uploadedContents,
+        errors: errors.length > 0 ? errors : undefined,
+        message:
+          uploadedContents.length > 0
+            ? `${uploadedContents.length} file(s) uploaded successfully${
+                errors.length > 0 ? `, ${errors.length} failed` : ""
+              }`
+            : "Upload failed",
       });
     } catch (error) {
       console.error("Upload error:", error);
@@ -310,7 +357,6 @@ router.get("/selector/all", requireAuth, async (req, res) => {
         resolution: content.resolution || "1280×720",
         duration: formattedDuration,
         filepath: content.filepath,
-        status: content.status || "ready",
         type: "content",
       };
     });
@@ -427,7 +473,7 @@ router.post("/drive/import-url", requireAuth, async (req, res) => {
       resolution: resolution,
     };
 
-    await Content.createEntry(req.session.accountId, contentData, 'ready');
+    await Content.createEntry(req.session.accountId, contentData);
 
     await logInfo("Content imported from Drive URL", {
       username: req.session.username,
