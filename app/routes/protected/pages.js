@@ -84,12 +84,32 @@ router.get("/content", requireAuth, async (req, res) => {
 
 router.get("/history", requireAuth, async (req, res) => {
   try {
-    const broadcasts = await Broadcast.getByAccount(req.session.accountId, 100);
+    const itemsPerPage = 10;
+    const pageNumber = parseInt(req.query.page) || 1;
+    
+    // Get total count of broadcasts
+    const totalBroadcasts = await Broadcast.countByAccount(req.session.accountId);
+    const totalPages = Math.ceil(totalBroadcasts / itemsPerPage);
+    
+    // Validate page number
+    const validPage = Math.max(1, Math.min(pageNumber, totalPages || 1));
+    const offset = (validPage - 1) * itemsPerPage;
+    
+    // Get paginated broadcasts
+    const broadcasts = await Broadcast.getByAccountWithPagination(
+      req.session.accountId,
+      itemsPerPage,
+      offset
+    );
 
     res.render("dashboard/history", {
       title: "History",
       session: req.session,
       broadcasts,
+      pageNumber: validPage,
+      totalPages: totalPages,
+      totalItems: totalBroadcasts,
+      itemsPerPage: itemsPerPage,
       currentPage: "history",
     });
   } catch (error) {

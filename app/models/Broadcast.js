@@ -150,6 +150,26 @@ class Broadcast {
   }
 
   /**
+   * Get broadcasts by account with pagination (alias for getByAccount)
+   */
+  static async getByAccountWithPagination(accountId, limit = 10, offset = 0) {
+    return await this.getByAccount(accountId, limit, offset);
+  }
+
+  /**
+   * Count total broadcasts for an account
+   */
+  static async countByAccount(accountId) {
+    const sql = `
+      SELECT COUNT(*) as total 
+      FROM broadcasts 
+      WHERE account_id = ?
+    `;
+    const result = await fetchOne(sql, [accountId]);
+    return result.total;
+  }
+
+  /**
    * Get all broadcasts
    */
   static async getAllBroadcasts(limit = 50, offset = 0) {

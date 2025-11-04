@@ -1,0 +1,90 @@
+<%
+// Pagination Configuration
+const itemsPerPage = 10;
+
+// Ensure we have numeric values
+const pageNum = typeof pageNumber === 'number' ? pageNumber : 1;
+const paginationTotalItems = typeof totalItems === 'number' ? totalItems : 0;
+const paginationTotalPages = typeof totalPages === 'number' ? totalPages : Math.ceil(paginationTotalItems / itemsPerPage);
+
+const startIndex = (pageNum - 1) * itemsPerPage;
+const endIndex = Math.min(startIndex + itemsPerPage, paginationTotalItems);
+
+// Helper function to generate page range
+function getPageRange(current, total, range = 2) {
+  const pages = [];
+  const start = Math.max(1, current - range);
+  const end = Math.min(total, current + range);
+  
+  if (start > 1) {
+    pages.push(1);
+    if (start > 2) pages.push('...');
+  }
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+  
+  if (end < total) {
+    if (end < total - 1) pages.push('...');
+    pages.push(total);
+  }
+  
+  return pages;
+}
+
+const pageRange = getPageRange(pageNum, paginationTotalPages);
+%>
+
+<% if (paginationTotalItems > 0) { %>
+<!-- Pagination -->
+<div class="mt-4 space-y-3">
+  <div class="flex items-center justify-center gap-2 flex-wrap">
+    <!-- Previous Button -->
+    <a
+      href="/history?page=<%= Math.max(1, pageNum - 1) %>"
+      class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition disabled:opacity-50 disabled:cursor-not-allowed <%= pageNum === 1 ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>"
+      <%= pageNum === 1 ? 'onclick="event.preventDefault()"' : '' %>
+    >
+      <i class="ti ti-chevron-left"></i>
+    </a>
+
+    <!-- Page Numbers -->
+    <% pageRange.forEach(function(page) { %>
+      <% if (page === '...') { %>
+        <span class="w-8 h-8 flex items-center justify-center text-gray-500">...</span>
+      <% } else { %>
+        <% if (page === pageNum) { %>
+          <button
+            class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded font-semibold"
+            disabled
+          >
+            <%= page %>
+          </button>
+        <% } else { %>
+          <a
+            href="/history?page=<%= page %>"
+            class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded transition"
+          >
+            <%= page %>
+          </a>
+        <% } %>
+      <% } %>
+    <% }); %>
+
+    <!-- Next Button -->
+    <a
+      href="/history?page=<%= Math.min(paginationTotalPages, pageNum + 1) %>"
+      class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition <%= pageNum === paginationTotalPages ? 'opacity-50 cursor-not-allowed pointer-events-none' : '' %>"
+      <%= pageNum === paginationTotalPages ? 'onclick="event.preventDefault()"' : '' %>
+    >
+      <i class="ti ti-chevron-right"></i>
+    </a>
+  </div>
+
+  <!-- Info Text -->
+  <p class="text-center text-sm text-gray-400">
+    Showing <%= startIndex + 1 %>-<%= endIndex %> of <%= paginationTotalItems %> broadcasts | Page <%= pageNum %> of <%= paginationTotalPages %>
+  </p>
+</div>
+<% } %>
