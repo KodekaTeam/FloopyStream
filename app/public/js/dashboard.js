@@ -46,6 +46,7 @@ function switchView(view) {
   currentView = view;
   const tableContainer = document.getElementById("tableViewContainer");
   const cardContainer = document.getElementById("cardViewContainer");
+  const tablePaginationContainer = document.getElementById("tablePaginationContainer");
   const cardViewBtn = document.getElementById("cardViewBtn");
   const tableViewBtn = document.getElementById("tableViewBtn");
 
@@ -69,6 +70,10 @@ function switchView(view) {
         cardContainer.classList.add("block");
       }
     }
+    // Hide table pagination
+    if (tablePaginationContainer) {
+      tablePaginationContainer.style.display = "none";
+    }
     if (cardViewBtn) cardViewBtn.classList.add("bg-gray-600");
     if (tableViewBtn) tableViewBtn.classList.remove("bg-gray-600");
 
@@ -86,6 +91,10 @@ function switchView(view) {
         cardContainer.classList.add("hidden");
         cardContainer.classList.add("md:hidden");
         cardContainer.classList.remove("block");
+      }
+      // Show table pagination
+      if (tablePaginationContainer) {
+        tablePaginationContainer.style.display = "block";
       }
       if (tableViewBtn) tableViewBtn.classList.add("bg-gray-600");
       if (cardViewBtn) cardViewBtn.classList.remove("bg-gray-600");
@@ -412,6 +421,23 @@ function filterCardItems() {
 // Initialize view on page load
 document.addEventListener("DOMContentLoaded", () => {
   console.log("=== DOMContentLoaded - Initializing pagination ===");
+
+  // Initialize table pagination visibility based on saved view preference or screen size
+  const tablePaginationContainer = document.getElementById("tablePaginationContainer");
+  if (tablePaginationContainer) {
+    const isMobile = window.innerWidth < 768;
+    const savedView = localStorage.getItem("dashboardView");
+
+    // On mobile, always hide table pagination
+    // On desktop, show table pagination unless card view is saved in localStorage
+    if (isMobile) {
+      tablePaginationContainer.style.display = "none";
+    } else if (savedView === "card") {
+      tablePaginationContainer.style.display = "none";
+    } else {
+      tablePaginationContainer.style.display = "block";
+    }
+  }
 
   // Collect all broadcasts from table rows
   const tbody = document.getElementById("streamsTableBody");
