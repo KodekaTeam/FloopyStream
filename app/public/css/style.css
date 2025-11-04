@@ -1237,8 +1237,8 @@ html.light {
   --warning-color: #d9954a;
   --background: #faf9f7;
   --surface: #f0ede8;
-  --text-primary: #3a3a3a;
-  --text-secondary: #7a7a7a;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
   --border-color: #e8e3da;
   --scrollbar-track: #f0ede8;
   --scrollbar-thumb: #d4cfc6;
@@ -1274,6 +1274,95 @@ html.light .bg-gray-800 {
 
 html.light .bg-gray-700 {
   background-color: #e8e3da;
+}
+
+/* Button Styles - Light Mode */
+html.light .btn {
+  color: #fff !important;
+}
+
+html.light .btn-primary {
+  background-color: #4f7fd9;
+  color: #fff !important;
+}
+
+html.light .btn-primary:hover {
+  background-color: #3557a1;
+  color: #fff !important;
+}
+
+html.light .btn-secondary {
+  background-color: #6b7a8f;
+  color: #fff !important;
+}
+
+html.light .btn-secondary:hover {
+  background-color: #4f5a6b;
+  color: #fff !important;
+}
+
+html.light .btn-danger {
+  background-color: #d64a4a;
+  color: #fff !important;
+}
+
+html.light .btn-danger:hover {
+  background-color: #a13a3a;
+  color: #fff !important;
+}
+
+html.light .btn-block {
+  width: 100%;
+}
+
+html.light .btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+html.light .btn-lg {
+  background: linear-gradient(135deg, #4f7fd9 0%, #3557a1 100%);
+  color: #fff !important;
+}
+
+html.light .btn-lg:hover {
+  background: linear-gradient(135deg, #3557a1 0%, #4f7fd9 100%);
+  color: #fff !important;
+}
+
+html.light .btn-secondary.btn-lg {
+  background: rgba(255, 255, 255, 0.7);
+  border: 2px solid #e8e3da;
+  color: #fff !important;
+}
+
+html.light .btn-secondary.btn-lg:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #4f7fd9;
+  color: #fff !important;
+}
+
+/* Override Tailwind utility classes for buttons in light mode */
+html.light .bg-blue-600 {
+  background-color: #4f7fd9 !important;
+  color: #fff !important;
+}
+
+html.light .bg-blue-600:hover,
+html.light .hover\:bg-blue-700:hover {
+  background-color: #3557a1 !important;
+  color: #fff !important;
+}
+
+html.light .bg-green-600 {
+  background-color: #10b981 !important;
+  color: #fff !important;
+}
+
+html.light .bg-green-600:hover,
+html.light .hover\:bg-green-700:hover {
+  background-color: #059669 !important;
+  color: #fff !important;
 }
 
 html.light .text-gray-400 {
@@ -1321,6 +1410,70 @@ html.light .form-control::placeholder {
   color: #a8a8a8;
 }
 
+/* Light mode for labels and text */
+html.light label {
+  color: #3a3a3a !important;
+}
+
+html.light .text-sm.text-gray-300 {
+  color: #5a5a5a !important;
+}
+
+html.light .text-xs.text-gray-400 {
+  color: #7a7a7a !important;
+}
+
+html.light .text-xs.text-gray-500 {
+  color: #888888 !important;
+}
+
+/* Light mode for select dropdowns and other form elements */
+html.light select {
+  background-color: #fdfbf9;
+  color: #3a3a3a;
+  border-color: #e0d9ce;
+}
+
+html.light select:focus {
+  background-color: #fef9f5;
+  border-color: #4f7fd9;
+}
+
+html.light button:disabled,
+html.light input:disabled {
+  color: #999999 !important;
+}
+
+/* Light mode for details/summary (Advanced Settings) */
+html.light details summary {
+  color: #3a3a3a !important;
+}
+
+html.light details summary span {
+  color: #3a3a3a !important;
+}
+
+html.light details summary i {
+  color: #888888 !important;
+}
+
+/* Light mode for alert/warning boxes */
+html.light .bg-amber-900 {
+  background-color: rgba(217, 119, 6, 0.15) !important;
+}
+
+html.light .border-amber-700 {
+  border-color: #d9954a !important;
+}
+
+html.light .text-amber-400 {
+  color: #d9954a !important;
+}
+
+html.light .text-amber-300 {
+  color: #e8b566 !important;
+}
+
 /* Soft light mode for cards */
 html.light .feature-card {
   background: rgba(240, 237, 232, 0.6);
@@ -1343,4 +1496,297 @@ html.light .auth-card {
   background: #fef9f5;
   border-color: #e8e3da;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+/* Light Mode - Override for Icons, Badges, and Action Colors */
+html.light .ti {
+  color: inherit;
+}
+
+html.light [class*="text-green"] {
+  color: #10b981 !important;
+}
+
+html.light [class*="text-red"] {
+  color: #ef4444 !important;
+}
+
+html.light [class*="text-blue"] {
+  color: #3b82f6 !important;
+}
+
+html.light [class*="text-cyan"] {
+  color: #06b6d4 !important;
+}
+
+html.light [class*="text-yellow"] {
+  color: #f59e0b !important;
+}
+
+html.light [class*="text-amber"] {
+  color: #f59e0b !important;
+}
+
+html.light [class*="text-gray"] {
+  color: #6b7280 !important;
+}
+
+/* Badge Colors - Keep Dark Colors */
+html.light .badge-active,
+html.light .bg-green-600 {
+  background-color: #10b981 !important;
+  color: #fff !important;
+}
+
+html.light .badge-failed,
+html.light .bg-red-600 {
+  background-color: #ef4444 !important;
+  color: #fff !important;
+}
+
+html.light .badge-completed,
+html.light .bg-blue-600 {
+  background-color: #3b82f6 !important;
+  color: #fff !important;
+}
+
+html.light .badge-scheduled,
+html.light .bg-yellow-600 {
+  background-color: #f59e0b !important;
+  color: #fff !important;
+}
+
+html.light .bg-gray-600 {
+  background-color: #4b5563 !important;
+  color: #fff !important;
+}
+
+/* Action Button Colors */
+html.light button[class*="text-green"],
+html.light button[class*="text-red"],
+html.light button[class*="text-blue"],
+html.light button[class*="text-cyan"],
+html.light button[class*="text-amber"] {
+  color: inherit !important;
+}
+
+html.light button.hover\:bg-gray-600:hover {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Button Cancel - Red on Light Mode */
+html.light .btn-cancel {
+  background-color: #d64a4a !important;
+  color: #fff !important;
+}
+
+html.light .btn-cancel:hover {
+  background-color: #a13a3a !important;
+  color: #fff !important;
+}
+
+/* Card View Button and Content Card Styling */
+html.light #cardViewBtn,
+html.light #tableViewBtn {
+  color: #fff !important;
+  background-color: transparent !important;
+}
+
+html.light #cardViewBtn:hover,
+html.light #tableViewBtn:hover {
+  background-color: rgba(79, 127, 217, 0.2) !important;
+  color: #fff !important;
+}
+
+html.light #cardViewBtn.bg-gray-600,
+html.light #tableViewBtn.bg-gray-600 {
+  background-color: #4f7fd9 !important;
+  color: #fff !important;
+  border-color: #4f7fd9 !important;
+}
+
+/* Ensure blue button text stays white in light mode */
+html.light button.bg-blue-600,
+html.light a.bg-blue-600 {
+  color: #ffffff !important;
+}
+
+html.light button.bg-blue-600:hover,
+html.light button.hover\:bg-blue-700:hover,
+html.light a.bg-blue-600:hover,
+html.light a.hover\:bg-blue-700:hover {
+  color: #ffffff !important;
+}
+
+/* Pagination link text white in light mode */
+html.light a.text-white,
+html.light span.text-white {
+  color: #ffffff !important;
+}
+
+html.light .pagination a,
+html.light .pagination a:hover {
+  color: #ffffff !important;
+}
+
+/* Override bg-gray-800 for pagination in light mode */
+html.light a.bg-gray-800,
+html.light button.bg-gray-800 {
+  background-color: #f0ede8 !important;
+  border-color: #e0d9ce !important;
+  color: #ffffff !important;
+}
+
+html.light a.hover\:bg-gray-700:hover,
+html.light button.hover\:bg-gray-700:hover {
+  background-color: #e8e3da !important;
+  color: #ffffff !important;
+}
+
+/* Icon buttons in light mode - keep original colors */
+html.light button[class*="text-"] {
+  color: inherit !important;
+}
+
+/* Button with text-white stays white in light mode */
+html.light button.text-white,
+html.light button:has(span.text-white) {
+  color: #ffffff !important;
+}
+
+/* Specific fix for bg-blue-600 buttons with text-white */
+html.light button.bg-blue-600.text-white {
+  color: #ffffff !important;
+}
+
+html.light button.bg-blue-600.text-white:hover {
+  color: #ffffff !important;
+}
+
+/* Ensure gray button text stays gray in light mode */
+html.light button.bg-gray-700,
+html.light button.bg-gray-600 {
+  color: #888888 !important;
+}
+
+html.light button.bg-gray-700:hover,
+html.light button.hover\:bg-gray-600:hover,
+html.light button.bg-gray-600:hover {
+  color: #666666 !important;
+}
+
+html.light button[class*="text-green-"] {
+  color: #10b981 !important;
+}
+
+html.light button[class*="text-red-"] {
+  color: #ef4444 !important;
+}
+
+html.light button[class*="text-blue-"] {
+  color: #3b82f6 !important;
+}
+
+html.light button[class*="text-cyan-"] {
+  color: #06b6d4 !important;
+}
+
+html.light button[class*="text-amber-"] {
+  color: #f59e0b !important;
+}
+
+/* Content Card - Ensure Text is Readable */
+html.light .content-card {
+  background-color: #fef9f5 !important;
+  border-color: #e8e3da !important;
+}
+
+html.light .content-info h4 {
+  color: #3a3a3a !important;
+}
+
+html.light .content-info p {
+  color: #7a7a7a !important;
+}
+
+/* Badge text on cards - Keep white */
+html.light .content-card .badge {
+  color: #fff !important;
+}
+
+html.light .content-card .badge-active {
+  background-color: #10b981 !important;
+  color: #fff !important;
+}
+
+html.light .content-card .badge-failed {
+  background-color: #ef4444 !important;
+  color: #fff !important;
+}
+
+html.light .content-card .badge-completed {
+  background-color: #3b82f6 !important;
+  color: #fff !important;
+}
+
+/* Pagination Styles */
+.pagination {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.pagination a,
+.pagination span {
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.pagination a:hover {
+  color: var(--primary-color);
+  background: rgba(59, 130, 246, 0.08);
+  border-color: var(--primary-color);
+}
+
+.pagination .active,
+.pagination a.active {
+  color: #ffffff !important;
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Light mode pagination */
+html.light .pagination a,
+html.light .pagination span {
+  color: #3a3a3a;
+  background: #f0ede8;
+  border-color: #e8e3da;
+}
+
+html.light .pagination a:hover {
+  color: #4f7fd9;
+  background: rgba(79, 127, 217, 0.08);
+  border-color: #4f7fd9;
+}
+
+html.light .pagination .active,
+html.light .pagination a.active,
+html.light .pagination span.active {
+  color: #ffffff !important;
+  background-color: #4f7fd9 !important;
+  border-color: #4f7fd9 !important;
+}
+
+html.light .pagination .active a,
+html.light .pagination a.active,
+html.light .pagination span.active {
+  color: #ffffff !important;
 }
