@@ -4,6 +4,9 @@
  */
 
 let allUsers = [];
+let filteredUsers = [];
+let currentPage = 1;
+const itemsPerPage = 10;
 
 // Load users on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -39,7 +42,9 @@ async function loadUsers() {
 
     if (data.success) {
       allUsers = data.users;
-      renderUsersTable(allUsers);
+      filteredUsers = allUsers;
+      currentPage = 1;
+      renderUsersTable(filteredUsers);
     } else {
       showToast('Failed to load users', 'error');
     }
@@ -77,7 +82,7 @@ function filterUsers() {
   const roleFilter = document.getElementById('filterRole').value;
   const statusFilter = document.getElementById('filterStatus').value;
 
-  const filtered = allUsers.filter(user => {
+  filteredUsers = allUsers.filter(user => {
     // Search filter
     const matchesSearch = !searchTerm || 
       user.username.toLowerCase().includes(searchTerm) ||
@@ -95,7 +100,8 @@ function filterUsers() {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  renderUsersTable(filtered);
+  currentPage = 1;
+  renderUsersTable(filteredUsers);
 }
 
 /**
@@ -113,10 +119,17 @@ function renderUsersTable(users) {
         </td>
       </tr>
     `;
+    hidePagination();
     return;
   }
 
-  tbody.innerHTML = users.map(user => {
+  // Calculate pagination
+  const totalPages = Math.ceil(users.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, users.length);
+  const paginatedUsers = users.slice(startIndex, endIndex);
+
+  tbody.innerHTML = paginatedUsers.map(user => {
     const isActive = user.is_active === 1;
     const isAdmin = user.account_role === 'admin';
     const createdDate = new Date(user.created_at).toLocaleDateString('en-GB');
@@ -200,6 +213,128 @@ function renderUsersTable(users) {
       </tr>
     `;
   }).join('');
+
+  // Render pagination
+  renderPagination(users.length, totalPages);
+}
+
+/**
+ * Render pagination controls
+ */
+function renderPagination(totalItems, totalPages) {
+  const paginationButtons = document.getElementById('paginationButtons');
+  const paginationInfo = document.getElementById('paginationInfo');
+  
+  if (totalItems === 0) {
+    hidePagination();
+    return;
+  }
+
+  // Generate page range
+  const pageRange = getPageRange(currentPage, totalPages);
+  
+  let html = '';
+  
+  // Previous button
+  html += `
+    <a
+      href="#"
+      onclick="goToPage(${Math.max(1, currentPage - 1)}); return false;"
+      class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition ${currentPage === 1 ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}"
+      ${currentPage === 1 ? 'onclick="event.preventDefault()"' : ''}
+    >
+      <i class="ti ti-chevron-left"></i>
+    </a>
+  `;
+
+  // Page numbers
+  pageRange.forEach(page => {
+    if (page === '...') {
+      html += `<span class="w-8 h-8 flex items-center justify-center text-gray-500">...</span>`;
+    } else if (page === currentPage) {
+      html += `
+        <button
+          class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded font-semibold"
+          disabled
+        >
+          ${page}
+        </button>
+      `;
+    } else {
+      html += `
+        <a
+          href="#"
+          onclick="goToPage(${page}); return false;"
+          class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded transition"
+        >
+          ${page}
+        </a>
+      `;
+    }
+  });
+
+  // Next button
+  html += `
+    <a
+      href="#"
+      onclick="goToPage(${Math.min(totalPages, currentPage + 1)}); return false;"
+      class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}"
+      ${currentPage === totalPages ? 'onclick="event.preventDefault()"' : ''}
+    >
+      <i class="ti ti-chevron-right"></i>
+    </a>
+  `;
+
+  paginationButtons.innerHTML = html;
+
+  // Update info text
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  paginationInfo.innerHTML = `Showing ${startIndex + 1}-${endIndex} of ${totalItems} users | Page ${currentPage} of ${totalPages}`;
+  
+  // Show pagination
+  document.getElementById('paginationContainer').classList.remove('hidden');
+}
+
+/**
+ * Hide pagination
+ */
+function hidePagination() {
+  document.getElementById('paginationContainer').classList.add('hidden');
+}
+
+/**
+ * Generate page range for pagination
+ */
+function getPageRange(current, total, range = 2) {
+  const pages = [];
+  const start = Math.max(1, current - range);
+  const end = Math.min(total, current + range);
+  
+  if (start > 1) {
+    pages.push(1);
+    if (start > 2) pages.push('...');
+  }
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+  
+  if (end < total) {
+    if (end < total - 1) pages.push('...');
+    pages.push(total);
+  }
+  
+  return pages;
+}
+
+/**
+ * Go to specific page
+ */
+function goToPage(page) {
+  currentPage = Math.max(1, Math.min(page, Math.ceil(filteredUsers.length / itemsPerPage)));
+  renderUsersTable(filteredUsers);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 /**
