@@ -1474,6 +1474,63 @@ html.light .text-amber-300 {
   color: #e8b566 !important;
 }
 
+/* Sidebar menu - keep gray on hover */
+html.light aside nav a {
+  color: #888888 !important;
+}
+
+html.light aside nav a i {
+  color: #888888 !important;
+}
+
+html.light aside nav a span {
+  color: #888888 !important;
+}
+
+html.light aside nav a:hover {
+  color: #888888 !important;
+  background-color: rgba(200, 200, 200, 0.2) !important;
+}
+
+html.light aside nav a:hover i {
+  color: #888888 !important;
+}
+
+html.light aside nav a:hover span {
+  color: #888888 !important;
+}
+
+/* Sidebar menu - active state should be white */
+html.light aside nav a[class*="bg-blue-600"] {
+  color: #ffffff !important;
+}
+
+html.light aside nav a[class*="bg-blue-600"] i {
+  color: #ffffff !important;
+}
+
+html.light aside nav a[class*="bg-blue-600"] span {
+  color: #ffffff !important;
+}
+
+/* Mobile bottom nav menu - keep gray text */
+html.light nav[class*="bottom"] a {
+  color: #888888 !important;
+}
+
+html.light nav[class*="bottom"] a:hover {
+  color: #888888 !important;
+}
+
+/* Mobile profile menu - keep gray text */
+html.light #mobileProfileMenu a {
+  color: #666666 !important;
+}
+
+html.light #mobileProfileMenu a:hover {
+  color: #3a3a3a !important;
+}
+
 /* Soft light mode for cards */
 html.light .feature-card {
   background: rgba(240, 237, 232, 0.6);
