@@ -11,6 +11,9 @@ const {
   startPlaylistBroadcast,
   stopLiveBroadcast,
 } = require("../../services/broadcastEngine");
+const {
+  broadcastWithAutoReconnect,
+} = require("../../services/broadcastEngine");
 const { logInfo, logError } = require("../../services/activityLogger");
 const { executeQuery } = require("../../core/database");
 
@@ -286,7 +289,14 @@ router.post("/start/:broadcastId", requireAuth, async (req, res) => {
         videoPath = candidateOriginal;
       }
 
-      await startLiveBroadcast(
+      await logInfo("Broadcast started manually", {
+        broadcastId,
+        username: req.session.username,
+      });
+
+      // Start broadcast with auto-reconnect capability
+      // Run in background - don't await to prevent timeout
+      broadcastWithAutoReconnect(
         parseInt(broadcastId),
         videoPath,
         broadcast.destination_url,
@@ -297,15 +307,19 @@ router.post("/start/:broadcastId", requireAuth, async (req, res) => {
           frame_rate: broadcast.frame_rate,
           resolution: broadcast.resolution,
           orientation: broadcast.orientation,
-        }
-      );
-
-      await logInfo("Broadcast started manually", {
-        broadcastId,
-        username: req.session.username,
+        },
+        false // not a playlist
+      ).catch((error) => {
+        console.error(
+          `Background broadcast error for ${broadcastId}:`,
+          error.message
+        );
       });
 
-      res.json({ success: true, message: "Broadcast started successfully" });
+      res.json({
+        success: true,
+        message: "Broadcast started successfully with auto-reconnect enabled",
+      });
     }
   } catch (error) {
     console.error("Broadcast manual start error:", error);

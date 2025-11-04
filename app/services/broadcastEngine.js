@@ -2,6 +2,12 @@ const ffmpeg = require("fluent-ffmpeg");
 const { logInfo, logError } = require("./activityLogger");
 const Broadcast = require("../models/Broadcast");
 const ffmpegErrorHandler = require("./ffmpegErrorHandler");
+const {
+  ConnectionHealthMonitor,
+  RetryStrategy,
+  StreamErrorDetector,
+  NetworkQualityMonitor,
+} = require("./connectionRecovery");
 
 // CRITICAL FIX: Use system FFmpeg instead of @ffmpeg-installer
 // @ffmpeg-installer binaries cause SIGSEGV in Docker due to ABI incompatibility
@@ -102,6 +108,212 @@ function isFacebookStream(url) {
     "rtmps://live-api",
   ];
   return fbPatterns.some((pattern) => url.includes(pattern));
+}
+
+/**
+ * Check if destination is YouTube
+ * @param {string} url - Destination URL
+ */
+function isYouTubeStream(url) {
+  const ytPatterns = [
+    "youtube.com",
+    "youtu.be",
+    "rtmp.youtube.com",
+    "rtsps://a.rtmp.youtube.com",
+  ];
+  return ytPatterns.some((pattern) => url.includes(pattern));
+}
+
+/**
+ * Add connection timeout options for FFmpeg output
+ * Prevents infinite hangs on network issues
+ */
+function getConnectionTimeoutOptions() {
+  return [
+    // Socket options
+    "-socket_timeout",
+    "10000000", // 10 second socket timeout (microseconds)
+    "-tcp_nodelay",
+    "1", // Disable Nagle's algorithm for low latency
+    "-fflags",
+    "nobuffer", // Minimize buffering
+    // Connection handling
+    "-rtmp_pageurl",
+    "http://127.0.0.1", // Add referer to avoid blocking
+    "-rtmp_swfverify",
+    "no", // Skip SWF verification
+  ];
+}
+
+/**
+ * Wrap broadcast function with auto-reconnect logic
+ */
+async function broadcastWithAutoReconnect(
+  broadcastId,
+  videoFilePath,
+  destinationUrl,
+  streamKey,
+  maxDurationSeconds,
+  advancedSettings,
+  isPlaylist = false,
+  playlistData = null
+) {
+  const retryStrategy = new RetryStrategy(4); // Max 4 retries for YouTube
+  const healthMonitor = new ConnectionHealthMonitor(broadcastId);
+  const networkMonitor = new NetworkQualityMonitor(broadcastId);
+
+  let lastError = null;
+  let isUserInitiatedStop = false;
+
+  // Mark broadcast as recovering to prevent duplicate restarts
+  let isRecovering = false;
+
+  while (retryStrategy.canRetry() && !isUserInitiatedStop) {
+    try {
+      console.log(
+        `\n🎬 [Broadcast ${broadcastId}] Starting stream (Attempt ${
+          retryStrategy.attempts + 1
+        })`
+      );
+
+      if (isPlaylist) {
+        // Start playlist broadcast
+        await startPlaylistBroadcast(
+          broadcastId,
+          playlistData.videos,
+          destinationUrl,
+          streamKey,
+          playlistData.shuffle || false,
+          playlistData.loop || true,
+          advancedSettings
+        );
+      } else {
+        // Start single video broadcast
+        await startLiveBroadcast(
+          broadcastId,
+          videoFilePath,
+          destinationUrl,
+          streamKey,
+          maxDurationSeconds,
+          advancedSettings,
+          {
+            healthMonitor,
+            networkMonitor,
+            isYouTube: isYouTubeStream(destinationUrl),
+          }
+        );
+      }
+
+      // If we reach here, stream ended successfully
+      console.log(`✅ [Broadcast ${broadcastId}] Stream ended successfully`);
+      await logInfo("Stream completed successfully", { broadcastId });
+      break;
+    } catch (error) {
+      lastError = error;
+      const errorMsg = error.message || error.toString();
+
+      console.error(`❌ [Broadcast ${broadcastId}] Stream error: ${errorMsg}`);
+
+      // Check if this is a user-initiated stop
+      if (
+        errorMsg.includes("killed with signal SIGKILL") ||
+        errorMsg.includes("killed with signal SIGTERM")
+      ) {
+        console.log("User initiated stream stop");
+        isUserInitiatedStop = true;
+        break;
+      }
+
+      // Check if it's a fatal error (don't retry)
+      if (StreamErrorDetector.isFatalError(error)) {
+        console.error("❌ Fatal error detected - not retrying:", errorMsg);
+        await logError("Fatal broadcast error - no retry", {
+          broadcastId,
+          error: errorMsg,
+        });
+        break;
+      }
+
+      // Check if it's a memory error
+      if (StreamErrorDetector.isMemoryError(error)) {
+        console.error("⚠️  Memory error detected:", errorMsg);
+        await logError("Memory error in broadcast", {
+          broadcastId,
+          error: errorMsg,
+        });
+        await Broadcast.updateStatus(
+          broadcastId,
+          "failed",
+          "Memory error - try reducing bitrate/resolution or restarting"
+        );
+        break;
+      }
+
+      // Log connection error
+      if (StreamErrorDetector.isConnectionError(error)) {
+        console.warn(
+          `⚠️  Connection error detected on attempt ${
+            retryStrategy.attempts + 1
+          }:`,
+          errorMsg
+        );
+        networkMonitor.recordReconnectAttempt();
+
+        // If too many reconnect attempts, suggest network issue
+        if (retryStrategy.attempts >= 2) {
+          await logError(
+            "Multiple connection failures - possible network issue",
+            {
+              broadcastId,
+              attempts: retryStrategy.attempts + 1,
+              lastError: errorMsg,
+              networkStatus: networkMonitor.getStatus(),
+            }
+          );
+        }
+      }
+
+      // If we can retry, wait before attempting again
+      if (retryStrategy.canRetry()) {
+        await retryStrategy.waitBeforeRetry();
+
+        // Update broadcast status to show reconnecting
+        await Broadcast.updateStatus(
+          broadcastId,
+          "reconnecting",
+          `Attempting to reconnect (${retryStrategy.attempts}/${retryStrategy.maxRetries})...`
+        );
+      } else {
+        // Max retries reached
+        console.error(
+          `❌ Max reconnection attempts (${retryStrategy.maxRetries}) reached`
+        );
+        await logError("Broadcast failed - max retries reached", {
+          broadcastId,
+          attempts: retryStrategy.attempts,
+          retryLog: retryStrategy.getLog(),
+          lastError: errorMsg,
+          networkStatus: networkMonitor.getStatus(),
+        });
+
+        // Final error message
+        let finalErrorMsg = `Stream disconnected after ${retryStrategy.attempts} reconnection attempts.`;
+        if (isYouTubeStream(destinationUrl)) {
+          finalErrorMsg +=
+            " Check: (1) YouTube stream key is valid, (2) Network connection is stable, (3) YouTube account has streaming enabled";
+        }
+        await Broadcast.updateStatus(broadcastId, "failed", finalErrorMsg);
+        break;
+      }
+    }
+  }
+
+  // Cleanup health monitor
+  healthMonitor.stopMonitoring();
+
+  if (isUserInitiatedStop) {
+    console.log(`✓ Broadcast ${broadcastId} stopped by user`);
+  }
 }
 
 /**
@@ -569,14 +781,24 @@ async function startPlaylistBroadcast(
   }
 }
 
-// Start a live broadcast
+/**
+ * Start a live broadcast
+ * @param {number} broadcastId - Broadcast ID
+ * @param {string} videoFilePath - Path to video file
+ * @param {string} destinationUrl - RTMP destination URL
+ * @param {string} streamKey - Stream key
+ * @param {number} maxDurationSeconds - Maximum duration in seconds (optional, default: no limit)
+ * @param {object} advancedSettings - Advanced Settings (bitrate, frame_rate, resolution, orientation)
+ * @param {object} options - Internal options (healthMonitor, networkMonitor, isYouTube, etc)
+ */
 async function startLiveBroadcast(
   broadcastId,
   videoFilePath,
   destinationUrl,
   streamKey,
   maxDurationSeconds = null,
-  advancedSettings = {}
+  advancedSettings = {},
+  options = {}
 ) {
   try {
     // Check if broadcast is already running
@@ -833,25 +1055,38 @@ async function startLiveBroadcast(
                 progress.currentKbps || "N/A"
               }kbps`
             );
+            // Track network quality if provided
+            if (options && options.networkMonitor && progress.currentKbps) {
+              options.networkMonitor.recordBitrate(progress.currentKbps);
+            }
           }
         }
       })
       .on("error", async (err, stdout, stderr) => {
+        const errorMsg = err.message || err.toString();
+        const stderrStr = stderr || "";
+
         // Check if this is a user-initiated stop (SIGKILL/SIGTERM) or actual error
         const isUserStop =
-          err.message.includes("killed with signal SIGKILL") ||
-          err.message.includes("killed with signal SIGTERM");
+          errorMsg.includes("killed with signal SIGKILL") ||
+          errorMsg.includes("killed with signal SIGTERM");
 
         // Check for SIGSEGV (segmentation fault) - likely memory or codec issue
-        const isSIGSEGV = err.message.includes("killed with signal SIGSEGV");
+        const isSIGSEGV = errorMsg.includes("killed with signal SIGSEGV");
+
+        // Check if this is a connection-related error for YouTube/RTMP
+        const isConnectionError = StreamErrorDetector.isConnectionError(
+          err,
+          stderrStr
+        );
 
         // Check if this is a Facebook connection error (needs retry)
         const isFBConnectionError =
           isFacebookStream(destinationUrl) &&
-          (err.message.includes("Connection refused") ||
-            err.message.includes("already publishing") ||
-            err.message.includes("Stream not found") ||
-            stderr.includes("Connection refused"));
+          (errorMsg.includes("Connection refused") ||
+            errorMsg.includes("already publishing") ||
+            errorMsg.includes("Stream not found") ||
+            stderrStr.includes("Connection refused"));
 
         if (isUserStop) {
           // User stopped the broadcast manually
@@ -868,7 +1103,7 @@ async function startLiveBroadcast(
           );
           await logError("Broadcast SIGSEGV crash - memory or codec issue", {
             broadcastId,
-            error: err.message,
+            error: errorMsg,
             suggestion:
               "Increase Docker memory, check video file, or reduce bitrate/resolution",
           });
@@ -881,11 +1116,11 @@ async function startLiveBroadcast(
           // Facebook connection error (likely previous connection not released)
           console.error(
             "⚠️  Facebook connection error (previous stream may still be active):",
-            err.message
+            errorMsg
           );
           await logError("Facebook connection error - retry needed", {
             broadcastId,
-            error: err.message,
+            error: errorMsg,
             suggestion: "Wait 10-15 seconds before retrying",
           });
           await Broadcast.updateStatus(
@@ -893,15 +1128,30 @@ async function startLiveBroadcast(
             "failed",
             "Facebook connection error. Please wait 10-15 seconds and try again."
           );
+        } else if (isConnectionError) {
+          // YouTube/RTMP connection error - should be retried by wrapper
+          console.error(
+            "⚠️  Stream connection error (will retry automatically):",
+            errorMsg
+          );
+          if (options && options.networkMonitor) {
+            options.networkMonitor.recordReconnectAttempt();
+          }
+          // Re-throw to trigger retry logic in wrapper
+          throw err;
         } else {
           // Other actual error occurred
-          console.error("Broadcast error:", err.message);
+          console.error("Broadcast error:", errorMsg);
           await logError("Broadcast failed", {
             broadcastId,
-            error: err.message,
-            stderr: stderr,
+            error: errorMsg,
+            stderr: stderrStr,
+            networkStatus:
+              options && options.networkMonitor
+                ? options.networkMonitor.getStatus()
+                : null,
           });
-          await Broadcast.updateStatus(broadcastId, "failed", err.message);
+          await Broadcast.updateStatus(broadcastId, "failed", errorMsg);
         }
         activeBroadcastProcesses.delete(broadcastId);
       })
@@ -1068,4 +1318,5 @@ module.exports = {
   getActiveBroadcastIds,
   stopAllBroadcasts,
   restartBroadcast,
+  broadcastWithAutoReconnect,
 };
