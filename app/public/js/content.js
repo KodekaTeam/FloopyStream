@@ -77,6 +77,15 @@ function showFileInfo(file) {
   const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
   fileInfo.textContent = `Selected: ${file.name} (${sizeMB} MB)`;
   fileInfo.classList.remove('hidden');
+  
+  // Auto-fill title with filename (without extension)
+  const titleInput = document.querySelector('input[name="title"]');
+  // if (titleInput && !titleInput.value) {
+    // Remove file extension from filename
+    const fileName = file.name;
+    const titleWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+    titleInput.value = titleWithoutExtension;
+  // }
 }
 
 // Handle upload form submission

@@ -1,13 +1,13 @@
 <%
 // Debug: Check what we have available
-// console.log('DEBUG - currentPage:', currentPage, 'typeof:', typeof currentPage);
+// console.log('DEBUG - pageNumber:', pageNumber, 'typeof:', typeof pageNumber);
 // console.log('DEBUG - totalItems:', totalItems, 'contentList.length:', contentList.length);
 
 // Pagination Configuration
 const itemsPerPage = 10;
 
 // Ensure we have numeric values
-const pageNum = typeof currentPage === 'number' ? currentPage : 1;
+const pageNum = typeof pageNumber === 'number' ? pageNumber : 1;
 const paginationTotalItems = typeof totalItems === 'number' ? totalItems : contentList.length;
 const paginationTotalPages = typeof totalPages === 'number' ? totalPages : Math.ceil(paginationTotalItems / itemsPerPage);
 
