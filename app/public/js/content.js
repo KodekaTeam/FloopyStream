@@ -1,6 +1,198 @@
 // Content/Gallery JavaScript
 // Handles video gallery interactions
 
+// ============================================
+// Gallery Pagination Variables
+// ============================================
+let allGalleryVideos = [];
+let filteredGalleryVideos = [];
+let currentGalleryPage = 1;
+let totalGalleryPages = 1;
+const galleryItemsPerPage = 10;
+
+// Initialize gallery pagination on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeGalleryPagination();
+});
+
+// ============================================
+// Gallery Pagination Functions
+// ============================================
+
+/**
+ * Initialize gallery pagination
+ */
+function initializeGalleryPagination() {
+  const container = document.getElementById('videoGrid');
+  if (!container) {
+    console.log('DEBUG: videoGrid container not found!');
+    return;
+  }
+
+  console.log('DEBUG: videoGrid container found');
+  console.log('DEBUG: container.children.length =', container.children.length);
+  console.log('DEBUG: container.querySelectorAll("div").length =', container.querySelectorAll('div').length);
+
+  // Collect all video cards - Get direct children that are video items
+  const cards = Array.from(container.children).filter(card => {
+    const hasH3 = card.querySelector('h3');
+    console.log('DEBUG: Checking card, hasH3 =', hasH3 ? 'YES' : 'NO');
+    return hasH3;
+  });
+  
+  console.log('DEBUG: Total cards after filter:', cards.length);
+  
+  allGalleryVideos = cards;
+  filteredGalleryVideos = [...allGalleryVideos];
+  currentGalleryPage = 1;
+  
+  console.log('DEBUG: initializeGalleryPagination - Found', allGalleryVideos.length, 'videos');
+  
+  // Render initial pagination
+  renderGalleryPagination();
+}
+
+/**
+ * Render gallery pagination
+ */
+function renderGalleryPagination() {
+  const totalVideos = filteredGalleryVideos.length;
+  totalGalleryPages = Math.ceil(totalVideos / galleryItemsPerPage);
+
+  console.log('DEBUG: renderGalleryPagination - Total videos:', totalVideos, 'Pages:', totalGalleryPages, 'Current page:', currentGalleryPage);
+
+  // If no videos or only 1 page, hide pagination
+  if (totalVideos === 0) {
+    document.getElementById('videoGrid').style.display = 'block';
+    return;
+  }
+
+  // Calculate start and end index
+  const startIndex = (currentGalleryPage - 1) * galleryItemsPerPage;
+  const endIndex = Math.min(startIndex + galleryItemsPerPage, totalVideos);
+
+  console.log('DEBUG: Showing indices', startIndex, 'to', endIndex);
+
+  // Hide all video cards first
+  filteredGalleryVideos.forEach(card => {
+    card.style.display = 'none';
+  });
+
+  // Show only current page videos
+  filteredGalleryVideos.slice(startIndex, endIndex).forEach(card => {
+    card.style.display = 'block';
+  });
+
+  // Render pagination buttons
+  renderGalleryPageNumbers();
+
+  // Update showing info
+  const showingInfo = document.getElementById('galleryShowingInfo');
+  if (showingInfo) {
+    showingInfo.innerHTML = `Showing ${startIndex + 1}-${endIndex} of ${totalVideos} videos | Page ${currentGalleryPage} of ${totalGalleryPages}`;
+  }
+
+  // Update button states
+  const prevBtn = document.getElementById('galleryPrevBtn');
+  const nextBtn = document.getElementById('galleryNextBtn');
+  
+  if (prevBtn) {
+    if (currentGalleryPage === 1) {
+      prevBtn.disabled = true;
+      prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+      prevBtn.disabled = false;
+      prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+  }
+
+  if (nextBtn) {
+    if (currentGalleryPage === totalGalleryPages) {
+      nextBtn.disabled = true;
+      nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+      nextBtn.disabled = false;
+      nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+  }
+}
+
+/**
+ * Render page numbers
+ */
+function renderGalleryPageNumbers() {
+  const container = document.getElementById('galleryPaginationNumbers');
+  if (!container) return;
+
+  const pageRange = getGalleryPageRange(currentGalleryPage, totalGalleryPages);
+  
+  let html = '';
+  pageRange.forEach(page => {
+    if (page === '...') {
+      html += `<span class="w-8 h-8 flex items-center justify-center text-gray-500">...</span>`;
+    } else if (page === currentGalleryPage) {
+      html += `
+        <button
+          class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded font-semibold"
+          disabled
+        >
+          ${page}
+        </button>
+      `;
+    } else {
+      html += `
+        <a
+          href="#"
+          onclick="goToGalleryPage(${page}); return false;"
+          class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded transition"
+        >
+          ${page}
+        </a>
+      `;
+    }
+  });
+
+  container.innerHTML = html;
+}
+
+/**
+ * Get page range for pagination
+ */
+function getGalleryPageRange(current, total, range = 2) {
+  const pages = [];
+  const start = Math.max(1, current - range);
+  const end = Math.min(total, current + range);
+  
+  if (start > 1) {
+    pages.push(1);
+    if (start > 2) pages.push('...');
+  }
+  
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+  
+  if (end < total) {
+    if (end < total - 1) pages.push('...');
+    pages.push(total);
+  }
+  
+  return pages;
+}
+
+/**
+ * Go to specific gallery page
+ */
+function goToGalleryPage(page) {
+  currentGalleryPage = Math.max(1, Math.min(page, totalGalleryPages));
+  renderGalleryPagination();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================
+// End Gallery Pagination
+// ============================================
+
 // Upload dropdown toggle
 function toggleUploadDropdown() {
   const dropdown = document.getElementById("uploadDropdown");

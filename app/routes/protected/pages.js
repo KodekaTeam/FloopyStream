@@ -46,30 +46,21 @@ router.get("/dashboard", requireAuth, async (req, res) => {
 
 router.get("/content", requireAuth, async (req, res) => {
   try {
+    // Get ALL content for dynamic client-side pagination
     const allContent = await Content.getByAccount(req.session.accountId, 1000);
 
-    // Pagination setup
-    const itemsPerPage = 10;
-    const pageParam = parseInt(req.query.page) || 1;
-    const totalItems = allContent.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    console.log('DEBUG [/content route] - Account ID:', req.session.accountId);
+    console.log('DEBUG [/content route] - Total content retrieved:', allContent.length);
+    console.log('DEBUG [/content route] - First few items:', allContent.slice(0, 3).map(c => ({ id: c.content_id, title: c.title })));
 
-    // Validate page number
-    const currentPage = Math.max(1, Math.min(pageParam, totalPages));
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedContent = allContent.slice(
-      startIndex,
-      startIndex + itemsPerPage
-    );
+    const totalItems = allContent.length;
 
     res.render("dashboard/content", {
       title: "Video Gallery",
       session: req.session,
-      contentList: paginatedContent,
+      contentList: allContent,  // Send ALL content to client for dynamic pagination
       totalItems: totalItems,
-      totalPages: totalPages,
       currentPage: "content",
-      pageNumber: currentPage,
       pageSection: "content",
     });
   } catch (error) {
