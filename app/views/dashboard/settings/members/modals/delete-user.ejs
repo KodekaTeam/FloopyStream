@@ -1,45 +1,60 @@
 <!-- Delete Confirmation Modal -->
 <div
   id="deleteUserModal"
-  class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4"
+  class="fixed inset-0 z-50 hidden"
+  style="pointer-events: none"
 >
-  <div class="bg-gray-800 rounded-lg max-w-md w-full border border-gray-700">
-    <div class="p-6">
-      <div class="flex items-center gap-4 mb-4">
-        <div
-          class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center"
-        >
-          <i class="ti ti-alert-triangle text-red-500 text-2xl"></i>
+  <!-- Backdrop with static behavior -->
+  <div class="absolute inset-0 bg-black/50" style="pointer-events: auto"></div>
+
+  <!-- Modal Container -->
+  <div
+    class="fixed inset-0 flex items-center justify-center p-4"
+    style="pointer-events: none"
+  >
+    <div
+      class="bg-gray-800 rounded-lg max-w-md w-full border border-gray-700"
+      style="pointer-events: auto"
+    >
+      <div class="p-6">
+        <div class="flex items-center gap-4 mb-4">
+          <div
+            class="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center"
+          >
+            <i class="ti ti-alert-triangle text-red-500 text-2xl"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-white">Delete User</h3>
+            <p class="text-gray-400 text-sm mt-1">
+              This action cannot be undone
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 class="text-xl font-bold text-white">Delete User</h3>
-          <p class="text-gray-400 text-sm mt-1">This action cannot be undone</p>
+
+        <p class="text-gray-300 mb-6">
+          Are you sure you want to delete user
+          <strong id="deleteUserName" class="text-white"></strong>? All their
+          content and broadcasts will also be deleted.
+        </p>
+
+        <input type="hidden" id="deleteUserId" />
+
+        <div class="flex gap-3">
+          <button
+            type="button"
+            onclick="closeDeleteUserModal()"
+            class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onclick="confirmDeleteUser()"
+            class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Delete User
+          </button>
         </div>
-      </div>
-
-      <p class="text-gray-300 mb-6">
-        Are you sure you want to delete user
-        <strong id="deleteUserName" class="text-white"></strong>? All their
-        content and broadcasts will also be deleted.
-      </p>
-
-      <input type="hidden" id="deleteUserId" />
-
-      <div class="flex gap-3">
-        <button
-          type="button"
-          onclick="closeDeleteUserModal()"
-          class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onclick="confirmDeleteUser()"
-          class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-        >
-          Delete User
-        </button>
       </div>
     </div>
   </div>

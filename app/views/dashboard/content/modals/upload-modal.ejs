@@ -1,158 +1,171 @@
 <!-- Upload Modal -->
 <div
   id="uploadModal"
-  class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4"
+  class="fixed inset-0 z-50 hidden"
+  style="pointer-events: none"
 >
+  <!-- Backdrop with static behavior -->
+  <div class="absolute inset-0 bg-black/60" style="pointer-events: auto"></div>
+
+  <!-- Modal Container -->
   <div
-    class="bg-gray-800 rounded-lg w-full max-w-2xl flex flex-col max-h-[90vh]"
+    class="fixed inset-0 flex items-center justify-center p-4"
+    style="pointer-events: none"
   >
-    <!-- Fixed Header -->
     <div
-      id="modalHeader"
-      class="flex items-center justify-between p-6 border-b border-gray-700 flex-shrink-0"
+      class="bg-gray-800 rounded-lg w-full max-w-2xl flex flex-col max-h-[90vh]"
+      style="pointer-events: auto"
     >
-      <h3 class="text-lg font-semibold">Upload Video</h3>
-      <button
-        id="closeButton"
-        onclick="closeUploadModal()"
-        class="text-gray-400 hover:text-white"
+      <!-- Fixed Header -->
+      <div
+        id="modalHeader"
+        class="flex items-center justify-between p-6 border-b border-gray-700 flex-shrink-0"
       >
-        <i class="ti ti-x text-xl"></i>
-      </button>
-    </div>
-
-    <!-- Scrollable Content -->
-    <div id="formContentContainer" class="overflow-y-auto flex-1">
-      <form id="uploadForm" enctype="multipart/form-data" class="p-6">
-        <div class="space-y-4">
-          <!-- File Upload Area -->
-          <div>
-            <label class="block text-sm font-medium mb-2">Video Files</label>
-            <div
-              class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 transition cursor-pointer"
-              id="dropZone"
-            >
-              <input
-                type="file"
-                name="videoFiles"
-                id="videoFileInput"
-                accept="video/*"
-                multiple
-                required
-                class="hidden"
-              />
-              <i class="ti ti-upload text-4xl text-gray-500 mb-2"></i>
-              <p class="text-gray-400 mb-1">Click to upload or drag and drop</p>
-              <p class="text-xs text-gray-500">
-                MP4, AVI, MOV, MKV (Max 5GB per file)
-              </p>
-              <p class="text-xs text-gray-500 mt-1">
-                You can select multiple files at once
-              </p>
-            </div>
-            <!-- File List Display -->
-            <div id="filesList" class="hidden mt-4">
-              <div class="text-sm font-medium mb-2">Selected Files:</div>
-              <div
-                id="filesListContainer"
-                class="space-y-2 max-h-48 overflow-y-auto"
-              ></div>
-              <button
-                type="button"
-                onclick="clearFilesList()"
-                class="mt-2 text-xs text-gray-400 hover:text-gray-300"
-              >
-                Clear all
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2"
-              >Title (Optional)</label
-            >
-            <p class="text-xs text-gray-500 mb-2">
-              Leave empty to auto-generate from filename
-            </p>
-            <input
-              type="text"
-              name="title"
-              placeholder="Leave empty for auto-generated title from filename"
-              class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium mb-2"
-              >Description (Optional)</label
-            >
-            <p class="text-xs text-gray-500 mb-2">
-              Optional: Add a description for all files being uploaded
-            </p>
-            <textarea
-              name="description"
-              rows="2"
-              placeholder="Add description (optional, applies to all files)..."
-              class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            ></textarea>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <!-- Progress Content (Initially Hidden) -->
-    <div
-      id="progressContentContainer"
-      class="hidden overflow-y-auto flex-1 p-6"
-    >
-      <div id="uploadProgress">
-        <div id="overallProgressContainer" class="mb-6">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-400">Overall Progress:</p>
-            <span id="overallPercent" class="text-sm text-blue-400">0%</span>
-          </div>
-          <div class="w-full bg-gray-700 rounded-full h-3">
-            <div
-              id="overallProgressBar"
-              class="bg-blue-600 h-3 rounded-full transition-all"
-              style="width: 0%"
-            ></div>
-          </div>
-        </div>
-
-        <div class="mb-2">
-          <p class="text-sm text-gray-400 mb-3">File Progress:</p>
-        </div>
-
-        <div
-          id="filesProgressContainer"
-          class="space-y-3 max-h-96 overflow-y-auto"
+        <h3 class="text-lg font-semibold">Upload Video</h3>
+        <button
+          id="closeButton"
+          onclick="closeUploadModal()"
+          class="text-gray-400 hover:text-white"
         >
-          <!-- Individual file progress will be added here -->
+          <i class="ti ti-x text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Scrollable Content -->
+      <div id="formContentContainer" class="overflow-y-auto flex-1">
+        <form id="uploadForm" enctype="multipart/form-data" class="p-6">
+          <div class="space-y-4">
+            <!-- File Upload Area -->
+            <div>
+              <label class="block text-sm font-medium mb-2">Video Files</label>
+              <div
+                class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 transition cursor-pointer"
+                id="dropZone"
+              >
+                <input
+                  type="file"
+                  name="videoFiles"
+                  id="videoFileInput"
+                  accept="video/*"
+                  multiple
+                  required
+                  class="hidden"
+                />
+                <i class="ti ti-upload text-4xl text-gray-500 mb-2"></i>
+                <p class="text-gray-400 mb-1">
+                  Click to upload or drag and drop
+                </p>
+                <p class="text-xs text-gray-500">
+                  MP4, AVI, MOV, MKV (Max 5GB per file)
+                </p>
+                <p class="text-xs text-gray-500 mt-1">
+                  You can select multiple files at once
+                </p>
+              </div>
+              <!-- File List Display -->
+              <div id="filesList" class="hidden mt-4">
+                <div class="text-sm font-medium mb-2">Selected Files:</div>
+                <div
+                  id="filesListContainer"
+                  class="space-y-2 max-h-48 overflow-y-auto"
+                ></div>
+                <button
+                  type="button"
+                  onclick="clearFilesList()"
+                  class="mt-2 text-xs text-gray-400 hover:text-gray-300"
+                >
+                  Clear all
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2"
+                >Title (Optional)</label
+              >
+              <p class="text-xs text-gray-500 mb-2">
+                Leave empty to auto-generate from filename
+              </p>
+              <input
+                type="text"
+                name="title"
+                placeholder="Leave empty for auto-generated title from filename"
+                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2"
+                >Description (Optional)</label
+              >
+              <p class="text-xs text-gray-500 mb-2">
+                Optional: Add a description for all files being uploaded
+              </p>
+              <textarea
+                name="description"
+                rows="2"
+                placeholder="Add description (optional, applies to all files)..."
+                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              ></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Progress Content (Initially Hidden) -->
+      <div
+        id="progressContentContainer"
+        class="hidden overflow-y-auto flex-1 p-6"
+      >
+        <div id="uploadProgress">
+          <div id="overallProgressContainer" class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-sm text-gray-400">Overall Progress:</p>
+              <span id="overallPercent" class="text-sm text-blue-400">0%</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-3">
+              <div
+                id="overallProgressBar"
+                class="bg-blue-600 h-3 rounded-full transition-all"
+                style="width: 0%"
+              ></div>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <p class="text-sm text-gray-400 mb-3">File Progress:</p>
+          </div>
+
+          <div
+            id="filesProgressContainer"
+            class="space-y-3 max-h-96 overflow-y-auto"
+          >
+            <!-- Individual file progress will be added here -->
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Fixed Footer -->
-    <div
-      id="modalFooter"
-      class="mt-6 p-6 border-t border-gray-700 flex gap-3 justify-end flex-shrink-0"
-    >
-      <button
-        type="button"
-        onclick="closeUploadModal()"
-        class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+      <!-- Fixed Footer -->
+      <div
+        id="modalFooter"
+        class="mt-6 p-6 border-t border-gray-700 flex gap-3 justify-end flex-shrink-0"
       >
-        Cancel
-      </button>
-      <button
-        type="submit"
-        id="uploadButton"
-        form="uploadForm"
-        class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-      >
-        Upload
-      </button>
+        <button
+          type="button"
+          onclick="closeUploadModal()"
+          class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          id="uploadButton"
+          form="uploadForm"
+          class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+        >
+          Upload
+        </button>
+      </div>
     </div>
   </div>
 </div>

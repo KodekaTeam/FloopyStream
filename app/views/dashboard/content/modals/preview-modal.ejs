@@ -1,52 +1,62 @@
 <!-- Video Preview Modal -->
 <div
   id="previewModal"
-  class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4"
+  class="fixed inset-0 z-50 hidden"
+  style="pointer-events: none"
 >
-  <div class="w-full max-w-4xl">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-white" id="previewTitle">
-        Video Preview
-      </h3>
-      <button
-        onclick="closePreviewModal()"
-        class="text-gray-400 hover:text-white p-2"
-      >
-        <i class="ti ti-x text-2xl"></i>
-      </button>
-    </div>
+  <!-- Backdrop with static behavior -->
+  <div class="absolute inset-0 bg-black/90" style="pointer-events: auto"></div>
 
-    <div class="bg-gray-900 rounded-lg overflow-hidden">
-      <video
-        id="previewVideo"
-        class="w-full"
-        controls
-        controlsList="nodownload"
-        preload="auto"
-        playsinline
-      >
-        <source id="previewSource" src="" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-    </div>
+  <!-- Modal Container -->
+  <div
+    class="fixed inset-0 flex items-center justify-center p-4"
+    style="pointer-events: none"
+  >
+    <div class="w-full max-w-4xl" style="pointer-events: auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-white" id="previewTitle">
+          Video Preview
+        </h3>
+        <button
+          onclick="closePreviewModal()"
+          class="text-gray-400 hover:text-white p-2"
+        >
+          <i class="ti ti-x text-2xl"></i>
+        </button>
+      </div>
 
-    <div class="mt-4 bg-gray-800 rounded-lg p-4">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-        <div>
-          <p class="text-gray-400">Duration</p>
-          <p class="text-white font-medium" id="previewDuration">-</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Size</p>
-          <p class="text-white font-medium" id="previewSize">-</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Resolution</p>
-          <p class="text-white font-medium" id="previewResolution">-</p>
-        </div>
-        <div>
-          <p class="text-gray-400">Format</p>
-          <p class="text-white font-medium" id="previewFormat">-</p>
+      <div class="bg-gray-900 rounded-lg overflow-hidden">
+        <video
+          id="previewVideo"
+          class="w-full"
+          controls
+          controlsList="nodownload"
+          preload="auto"
+          playsinline
+        >
+          <source id="previewSource" src="" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+
+      <div class="mt-4 bg-gray-800 rounded-lg p-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div>
+            <p class="text-gray-400">Duration</p>
+            <p class="text-white font-medium" id="previewDuration">-</p>
+          </div>
+          <div>
+            <p class="text-gray-400">Size</p>
+            <p class="text-white font-medium" id="previewSize">-</p>
+          </div>
+          <div>
+            <p class="text-gray-400">Resolution</p>
+            <p class="text-white font-medium" id="previewResolution">-</p>
+          </div>
+          <div>
+            <p class="text-gray-400">Format</p>
+            <p class="text-white font-medium" id="previewFormat">-</p>
+          </div>
         </div>
       </div>
     </div>

@@ -1,128 +1,143 @@
 <!-- Import from Google Drive Modal -->
 <div
   id="importDriveModal"
-  class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4"
+  class="fixed inset-0 z-50 hidden"
+  style="pointer-events: none"
 >
-  <div class="bg-gray-800 rounded-lg w-full max-w-2xl">
-    <div class="flex items-center justify-between p-6 border-b border-gray-700">
-      <div>
-        <h3 class="text-lg font-semibold">Import from Google Drive</h3>
-        <p class="text-sm text-gray-400 mt-1">
-          Paste Google Drive video sharing link
-        </p>
-      </div>
-      <button
-        onclick="closeImportDriveModal()"
-        class="text-gray-400 hover:text-white"
-      >
-        <i class="ti ti-x text-xl"></i>
-      </button>
-    </div>
+  <!-- Backdrop with static behavior -->
+  <div class="absolute inset-0 bg-black/60" style="pointer-events: auto"></div>
 
-    <form id="importDriveForm" class="p-6">
-      <div class="space-y-4">
-        <!-- Instructions -->
-        <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
-          <div class="flex gap-3">
-            <i
-              class="ti ti-info-circle text-blue-400 text-xl flex-shrink-0 mt-0.5"
-            ></i>
-            <div class="text-sm">
-              <p class="font-medium text-blue-300 mb-2">
-                How to get sharing link:
-              </p>
-              <ol class="list-decimal list-inside space-y-1 text-gray-300">
-                <li>Open your video file in Google Drive</li>
-                <li>Click "Share" button</li>
-                <li>Change to "Anyone with the link"</li>
-                <li>Copy the link and paste below</li>
-              </ol>
+  <!-- Modal Container -->
+  <div
+    class="fixed inset-0 flex items-center justify-center p-4"
+    style="pointer-events: none"
+  >
+    <div
+      class="bg-gray-800 rounded-lg w-full max-w-2xl"
+      style="pointer-events: auto"
+    >
+      <div
+        class="flex items-center justify-between p-6 border-b border-gray-700"
+      >
+        <div>
+          <h3 class="text-lg font-semibold">Import from Google Drive</h3>
+          <p class="text-sm text-gray-400 mt-1">
+            Paste Google Drive video sharing link
+          </p>
+        </div>
+        <button
+          onclick="closeImportDriveModal()"
+          class="text-gray-400 hover:text-white"
+        >
+          <i class="ti ti-x text-xl"></i>
+        </button>
+      </div>
+
+      <form id="importDriveForm" class="p-6">
+        <div class="space-y-4">
+          <!-- Instructions -->
+          <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+            <div class="flex gap-3">
+              <i
+                class="ti ti-info-circle text-blue-400 text-xl flex-shrink-0 mt-0.5"
+              ></i>
+              <div class="text-sm">
+                <p class="font-medium text-blue-300 mb-2">
+                  How to get sharing link:
+                </p>
+                <ol class="list-decimal list-inside space-y-1 text-gray-300">
+                  <li>Open your video file in Google Drive</li>
+                  <li>Click "Share" button</li>
+                  <li>Change to "Anyone with the link"</li>
+                  <li>Copy the link and paste below</li>
+                </ol>
+              </div>
             </div>
+          </div>
+
+          <!-- Google Drive URL Input -->
+          <div>
+            <label class="block text-sm font-medium mb-2">
+              Google Drive Link
+              <span class="text-red-400">*</span>
+            </label>
+            <div class="relative">
+              <input
+                type="text"
+                id="driveUrl"
+                required
+                placeholder="https://drive.google.com/file/d/xxxxx/view..."
+                class="w-full bg-gray-700 border border-gray-600 text-white pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <i
+                class="ti ti-brand-google-drive absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              ></i>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">
+              Supported formats: https://drive.google.com/file/d/FILE_ID or
+              https://drive.google.com/open?id=FILE_ID
+            </p>
+          </div>
+
+          <!-- Video Title (Optional) -->
+          <div>
+            <label class="block text-sm font-medium mb-2">
+              Video Title (Optional)
+            </label>
+            <input
+              type="text"
+              id="driveVideoTitle"
+              placeholder="Leave empty to use original filename"
+              class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- Video Description (Optional) -->
+          <div>
+            <label class="block text-sm font-medium mb-2">
+              Description (Optional)
+            </label>
+            <textarea
+              id="driveVideoDescription"
+              rows="2"
+              placeholder="Add description..."
+              class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            ></textarea>
           </div>
         </div>
 
-        <!-- Google Drive URL Input -->
-        <div>
-          <label class="block text-sm font-medium mb-2">
-            Google Drive Link
-            <span class="text-red-400">*</span>
-          </label>
-          <div class="relative">
-            <input
-              type="text"
-              id="driveUrl"
-              required
-              placeholder="https://drive.google.com/file/d/xxxxx/view..."
-              class="w-full bg-gray-700 border border-gray-600 text-white pl-10 pr-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <i
-              class="ti ti-brand-google-drive absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            ></i>
+        <!-- Import Progress -->
+        <div id="driveImportProgress" class="hidden mt-4">
+          <div class="w-full bg-gray-700 rounded-full h-2">
+            <div
+              id="driveProgressBar"
+              class="bg-blue-600 h-2 rounded-full transition-all"
+              style="width: 0%"
+            ></div>
           </div>
-          <p class="text-xs text-gray-400 mt-1">
-            Supported formats: https://drive.google.com/file/d/FILE_ID or
-            https://drive.google.com/open?id=FILE_ID
+          <p class="text-sm text-gray-400 mt-2 text-center">
+            <span id="driveProgressText">Downloading from Google Drive...</span>
           </p>
         </div>
 
-        <!-- Video Title (Optional) -->
-        <div>
-          <label class="block text-sm font-medium mb-2">
-            Video Title (Optional)
-          </label>
-          <input
-            type="text"
-            id="driveVideoTitle"
-            placeholder="Leave empty to use original filename"
-            class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+        <div class="mt-6 flex gap-3 justify-end">
+          <button
+            type="button"
+            onclick="closeImportDriveModal()"
+            class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            id="importDriveBtn"
+            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2"
+          >
+            <i class="ti ti-download"></i>
+            <span>Import Video</span>
+          </button>
         </div>
-
-        <!-- Video Description (Optional) -->
-        <div>
-          <label class="block text-sm font-medium mb-2">
-            Description (Optional)
-          </label>
-          <textarea
-            id="driveVideoDescription"
-            rows="2"
-            placeholder="Add description..."
-            class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          ></textarea>
-        </div>
-      </div>
-
-      <!-- Import Progress -->
-      <div id="driveImportProgress" class="hidden mt-4">
-        <div class="w-full bg-gray-700 rounded-full h-2">
-          <div
-            id="driveProgressBar"
-            class="bg-blue-600 h-2 rounded-full transition-all"
-            style="width: 0%"
-          ></div>
-        </div>
-        <p class="text-sm text-gray-400 mt-2 text-center">
-          <span id="driveProgressText">Downloading from Google Drive...</span>
-        </p>
-      </div>
-
-      <div class="mt-6 flex gap-3 justify-end">
-        <button
-          type="button"
-          onclick="closeImportDriveModal()"
-          class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          id="importDriveBtn"
-          class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2"
-        >
-          <i class="ti ti-download"></i>
-          <span>Import Video</span>
-        </button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </div>

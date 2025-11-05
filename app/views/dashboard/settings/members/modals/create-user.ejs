@@ -1,128 +1,141 @@
 <!-- Create User Modal -->
 <div
   id="createUserModal"
-  class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center p-4"
+  class="fixed inset-0 z-50 hidden"
+  style="pointer-events: none"
 >
+  <!-- Backdrop with static behavior -->
+  <div class="absolute inset-0 bg-black/70" style="pointer-events: auto"></div>
+
+  <!-- Modal Container -->
   <div
-    class="bg-gray-800 rounded-xl max-w-md w-full border border-gray-700 max-h-[90vh] overflow-y-auto shadow-2xl"
+    class="fixed inset-0 flex items-center justify-center p-4"
+    style="pointer-events: none"
   >
-    <div class="p-6 border-b border-gray-700">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xl font-bold text-white">Create New User</h3>
-        <button
-          onclick="closeCreateUserModal()"
-          class="text-gray-400 hover:text-white transition-colors"
-        >
-          <i class="ti ti-x text-xl"></i>
-        </button>
-      </div>
-    </div>
-
-    <form id="createUserForm" class="p-6 space-y-5">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-
-      <!-- Profile Picture -->
-      <div>
-        <label class="block text-sm font-medium text-gray-300 mb-3"
-          >Profile Picture</label
-        >
-        <div class="flex items-center gap-4">
-          <div
-            id="profilePreview"
-            class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl overflow-hidden"
-          >
-            <i class="ti ti-user text-3xl"></i>
-          </div>
+    <div
+      class="bg-gray-800 rounded-xl max-w-md w-full border border-gray-700 max-h-[90vh] overflow-y-auto shadow-2xl"
+      style="pointer-events: auto"
+    >
+      <div class="p-6 border-b border-gray-700">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-bold text-white">Create New User</h3>
           <button
-            type="button"
-            onclick="document.getElementById('profilePictureInput').click()"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+            onclick="closeCreateUserModal()"
+            class="text-gray-400 hover:text-white transition-colors"
           >
-            Choose Photo
+            <i class="ti ti-x text-xl"></i>
           </button>
-          <input
-            type="file"
-            id="profilePictureInput"
-            name="profilePicture"
-            accept="image/*"
-            class="hidden"
-            onchange="previewProfilePicture(event)"
-          />
         </div>
       </div>
 
-      <!-- Username -->
-      <div>
-        <label class="block text-sm font-medium text-gray-300 mb-2"
-          >Username</label
-        >
-        <input
-          type="text"
-          name="username"
-          required
-          minlength="3"
-          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
-          placeholder="Enter username"
-        />
-      </div>
+      <form id="createUserForm" class="p-6 space-y-5">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
-      <!-- Role -->
-      <div>
-        <label class="block text-sm font-medium text-gray-300 mb-2">Role</label>
-        <select
-          name="role"
-          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
-        >
-          <option value="member">Member</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
+        <!-- Profile Picture -->
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-3"
+            >Profile Picture</label
+          >
+          <div class="flex items-center gap-4">
+            <div
+              id="profilePreview"
+              class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl overflow-hidden"
+            >
+              <i class="ti ti-user text-3xl"></i>
+            </div>
+            <button
+              type="button"
+              onclick="document.getElementById('profilePictureInput').click()"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+            >
+              Choose Photo
+            </button>
+            <input
+              type="file"
+              id="profilePictureInput"
+              name="profilePicture"
+              accept="image/*"
+              class="hidden"
+              onchange="previewProfilePicture(event)"
+            />
+          </div>
+        </div>
 
-      <!-- Status -->
-      <div>
-        <label class="block text-sm font-medium text-gray-300 mb-2"
-          >Status</label
-        >
-        <select
-          name="status"
-          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
-        >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-      </div>
+        <!-- Username -->
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2"
+            >Username</label
+          >
+          <input
+            type="text"
+            name="username"
+            required
+            minlength="3"
+            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
+            placeholder="Enter username"
+          />
+        </div>
 
-      <!-- Password -->
-      <div>
-        <label class="block text-sm font-medium text-gray-300 mb-2"
-          >Password</label
-        >
-        <input
-          type="password"
-          name="password"
-          required
-          minlength="6"
-          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
-          placeholder="Enter password"
-        />
-      </div>
+        <!-- Role -->
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2"
+            >Role</label
+          >
+          <select
+            name="role"
+            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
+          >
+            <option value="member">Member</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
 
-      <!-- Buttons -->
-      <div class="flex gap-3 pt-4">
-        <button
-          type="button"
-          onclick="closeCreateUserModal()"
-          class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg transition-colors font-medium"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors font-medium"
-        >
-          Create User
-        </button>
-      </div>
-    </form>
+        <!-- Status -->
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2"
+            >Status</label
+          >
+          <select
+            name="status"
+            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2"
+            >Password</label
+          >
+          <input
+            type="password"
+            name="password"
+            required
+            minlength="6"
+            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
+            placeholder="Enter password"
+          />
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3 pt-4">
+          <button
+            type="button"
+            onclick="closeCreateUserModal()"
+            class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg transition-colors font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors font-medium"
+          >
+            Create User
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

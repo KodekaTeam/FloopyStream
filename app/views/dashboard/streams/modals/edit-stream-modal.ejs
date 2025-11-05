@@ -1,13 +1,16 @@
 <!-- Edit Stream Modal -->
-<div
-  id="editStreamModal"
-  class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4"
->
-  <div
-    class="bg-gray-900 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
-  >
-    <!-- Header -->
-    <div class="flex items-center justify-between p-6 border-b border-gray-700">
+<div id="editStreamModal" class="fixed inset-0 z-50 hidden" style="pointer-events: none;">
+  <!-- Backdrop with static behavior -->
+  <div class="absolute inset-0 bg-black/60" style="pointer-events: auto;"></div>
+  
+  <!-- Modal Container -->
+  <div class="fixed inset-0 flex items-center justify-center p-4" style="pointer-events: none;">
+    <div
+      class="bg-gray-900 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+      style="pointer-events: auto;"
+    >
+      <!-- Header -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-700">
       <h3 class="text-xl font-bold text-white">Edit Stream</h3>
       <button
         onclick="closeEditStreamModal()"
@@ -375,6 +378,6 @@
           <span>Save Changes</span>
         </button>
       </div>
-    </form>
+    </div>
   </div>
 </div>

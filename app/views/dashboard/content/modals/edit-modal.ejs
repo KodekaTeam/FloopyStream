@@ -1,101 +1,119 @@
 <!-- Edit Video Modal -->
 <div
   id="editModal"
-  class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4"
+  class="fixed inset-0 z-50 hidden"
+  style="pointer-events: none"
 >
-  <div class="bg-gray-800 rounded-lg w-full max-w-2xl">
-    <div class="flex items-center justify-between p-6 border-b border-gray-700">
-      <h3 class="text-lg font-semibold">Edit Video</h3>
-      <button onclick="closeEditModal()" class="text-gray-400 hover:text-white">
-        <i class="ti ti-x text-xl"></i>
-      </button>
-    </div>
+  <!-- Backdrop with static behavior -->
+  <div class="absolute inset-0 bg-black/60" style="pointer-events: auto"></div>
 
-    <form id="editForm" class="p-6">
-      <input type="hidden" id="editContentId" />
-
-      <div class="space-y-4">
-        <!-- Video Preview -->
-        <div class="aspect-video bg-gray-900 rounded-lg overflow-hidden">
-          <video
-            id="editVideoPreview"
-            class="w-full h-full"
-            controls
-            controlsList="nodownload"
-            preload="metadata"
-          >
-            <source id="editVideoSource" src="" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2">Title</label>
-          <input
-            type="text"
-            id="editTitle"
-            required
-            placeholder="Enter video title"
-            class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium mb-2">Description</label>
-          <textarea
-            id="editDescription"
-            rows="3"
-            placeholder="Add description..."
-            class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          ></textarea>
-        </div>
-
-        <div class="grid grid-cols-3 gap-4">
-          <div>
-            <label class="block text-sm font-medium mb-2">Duration</label>
-            <input
-              type="text"
-              id="editDuration"
-              disabled
-              class="w-full bg-gray-900 border border-gray-600 text-gray-400 px-4 py-2 rounded-lg cursor-not-allowed"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-2">Resolution</label>
-            <input
-              type="text"
-              id="editResolution"
-              disabled
-              class="w-full bg-gray-900 border border-gray-600 text-gray-400 px-4 py-2 rounded-lg cursor-not-allowed"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium mb-2">File Size</label>
-            <input
-              type="text"
-              id="editFileSize"
-              disabled
-              class="w-full bg-gray-900 border border-gray-600 text-gray-400 px-4 py-2 rounded-lg cursor-not-allowed"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-6 flex gap-3 justify-end">
+  <!-- Modal Container -->
+  <div
+    class="fixed inset-0 flex items-center justify-center p-4"
+    style="pointer-events: none"
+  >
+    <div
+      class="bg-gray-800 rounded-lg w-full max-w-2xl"
+      style="pointer-events: auto"
+    >
+      <div
+        class="flex items-center justify-between p-6 border-b border-gray-700"
+      >
+        <h3 class="text-lg font-semibold">Edit Video</h3>
         <button
-          type="button"
           onclick="closeEditModal()"
-          class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+          class="text-gray-400 hover:text-white"
         >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-        >
-          Save Changes
+          <i class="ti ti-x text-xl"></i>
         </button>
       </div>
-    </form>
+
+      <form id="editForm" class="p-6">
+        <input type="hidden" id="editContentId" />
+
+        <div class="space-y-4">
+          <!-- Video Preview -->
+          <div class="aspect-video bg-gray-900 rounded-lg overflow-hidden">
+            <video
+              id="editVideoPreview"
+              class="w-full h-full"
+              controls
+              controlsList="nodownload"
+              preload="metadata"
+            >
+              <source id="editVideoSource" src="" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Title</label>
+            <input
+              type="text"
+              id="editTitle"
+              required
+              placeholder="Enter video title"
+              class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Description</label>
+            <textarea
+              id="editDescription"
+              rows="3"
+              placeholder="Add description..."
+              class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            ></textarea>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-2">Duration</label>
+              <input
+                type="text"
+                id="editDuration"
+                disabled
+                class="w-full bg-gray-900 border border-gray-600 text-gray-400 px-4 py-2 rounded-lg cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Resolution</label>
+              <input
+                type="text"
+                id="editResolution"
+                disabled
+                class="w-full bg-gray-900 border border-gray-600 text-gray-400 px-4 py-2 rounded-lg cursor-not-allowed"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">File Size</label>
+              <input
+                type="text"
+                id="editFileSize"
+                disabled
+                class="w-full bg-gray-900 border border-gray-600 text-gray-400 px-4 py-2 rounded-lg cursor-not-allowed"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex gap-3 justify-end">
+          <button
+            type="button"
+            onclick="closeEditModal()"
+            class="px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+          >
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

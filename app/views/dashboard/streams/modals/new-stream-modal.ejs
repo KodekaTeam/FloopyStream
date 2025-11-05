@@ -1,593 +1,610 @@
 <!-- New Stream Modal -->
 <div
   id="newStreamModal"
-  class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4"
+  class="fixed inset-0 z-50 hidden"
+  style="pointer-events: none"
 >
+  <!-- Backdrop with static behavior -->
+  <div class="absolute inset-0 bg-black/60" style="pointer-events: auto"></div>
+
+  <!-- Modal Container -->
   <div
-    class="bg-gray-900 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+    class="fixed inset-0 flex items-center justify-center p-4"
+    style="pointer-events: none"
   >
-    <!-- Header -->
-    <div class="flex items-center justify-between p-6 border-b border-gray-700">
-      <h3 class="text-xl font-bold text-white">Create New Stream</h3>
-      <div class="flex items-center gap-3">
-        <button
-          type="button"
-          class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm flex items-center gap-2"
-        >
-          <i class="ti ti-bulb"></i>
-          <span>Tips</span>
-        </button>
-        <button
-          onclick="closeNewStreamModal()"
-          class="text-gray-400 hover:text-white p-2"
-        >
-          <i class="ti ti-x text-2xl"></i>
-        </button>
+    <div
+      class="bg-gray-900 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+      style="pointer-events: auto"
+    >
+      <!-- Header -->
+      <div
+        class="flex items-center justify-between p-6 border-b border-gray-700"
+      >
+        <h3 class="text-xl font-bold text-white">Create New Stream</h3>
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm flex items-center gap-2"
+          >
+            <i class="ti ti-bulb"></i>
+            <span>Tips</span>
+          </button>
+          <button
+            onclick="closeNewStreamModal()"
+            class="text-gray-400 hover:text-white p-2"
+          >
+            <i class="ti ti-x text-2xl"></i>
+          </button>
+        </div>
       </div>
-    </div>
 
-    <form id="newStreamForm" class="flex-1 overflow-y-auto">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-        <!-- Left Column: Form -->
-        <div class="space-y-4 order-2 lg:order-1">
-          <!-- Select Video -->
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2"
-              >Select Video</label
-            >
-
-            <!-- Custom Dropdown Button -->
-            <div class="relative">
-              <button
-                type="button"
-                id="videoDropdownButton"
-                onclick="toggleVideoDropdown()"
-                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between hover:bg-gray-600 transition-colors"
+      <form id="newStreamForm" class="flex-1 overflow-y-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+          <!-- Left Column: Form -->
+          <div class="space-y-4 order-2 lg:order-1">
+            <!-- Select Video -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2"
+                >Select Video</label
               >
-                <span id="selectedVideoText" class="text-gray-400"
-                  >Choose a video...</span
+
+              <!-- Custom Dropdown Button -->
+              <div class="relative">
+                <button
+                  type="button"
+                  id="videoDropdownButton"
+                  onclick="toggleVideoDropdown()"
+                  class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-between hover:bg-gray-600 transition-colors"
                 >
-                <i class="ti ti-chevron-down"></i>
-              </button>
+                  <span id="selectedVideoText" class="text-gray-400"
+                    >Choose a video...</span
+                  >
+                  <i class="ti ti-chevron-down"></i>
+                </button>
 
-              <!-- Hidden input for form submission -->
-              <input
-                type="hidden"
-                name="contentId"
-                id="selectedContentId"
-                required
-              />
+                <!-- Hidden input for form submission -->
+                <input
+                  type="hidden"
+                  name="contentId"
+                  id="selectedContentId"
+                  required
+                />
 
-              <!-- Dropdown List -->
-              <div
-                id="videoDropdownList"
-                class="hidden absolute z-50 w-full mt-2 bg-gray-800 border border-gray-600 rounded-lg shadow-lg max-h-96 overflow-y-auto"
-              >
-                <!-- Search Box -->
+                <!-- Dropdown List -->
                 <div
-                  class="sticky top-0 bg-gray-800 border-b border-gray-700 p-3"
+                  id="videoDropdownList"
+                  class="hidden absolute z-50 w-full mt-2 bg-gray-800 border border-gray-600 rounded-lg shadow-lg max-h-96 overflow-y-auto"
                 >
-                  <div class="relative">
-                    <i
-                      class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    ></i>
-                    <input
-                      type="text"
-                      id="videoSearchInput"
-                      placeholder="Search videos..."
-                      onkeyup="filterVideoDropdown()"
-                      class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 pl-10 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <!-- Video List -->
-                <div class="p-2">
-                  <!-- Playlists Section -->
-                  <% if (playlists && playlists.length > 0) { %>
-                  <div class="px-2 py-1 text-xs text-gray-400 font-medium">
-                    PLAYLISTS
-                  </div>
-                  <% playlists.forEach(function(playlist) { %>
+                  <!-- Search Box -->
                   <div
-                    class="video-dropdown-item flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-700 transition-colors"
-                    data-content-id="<%= playlist.playlist_id %>"
-                    data-filename=""
-                    data-title="<%= playlist.playlist_name %>"
-                    data-duration="0"
-                    data-resolution="Playlist"
-                    data-type="playlist"
-                    data-video-count="<%= playlist.video_count || 0 %>"
-                    onclick="selectVideoFromDropdownItem(this)"
+                    class="sticky top-0 bg-gray-800 border-b border-gray-700 p-3"
                   >
-                    <!-- Playlist Icon with Gradient -->
-                    <div
-                      class="w-24 h-14 bg-gradient-to-br from-purple-600 to-blue-600 rounded overflow-hidden flex-shrink-0 flex items-center justify-center"
-                    >
-                      <i class="ti ti-playlist text-white text-2xl"></i>
-                    </div>
-
-                    <!-- Playlist Info -->
-                    <div class="flex-1 min-w-0">
-                      <p
-                        class="text-white font-medium truncate flex items-center gap-2"
-                      >
-                        <i class="ti ti-playlist text-purple-400 text-sm"></i>
-                        <%= playlist.playlist_name %>
-                      </p>
-                      <p class="text-xs text-gray-400">
-                        Playlist • <%= playlist.video_count || 0 %> videos
-                      </p>
-                    </div>
-                  </div>
-                  <% }) %>
-
-                  <!-- Divider -->
-                  <div class="my-2 border-t border-gray-700"></div>
-                  <div class="px-2 py-1 text-xs text-gray-400 font-medium">
-                    VIDEOS
-                  </div>
-                  <% } %>
-
-                  <!-- Videos Section -->
-                  <% if (contentList && contentList.length > 0) { %> <%
-                  contentList.forEach(function(content) { %>
-                  <div
-                    class="video-dropdown-item flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-700 transition-colors"
-                    data-content-id="<%= content.content_id %>"
-                    data-filename="<%= content.filename %>"
-                    data-title="<%= content.title %>"
-                    data-duration="<%= content.duration_seconds || 0 %>"
-                    data-resolution="<%= content.resolution || 'N/A' %>"
-                    data-type="content"
-                    onclick="selectVideoFromDropdownItem(this)"
-                  >
-                    <!-- Thumbnail Preview -->
-                    <div
-                      class="w-24 h-14 bg-gray-700 rounded overflow-hidden flex-shrink-0"
-                    >
-                      <% if (content.thumbnail_path) { %>
-                      <img
-                        src="/storage/thumbnails/<%= content.thumbnail_path %>"
-                        alt="<%= content.title %>"
-                        class="w-full h-full object-cover"
+                    <div class="relative">
+                      <i
+                        class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      ></i>
+                      <input
+                        type="text"
+                        id="videoSearchInput"
+                        placeholder="Search videos..."
+                        onkeyup="filterVideoDropdown()"
+                        class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 pl-10 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
-                      <% } else { %>
-                      <div
-                        class="w-full h-full flex items-center justify-center"
-                      >
-                        <i class="ti ti-video text-gray-500"></i>
-                      </div>
-                      <% } %>
                     </div>
+                  </div>
 
-                    <!-- Video Info -->
-                    <div class="flex-1 min-w-0">
-                      <p class="text-white font-medium truncate">
-                        <%= content.title %>
-                      </p>
-                      <p class="text-xs text-gray-400">
-                        <%= content.resolution || '1248×704' %> • <% const
-                        duration = content.duration_seconds || 0; const mins =
-                        Math.floor(duration / 60); const secs =
-                        Math.floor(duration % 60); %> <%= mins %>:<%=
-                        String(secs).padStart(2, '0') %>
-                      </p>
+                  <!-- Video List -->
+                  <div class="p-2">
+                    <!-- Playlists Section -->
+                    <% if (playlists && playlists.length > 0) { %>
+                    <div class="px-2 py-1 text-xs text-gray-400 font-medium">
+                      PLAYLISTS
                     </div>
+                    <% playlists.forEach(function(playlist) { %>
+                    <div
+                      class="video-dropdown-item flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-700 transition-colors"
+                      data-content-id="<%= playlist.playlist_id %>"
+                      data-filename=""
+                      data-title="<%= playlist.playlist_name %>"
+                      data-duration="0"
+                      data-resolution="Playlist"
+                      data-type="playlist"
+                      data-video-count="<%= playlist.video_count || 0 %>"
+                      onclick="selectVideoFromDropdownItem(this)"
+                    >
+                      <!-- Playlist Icon with Gradient -->
+                      <div
+                        class="w-24 h-14 bg-gradient-to-br from-purple-600 to-blue-600 rounded overflow-hidden flex-shrink-0 flex items-center justify-center"
+                      >
+                        <i class="ti ti-playlist text-white text-2xl"></i>
+                      </div>
+
+                      <!-- Playlist Info -->
+                      <div class="flex-1 min-w-0">
+                        <p
+                          class="text-white font-medium truncate flex items-center gap-2"
+                        >
+                          <i class="ti ti-playlist text-purple-400 text-sm"></i>
+                          <%= playlist.playlist_name %>
+                        </p>
+                        <p class="text-xs text-gray-400">
+                          Playlist • <%= playlist.video_count || 0 %> videos
+                        </p>
+                      </div>
+                    </div>
+                    <% }) %>
+
+                    <!-- Divider -->
+                    <div class="my-2 border-t border-gray-700"></div>
+                    <div class="px-2 py-1 text-xs text-gray-400 font-medium">
+                      VIDEOS
+                    </div>
+                    <% } %>
+
+                    <!-- Videos Section -->
+                    <% if (contentList && contentList.length > 0) { %> <%
+                    contentList.forEach(function(content) { %>
+                    <div
+                      class="video-dropdown-item flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-700 transition-colors"
+                      data-content-id="<%= content.content_id %>"
+                      data-filename="<%= content.filename %>"
+                      data-title="<%= content.title %>"
+                      data-duration="<%= content.duration_seconds || 0 %>"
+                      data-resolution="<%= content.resolution || 'N/A' %>"
+                      data-type="content"
+                      onclick="selectVideoFromDropdownItem(this)"
+                    >
+                      <!-- Thumbnail Preview -->
+                      <div
+                        class="w-24 h-14 bg-gray-700 rounded overflow-hidden flex-shrink-0"
+                      >
+                        <% if (content.thumbnail_path) { %>
+                        <img
+                          src="/storage/thumbnails/<%= content.thumbnail_path %>"
+                          alt="<%= content.title %>"
+                          class="w-full h-full object-cover"
+                        />
+                        <% } else { %>
+                        <div
+                          class="w-full h-full flex items-center justify-center"
+                        >
+                          <i class="ti ti-video text-gray-500"></i>
+                        </div>
+                        <% } %>
+                      </div>
+
+                      <!-- Video Info -->
+                      <div class="flex-1 min-w-0">
+                        <p class="text-white font-medium truncate">
+                          <%= content.title %>
+                        </p>
+                        <p class="text-xs text-gray-400">
+                          <%= content.resolution || '1248×704' %> • <% const
+                          duration = content.duration_seconds || 0; const mins =
+                          Math.floor(duration / 60); const secs =
+                          Math.floor(duration % 60); %> <%= mins %>:<%=
+                          String(secs).padStart(2, '0') %>
+                        </p>
+                      </div>
+                    </div>
+                    <% }) %> <% } else { %>
+                    <div class="p-4 text-center text-gray-400">
+                      <i class="ti ti-inbox text-3xl mb-2"></i>
+                      <p>No videos available</p>
+                    </div>
+                    <% } %>
                   </div>
-                  <% }) %> <% } else { %>
-                  <div class="p-4 text-center text-gray-400">
-                    <i class="ti ti-inbox text-3xl mb-2"></i>
-                    <p>No videos available</p>
-                  </div>
-                  <% } %>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Broadcast Name -->
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2"
-              >Broadcast Name</label
-            >
-            <input
-              type="text"
-              name="broadcastName"
-              id="broadcastNameInput"
-              placeholder="Enter broadcast name..."
-              class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <!-- Platform Selection -->
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2"
-              >Streaming Platform</label
-            >
-            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              <button
-                type="button"
-                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="youtube"
-                data-url="rtmp://a.rtmp.youtube.com/live2/"
-                onclick="selectPlatform(this)"
+            <!-- Broadcast Name -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2"
+                >Broadcast Name</label
               >
-                <i class="ti ti-brand-youtube text-2xl text-red-500"></i>
-                <span class="text-xs text-gray-300">YouTube</span>
-              </button>
-
-              <button
-                type="button"
-                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="facebook"
-                data-url="rtmps://live-api-s.facebook.com:443/rtmp/"
-                onclick="selectPlatform(this)"
-              >
-                <i class="ti ti-brand-facebook text-2xl text-blue-500"></i>
-                <span class="text-xs text-gray-300">Facebook</span>
-              </button>
-
-              <button
-                type="button"
-                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="twitch"
-                data-url="rtmp://live.twitch.tv/app/"
-                onclick="selectPlatform(this)"
-              >
-                <i class="ti ti-brand-twitch text-2xl text-purple-500"></i>
-                <span class="text-xs text-gray-300">Twitch</span>
-              </button>
-
-              <button
-                type="button"
-                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="tiktok"
-                data-url="rtmp://push.tiktok.com/live/"
-                onclick="selectPlatform(this)"
-              >
-                <i class="ti ti-brand-tiktok text-2xl text-gray-300"></i>
-                <span class="text-xs text-gray-300">TikTok</span>
-              </button>
-
-              <button
-                type="button"
-                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="instagram"
-                data-url="rtmps://live-upload.instagram.com:443/rtmp/"
-                onclick="selectPlatform(this)"
-              >
-                <i class="ti ti-brand-instagram text-2xl text-pink-500"></i>
-                <span class="text-xs text-gray-300">Instagram</span>
-              </button>
-
-              <button
-                type="button"
-                class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-blue-500 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="custom"
-                data-url=""
-                onclick="selectPlatform(this)"
-              >
-                <i class="ti ti-cast text-2xl text-gray-300"></i>
-                <span class="text-xs text-gray-300">Custom</span>
-              </button>
-            </div>
-            <input
-              type="hidden"
-              name="platformName"
-              id="platformNameInput"
-              value="custom"
-            />
-          </div>
-
-          <!-- Stream Configuration -->
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2"
-              >Stream Configuration</label
-            >
-
-            <!-- RTMP URL -->
-            <div class="relative mb-3">
-              <i
-                class="ti ti-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              ></i>
               <input
                 type="text"
-                name="destinationUrl"
-                id="destinationUrlInput"
-                required
-                placeholder="RTMP URL (will be auto-filled when selecting platform)"
-                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                name="broadcastName"
+                id="broadcastNameInput"
+                placeholder="Enter broadcast name..."
+                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <button
-                type="button"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-                title="RTMP Configuration"
-              >
-                <i class="ti ti-settings"></i>
-              </button>
             </div>
 
-            <!-- Stream Key -->
-            <div class="relative">
-              <i
-                class="ti ti-key absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              ></i>
-              <input
-                type="password"
-                name="streamKey"
-                id="streamKeyInput"
-                placeholder="Stream Key (paste your stream key here)"
-                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                type="button"
-                onclick="toggleStreamKeyVisibility()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+            <!-- Platform Selection -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2"
+                >Streaming Platform</label
               >
-                <i class="ti ti-eye" id="toggleKeyIcon"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Schedule Settings -->
-          <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
-            <div class="mb-3">
-              <div class="flex items-center justify-between mb-1">
-                <label class="text-sm font-medium text-gray-300"
-                  >Schedule Settings</label
+              <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                <button
+                  type="button"
+                  class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                  data-platform="youtube"
+                  data-url="rtmp://a.rtmp.youtube.com/live2/"
+                  onclick="selectPlatform(this)"
                 >
-                <span class="text-xs text-gray-500 hidden sm:inline"
+                  <i class="ti ti-brand-youtube text-2xl text-red-500"></i>
+                  <span class="text-xs text-gray-300">YouTube</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                  data-platform="facebook"
+                  data-url="rtmps://live-api-s.facebook.com:443/rtmp/"
+                  onclick="selectPlatform(this)"
+                >
+                  <i class="ti ti-brand-facebook text-2xl text-blue-500"></i>
+                  <span class="text-xs text-gray-300">Facebook</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                  data-platform="twitch"
+                  data-url="rtmp://live.twitch.tv/app/"
+                  onclick="selectPlatform(this)"
+                >
+                  <i class="ti ti-brand-twitch text-2xl text-purple-500"></i>
+                  <span class="text-xs text-gray-300">Twitch</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                  data-platform="tiktok"
+                  data-url="rtmp://push.tiktok.com/live/"
+                  onclick="selectPlatform(this)"
+                >
+                  <i class="ti ti-brand-tiktok text-2xl text-gray-300"></i>
+                  <span class="text-xs text-gray-300">TikTok</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
+                  data-platform="instagram"
+                  data-url="rtmps://live-upload.instagram.com:443/rtmp/"
+                  onclick="selectPlatform(this)"
+                >
+                  <i class="ti ti-brand-instagram text-2xl text-pink-500"></i>
+                  <span class="text-xs text-gray-300">Instagram</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-blue-500 rounded-lg hover:border-blue-500 transition-colors"
+                  data-platform="custom"
+                  data-url=""
+                  onclick="selectPlatform(this)"
+                >
+                  <i class="ti ti-cast text-2xl text-gray-300"></i>
+                  <span class="text-xs text-gray-300">Custom</span>
+                </button>
+              </div>
+              <input
+                type="hidden"
+                name="platformName"
+                id="platformNameInput"
+                value="custom"
+              />
+            </div>
+
+            <!-- Stream Configuration -->
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2"
+                >Stream Configuration</label
+              >
+
+              <!-- RTMP URL -->
+              <div class="relative mb-3">
+                <i
+                  class="ti ti-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                ></i>
+                <input
+                  type="text"
+                  name="destinationUrl"
+                  id="destinationUrlInput"
+                  required
+                  placeholder="RTMP URL (will be auto-filled when selecting platform)"
+                  class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  title="RTMP Configuration"
+                >
+                  <i class="ti ti-settings"></i>
+                </button>
+              </div>
+
+              <!-- Stream Key -->
+              <div class="relative">
+                <i
+                  class="ti ti-key absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                ></i>
+                <input
+                  type="password"
+                  name="streamKey"
+                  id="streamKeyInput"
+                  placeholder="Stream Key (paste your stream key here)"
+                  class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onclick="toggleStreamKeyVisibility()"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                >
+                  <i class="ti ti-eye" id="toggleKeyIcon"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Schedule Settings -->
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+              <div class="mb-3">
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-sm font-medium text-gray-300"
+                    >Schedule Settings</label
+                  >
+                  <span class="text-xs text-gray-500 hidden sm:inline"
+                    >Server time: <%= typeof formatTimestamp === 'function' ?
+                    formatTimestamp(new Date(), 'datetime') : (new
+                    Date().toLocaleString('en-US', { timeZone:
+                    process.env.TIMEZONE || 'UTC' }).replace(',', '')) %></span
+                  >
+                </div>
+                <span class="text-xs text-gray-500 block sm:hidden"
                   >Server time: <%= typeof formatTimestamp === 'function' ?
                   formatTimestamp(new Date(), 'datetime') : (new
                   Date().toLocaleString('en-US', { timeZone:
                   process.env.TIMEZONE || 'UTC' }).replace(',', '')) %></span
                 >
               </div>
-              <span class="text-xs text-gray-500 block sm:hidden"
-                >Server time: <%= typeof formatTimestamp === 'function' ?
-                formatTimestamp(new Date(), 'datetime') : (new
-                Date().toLocaleString('en-US', { timeZone: process.env.TIMEZONE
-                || 'UTC' }).replace(',', '')) %></span
-              >
+
+              <div class="flex flex-col gap-3">
+                <!-- Loop Video Toggle -->
+                <div
+                  class="flex items-center justify-between sm:justify-start gap-2"
+                >
+                  <label class="text-sm text-gray-400">Loop Video</label>
+                  <label
+                    class="relative inline-flex items-center cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      name="loopVideo"
+                      class="sr-only peer"
+                      checked
+                    />
+                    <div
+                      class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                    ></div>
+                  </label>
+                </div>
+
+                <!-- Schedule Time -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                  <div class="flex-1">
+                    <label class="block text-xs text-gray-400 mb-1.5"
+                      >Schedule Time</label
+                    >
+                    <input
+                      type="datetime-local"
+                      name="scheduledTime"
+                      class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="<%= (function(){ try { const d = new Date(); return d.toISOString().slice(0,16); } catch(e){ return ''; } })() %>"
+                    />
+                  </div>
+
+                  <!-- Duration -->
+                  <div class="w-full sm:w-32">
+                    <label class="block text-xs text-gray-400 mb-1.5"
+                      >Duration</label
+                    >
+                    <input
+                      type="number"
+                      name="duration"
+                      placeholder="minutes"
+                      class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div class="flex flex-col gap-3">
-              <!-- Loop Video Toggle -->
+            <!-- Advanced Settings -->
+            <details
+              id="advancedSettingsDetails"
+              class="bg-gray-800 border border-gray-700 rounded-lg"
+              onchange="toggleAdvancedSettings(this)"
+            >
+              <summary
+                class="cursor-pointer p-4 flex items-center justify-between"
+              >
+                <div class="flex items-center gap-2">
+                  <i class="ti ti-settings text-gray-400"></i>
+                  <span class="text-sm font-medium text-white"
+                    >Advanced Settings</span
+                  >
+                </div>
+                <i class="ti ti-chevron-down text-gray-400"></i>
+              </summary>
+
+              <!-- Warning Banner -->
               <div
-                class="flex items-center justify-between sm:justify-start gap-2"
+                class="mx-4 mb-4 bg-amber-900/20 border border-amber-700 rounded-lg p-3 flex gap-3"
               >
-                <label class="text-sm text-gray-400">Loop Video</label>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name="loopVideo"
-                    class="sr-only peer"
-                    checked
-                  />
-                  <div
-                    class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
-                  ></div>
-                </label>
-              </div>
-
-              <!-- Schedule Time -->
-              <div class="flex flex-col sm:flex-row gap-3">
-                <div class="flex-1">
-                  <label class="block text-xs text-gray-400 mb-1.5"
-                    >Schedule Time</label
-                  >
-                  <input
-                    type="datetime-local"
-                    name="scheduledTime"
-                    class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    min="<%= (function(){ try { const d = new Date(); return d.toISOString().slice(0,16); } catch(e){ return ''; } })() %>"
-                  />
-                </div>
-
-                <!-- Duration -->
-                <div class="w-full sm:w-32">
-                  <label class="block text-xs text-gray-400 mb-1.5"
-                    >Duration</label
-                  >
-                  <input
-                    type="number"
-                    name="duration"
-                    placeholder="minutes"
-                    class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    min="0"
-                  />
+                <i class="ti ti-alert-triangle text-amber-500 mt-0.5"></i>
+                <div>
+                  <p class="text-amber-400 text-xs font-medium">
+                    Advanced Settings Warning
+                  </p>
+                  <p class="text-amber-300/70 text-xs mt-1">
+                    Using advanced settings will make the streaming process more
+                    resource-intensive
+                  </p>
                 </div>
               </div>
-            </div>
+
+              <!-- Hidden input to track if Advanced Settings is enabled -->
+              <input
+                type="hidden"
+                name="useAdvancedSettings"
+                id="useAdvancedSettings"
+                value="false"
+              />
+
+              <div class="px-4 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Bitrate -->
+                <div>
+                  <label class="block text-xs text-gray-400 mb-1"
+                    >Bitrate</label
+                  >
+                  <select
+                    name="bitrate"
+                    id="advSettingBitrate"
+                    disabled
+                    class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    <option value="2500k" selected>2500 kbps</option>
+                    <option value="3000k">3000 kbps</option>
+                    <option value="4500k">4500 kbps</option>
+                    <option value="6000k">6000 kbps</option>
+                  </select>
+                </div>
+
+                <!-- Frame Rate -->
+                <div>
+                  <label class="block text-xs text-gray-400 mb-1"
+                    >Frame Rate</label
+                  >
+                  <select
+                    name="framerate"
+                    id="advSettingFramerate"
+                    disabled
+                    class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    <option value="30" selected>30 FPS</option>
+                    <option value="60">60 FPS</option>
+                  </select>
+                </div>
+
+                <!-- Resolution -->
+                <div>
+                  <label class="block text-xs text-gray-400 mb-1"
+                    >Resolution</label
+                  >
+                  <select
+                    name="resolution"
+                    id="advSettingResolution"
+                    disabled
+                    class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    <option value="720p" selected>720p HD</option>
+                    <option value="1080p">1080p Full HD</option>
+                    <option value="1440p">1440p Quad HD</option>
+                    <option value="2160p">2160p 4K UHD</option>
+                  </select>
+                  <p class="text-xs text-gray-500 mt-1">1280×720 (720p HD)</p>
+                </div>
+
+                <!-- Orientation -->
+                <div>
+                  <label class="block text-xs text-gray-400 mb-1"
+                    >Orientation</label
+                  >
+                  <div class="flex gap-2">
+                    <button
+                      type="button"
+                      id="advSettingLandscape"
+                      disabled
+                      class="flex-1 flex items-center justify-center gap-1 bg-blue-600 text-white px-3 py-2 rounded text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      onclick="selectOrientation('landscape', this)"
+                    >
+                      <i class="ti ti-device-laptop"></i>
+                      <span>Landscape</span>
+                    </button>
+                    <button
+                      type="button"
+                      id="advSettingPortrait"
+                      disabled
+                      class="flex-1 flex items-center justify-center gap-1 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                      onclick="selectOrientation('portrait', this)"
+                    >
+                      <i class="ti ti-device-mobile"></i>
+                      <span>Portrait</span>
+                    </button>
+                  </div>
+                  <input type="hidden" name="orientation" value="landscape" />
+                </div>
+              </div>
+            </details>
           </div>
 
-          <!-- Advanced Settings -->
-          <details
-            id="advancedSettingsDetails"
-            class="bg-gray-800 border border-gray-700 rounded-lg"
-            onchange="toggleAdvancedSettings(this)"
-          >
-            <summary
-              class="cursor-pointer p-4 flex items-center justify-between"
-            >
-              <div class="flex items-center gap-2">
-                <i class="ti ti-settings text-gray-400"></i>
-                <span class="text-sm font-medium text-white"
-                  >Advanced Settings</span
-                >
-              </div>
-              <i class="ti ti-chevron-down text-gray-400"></i>
-            </summary>
-
-            <!-- Warning Banner -->
+          <!-- Right Column: Video Preview -->
+          <div class="space-y-4 order-1 lg:order-2">
+            <!-- Video Preview Player -->
             <div
-              class="mx-4 mb-4 bg-amber-900/20 border border-amber-700 rounded-lg p-3 flex gap-3"
+              class="bg-black rounded-lg overflow-hidden aspect-video"
+              id="streamPreviewContainer"
             >
-              <i class="ti ti-alert-triangle text-amber-500 mt-0.5"></i>
-              <div>
-                <p class="text-amber-400 text-xs font-medium">
-                  Advanced Settings Warning
-                </p>
-                <p class="text-amber-300/70 text-xs mt-1">
-                  Using advanced settings will make the streaming process more
-                  resource-intensive
-                </p>
+              <video
+                id="streamPreviewVideo"
+                class="w-full h-full"
+                controls
+                controlsList="nodownload"
+              >
+                <source id="streamPreviewSource" src="" type="video/mp4" />
+                Your browser does not support video tag.
+              </video>
+              <div
+                id="noVideoSelected"
+                class="w-full h-full flex flex-col items-center justify-center text-gray-500 relative"
+              >
+                <i class="ti ti-video-off text-6xl mb-3"></i>
+                <p class="text-sm">Select a video to preview</p>
               </div>
             </div>
 
-            <!-- Hidden input to track if Advanced Settings is enabled -->
-            <input
-              type="hidden"
-              name="useAdvancedSettings"
-              id="useAdvancedSettings"
-              value="false"
-            />
-
-            <div class="px-4 pb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- Bitrate -->
-              <div>
-                <label class="block text-xs text-gray-400 mb-1">Bitrate</label>
-                <select
-                  name="bitrate"
-                  id="advSettingBitrate"
-                  disabled
-                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                >
-                  <option value="2500k" selected>2500 kbps</option>
-                  <option value="3000k">3000 kbps</option>
-                  <option value="4500k">4500 kbps</option>
-                  <option value="6000k">6000 kbps</option>
-                </select>
-              </div>
-
-              <!-- Frame Rate -->
-              <div>
-                <label class="block text-xs text-gray-400 mb-1"
-                  >Frame Rate</label
-                >
-                <select
-                  name="framerate"
-                  id="advSettingFramerate"
-                  disabled
-                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                >
-                  <option value="30" selected>30 FPS</option>
-                  <option value="60">60 FPS</option>
-                </select>
-              </div>
-
-              <!-- Resolution -->
-              <div>
-                <label class="block text-xs text-gray-400 mb-1"
-                  >Resolution</label
-                >
-                <select
-                  name="resolution"
-                  id="advSettingResolution"
-                  disabled
-                  class="w-full bg-gray-700 border border-gray-600 text-white px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-                >
-                  <option value="720p" selected>720p HD</option>
-                  <option value="1080p">1080p Full HD</option>
-                  <option value="1440p">1440p Quad HD</option>
-                  <option value="2160p">2160p 4K UHD</option>
-                </select>
-                <p class="text-xs text-gray-500 mt-1">1280×720 (720p HD)</p>
-              </div>
-
-              <!-- Orientation -->
-              <div>
-                <label class="block text-xs text-gray-400 mb-1"
-                  >Orientation</label
-                >
-                <div class="flex gap-2">
-                  <button
-                    type="button"
-                    id="advSettingLandscape"
-                    disabled
-                    class="flex-1 flex items-center justify-center gap-1 bg-blue-600 text-white px-3 py-2 rounded text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    onclick="selectOrientation('landscape', this)"
-                  >
-                    <i class="ti ti-device-laptop"></i>
-                    <span>Landscape</span>
-                  </button>
-                  <button
-                    type="button"
-                    id="advSettingPortrait"
-                    disabled
-                    class="flex-1 flex items-center justify-center gap-1 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-                    onclick="selectOrientation('portrait', this)"
-                  >
-                    <i class="ti ti-device-mobile"></i>
-                    <span>Portrait</span>
-                  </button>
+            <!-- Video Info (shown when video selected) -->
+            <div id="streamVideoInfo" class="hidden">
+              <div class="bg-gray-800 rounded-lg p-4 space-y-2">
+                <p class="text-white font-medium text-sm" id="streamVideoTitle">
+                  Video Title
+                </p>
+                <div class="flex items-center gap-4 text-xs text-gray-400">
+                  <span id="streamVideoResolution">1248×704</span>
+                  <span>•</span>
+                  <span id="streamVideoDuration">0:00</span>
                 </div>
-                <input type="hidden" name="orientation" value="landscape" />
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <!-- Right Column: Video Preview -->
-        <div class="space-y-4 order-1 lg:order-2">
-          <!-- Video Preview Player -->
-          <div
-            class="bg-black rounded-lg overflow-hidden aspect-video"
-            id="streamPreviewContainer"
-          >
-            <video
-              id="streamPreviewVideo"
-              class="w-full h-full"
-              controls
-              controlsList="nodownload"
-            >
-              <source id="streamPreviewSource" src="" type="video/mp4" />
-              Your browser does not support video tag.
-            </video>
-            <div
-              id="noVideoSelected"
-              class="w-full h-full flex flex-col items-center justify-center text-gray-500 relative"
-            >
-              <i class="ti ti-video-off text-6xl mb-3"></i>
-              <p class="text-sm">Select a video to preview</p>
-            </div>
-          </div>
-
-          <!-- Video Info (shown when video selected) -->
-          <div id="streamVideoInfo" class="hidden">
-            <div class="bg-gray-800 rounded-lg p-4 space-y-2">
-              <p class="text-white font-medium text-sm" id="streamVideoTitle">
-                Video Title
-              </p>
-              <div class="flex items-center gap-4 text-xs text-gray-400">
-                <span id="streamVideoResolution">1248×704</span>
-                <span>•</span>
-                <span id="streamVideoDuration">0:00</span>
               </div>
             </div>
           </div>
         </div>
+      </form>
+
+      <!-- Footer -->
+      <div class="flex gap-3 justify-end border-t border-gray-700 p-6">
+        <button
+          type="button"
+          onclick="closeNewStreamModal()"
+          class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          form="newStreamForm"
+          class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
+        >
+          <i class="ti ti-broadcast"></i>
+          <span>Create Stream</span>
+        </button>
       </div>
-    </form>
-
-    <!-- Footer -->
-    <div class="flex gap-3 justify-end border-t border-gray-700 p-6">
-      <button
-        type="button"
-        onclick="closeNewStreamModal()"
-        class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
-      >
-        Cancel
-      </button>
-      <button
-        type="submit"
-        form="newStreamForm"
-        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 font-medium"
-      >
-        <i class="ti ti-broadcast"></i>
-        <span>Create Stream</span>
-      </button>
     </div>
   </div>
 </div>
