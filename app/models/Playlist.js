@@ -1,4 +1,5 @@
 const { executeQuery, fetchOne, fetchAll } = require("../core/database");
+const { v4: uuidv4 } = require('uuid');
 
 /**
  * Playlist Model
@@ -17,13 +18,15 @@ class Playlist {
   ) {
     const { getCurrentTimestamp } = require("../utils/datetime");
     const now = getCurrentTimestamp();
+    const playlistUuid = uuidv4();
 
     const query = `
-      INSERT INTO playlists (account_id, playlist_name, description, playback_mode, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO playlists (playlist_uuid, account_id, playlist_name, description, playback_mode, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     const result = await executeQuery(query, [
+      playlistUuid,
       accountId,
       playlistName,
       description,
@@ -133,12 +136,14 @@ class Playlist {
       orderIndex = result.count;
     }
 
+    const itemUuid = uuidv4();
     const query = `
-      INSERT INTO playlist_items (playlist_id, content_id, order_index, added_at)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO playlist_items (item_uuid, playlist_id, content_id, order_index, added_at)
+      VALUES (?, ?, ?, ?, ?)
     `;
     const { getCurrentTimestamp } = require("../utils/datetime");
     return await executeQuery(query, [
+      itemUuid,
       playlistId,
       contentId,
       orderIndex,
