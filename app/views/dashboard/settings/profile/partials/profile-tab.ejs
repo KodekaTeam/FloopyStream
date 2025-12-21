@@ -21,7 +21,7 @@
         </label>
         <input
           type="text"
-          value="<%= account.username %>"
+          value="<%= userAccount.username %>"
           disabled
           class="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-500 cursor-not-allowed"
         />
@@ -39,7 +39,7 @@
         <input
           type="email"
           name="email"
-          value="<%= account.email || '' %>"
+          value="<%= userAccount.email || '' %>"
           class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Enter your email address"
         />
@@ -53,7 +53,7 @@
         <input
           type="text"
           name="displayName"
-          value="<%= account.display_name || '' %>"
+          value="<%= userAccount.display_name || '' %>"
           class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Enter your display name"
         />

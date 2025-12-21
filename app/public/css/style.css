@@ -1228,87 +1228,99 @@ html {
   }
 }
 
-/* Light Mode Styles - Soft & Warm */
+/* Light Mode Styles - Clean & Modern */
 html.light {
-  --primary-color: #4f7fd9;
-  --secondary-color: #6b7a8f;
-  --success-color: #4fa373;
-  --danger-color: #d64a4a;
-  --warning-color: #d9954a;
-  --background: #faf9f7;
-  --surface: #f0ede8;
-  --text-primary: #ffffff;
-  --text-secondary: #ffffff;
-  --border-color: #e8e3da;
-  --scrollbar-track: #f0ede8;
-  --scrollbar-thumb: #d4cfc6;
-  --scrollbar-thumb-hover: #bfb9ae;
+  --primary-color: #2563eb;
+  --secondary-color: #475569;
+  --success-color: #059669;
+  --danger-color: #dc2626;
+  --warning-color: #d97706;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border-color: #e2e8f0;
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
 }
 
 html.light,
 html.light body {
-  background-color: #faf9f7;
-  color: #3a3a3a;
+  background-color: var(--background);
+  color: var(--text-primary);
 }
 
 html.light ::-webkit-scrollbar-track {
-  background: #f0ede8;
+  background: var(--scrollbar-track);
 }
 
 html.light ::-webkit-scrollbar-thumb {
-  background: #d4cfc6;
+  background: var(--scrollbar-thumb);
 }
 
 html.light ::-webkit-scrollbar-thumb:hover {
-  background: #bfb9ae;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Light mode for common elements */
 html.light .bg-gray-900 {
-  background-color: #f5f3f0;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+/* Page background wrappers should be slate, not white */
+html.light body.bg-gray-900,
+html.light .bg-gray-900.h-screen,
+html.light .bg-gray-900.min-h-screen,
+html.light .bg-gray-900.fixed.inset-0 {
+  background-color: #f8fafc !important;
+  border: none !important;
 }
 
 html.light .bg-gray-800 {
-  background-color: #f0ede8;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
 }
 
 html.light .bg-gray-700 {
-  background-color: #e8e3da;
+  background-color: #f1f5f9;
 }
 
 /* Button Styles - Light Mode */
 html.light .btn {
-  color: #fff !important;
+  font-weight: 500;
 }
 
 html.light .btn-primary {
-  background-color: #4f7fd9;
-  color: #fff !important;
+  background-color: var(--primary-color);
+  color: #ffffff;
 }
 
 html.light .btn-primary:hover {
-  background-color: #3557a1;
-  color: #fff !important;
+  background-color: #1d4ed8;
+  color: #ffffff;
 }
 
 html.light .btn-secondary {
-  background-color: #6b7a8f;
-  color: #fff !important;
+  background-color: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
 }
 
 html.light .btn-secondary:hover {
-  background-color: #4f5a6b;
-  color: #fff !important;
+  background-color: #e2e8f0;
+  color: #0f172a;
 }
 
 html.light .btn-danger {
-  background-color: #d64a4a;
-  color: #fff !important;
+  background-color: var(--danger-color);
+  color: #ffffff;
 }
 
 html.light .btn-danger:hover {
-  background-color: #a13a3a;
-  color: #fff !important;
+  background-color: #b91c1c;
+  color: #ffffff;
 }
 
 html.light .btn-block {
@@ -1321,188 +1333,294 @@ html.light .btn-sm {
 }
 
 html.light .btn-lg {
-  background: linear-gradient(135deg, #4f7fd9 0%, #3557a1 100%);
-  color: #fff !important;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
 }
 
 html.light .btn-lg:hover {
-  background: linear-gradient(135deg, #3557a1 0%, #4f7fd9 100%);
-  color: #fff !important;
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  color: #ffffff;
+  box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
 }
 
 html.light .btn-secondary.btn-lg {
-  background: rgba(255, 255, 255, 0.7);
-  border: 2px solid #e8e3da;
-  color: #fff !important;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 html.light .btn-secondary.btn-lg:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: #4f7fd9;
-  color: #fff !important;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a !important;
 }
 
 /* Override Tailwind utility classes for buttons in light mode */
 html.light .bg-blue-600 {
-  background-color: #4f7fd9 !important;
-  color: #fff !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
 }
 
 html.light .bg-blue-600:hover,
 html.light .hover\:bg-blue-700:hover {
-  background-color: #3557a1 !important;
-  color: #fff !important;
+  background-color: #1d4ed8 !important;
+  color: #ffffff !important;
 }
 
 html.light .bg-green-600 {
-  background-color: #10b981 !important;
-  color: #fff !important;
+  background-color: #059669 !important;
+  color: #ffffff !important;
 }
 
 html.light .bg-green-600:hover,
 html.light .hover\:bg-green-700:hover {
-  background-color: #059669 !important;
-  color: #fff !important;
+  background-color: #047857 !important;
+  color: #ffffff !important;
 }
 
 html.light .text-gray-400 {
-  color: #8a8a8a;
+  color: #64748b;
+}
+
+html.light .text-gray-500 {
+  color: #64748b;
 }
 
 html.light .text-gray-300 {
-  color: #6a6a6a;
+  color: #475569;
 }
 
 html.light .text-white {
-  color: #3a3a3a;
+  color: #0f172a;
+}
+
+/* Text colors for light mode - darker shades */
+html.light .text-blue-300,
+html.light .text-blue-400,
+html.light .text-blue-500 {
+  color: #2563eb !important;
+}
+
+html.light .text-green-300,
+html.light .text-green-400,
+html.light .text-green-500 {
+  color: #059669 !important;
+}
+
+html.light .text-red-300,
+html.light .text-red-400,
+html.light .text-red-500 {
+  color: #dc2626 !important;
+}
+
+html.light .text-yellow-300,
+html.light .text-yellow-400,
+html.light .text-yellow-500 {
+  color: #d97706 !important;
+}
+
+html.light .text-cyan-300,
+html.light .text-cyan-400,
+html.light .text-cyan-500 {
+  color: #0891b2 !important;
+}
+
+html.light .text-purple-300,
+html.light .text-purple-400,
+html.light .text-purple-500 {
+  color: #7c3aed !important;
+}
+
+html.light .text-pink-300,
+html.light .text-pink-400,
+html.light .text-pink-500 {
+  color: #db2777 !important;
+}
+
+/* Hover states for text colors in light mode */
+html.light .hover\:text-blue-300:hover {
+  color: #1d4ed8 !important;
+}
+
+html.light .hover\:text-red-300:hover {
+  color: #b91c1c !important;
+}
+
+html.light .hover\:text-gray-400:hover {
+  color: #334155 !important;
+}
+
+/* Gradient overrides for light mode */
+html.light .from-gray-900 {
+  --tw-gradient-from: #ffffff !important;
+  --tw-gradient-stops: var(--tw-gradient-from),
+    var(--tw-gradient-to, rgb(255 255 255 / 0)) !important;
+}
+
+html.light .to-gray-800 {
+  --tw-gradient-to: #f8fafc !important;
+}
+
+html.light .from-gray-800 {
+  --tw-gradient-from: #f8fafc !important;
+  --tw-gradient-stops: var(--tw-gradient-from),
+    var(--tw-gradient-to, rgb(248 250 252 / 0)) !important;
+}
+
+html.light .to-gray-900 {
+  --tw-gradient-to: #ffffff !important;
 }
 
 html.light .border-gray-700 {
-  border-color: #e8e3da;
+  border-color: #e2e8f0;
 }
 
 html.light .border-gray-600 {
-  border-color: #e0d9ce;
+  border-color: #cbd5e1;
 }
 
 html.light .hover\:bg-gray-700:hover {
-  background-color: #e8e3da;
+  background-color: #f1f5f9;
 }
 
 html.light .hover\:text-white:hover {
-  color: #3a3a3a;
+  color: #0f172a;
 }
 
-/* Soft light mode for forms */
+/* Modern light mode for forms */
 html.light .form-control {
-  background-color: #fdfbf9;
-  color: #3a3a3a;
-  border-color: #e0d9ce;
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #e2e8f0;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 html.light .form-control:focus {
-  background-color: #fef9f5;
-  border-color: #4f7fd9;
-  box-shadow: 0 0 0 3px rgba(79, 127, 217, 0.15);
+  background-color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 html.light .form-control::placeholder {
-  color: #a8a8a8;
+  color: #94a3b8;
 }
 
 /* Light mode for labels and text */
 html.light label {
-  color: #3a3a3a !important;
+  color: #0f172a !important;
+  font-weight: 500;
 }
 
 html.light .text-sm.text-gray-300 {
-  color: #5a5a5a !important;
+  color: #475569 !important;
 }
 
 html.light .text-xs.text-gray-400 {
-  color: #7a7a7a !important;
+  color: #64748b !important;
 }
 
 html.light .text-xs.text-gray-500 {
-  color: #888888 !important;
+  color: #64748b !important;
 }
 
 /* Light mode for select dropdowns and other form elements */
 html.light select {
-  background-color: #fdfbf9;
-  color: #3a3a3a;
-  border-color: #e0d9ce;
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #e2e8f0;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDFMNiA2TDExIDEiIHN0cm9rZT0iIzMzNDE1NSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+");
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDFMNiA2TDExIDEiIHN0cm9rZT0iI2ZmZmZmYiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9zdmc+");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 0.8rem;
+  padding-right: 2.5rem;
 }
 
 html.light select:focus {
-  background-color: #fef9f5;
-  border-color: #4f7fd9;
+  background-color: #ffffff;
+  border-color: #2563eb;
 }
 
 html.light button:disabled,
 html.light input:disabled {
-  color: #999999 !important;
+  background-color: #f1f5f9;
+  color: #94a3b8 !important;
+  border-color: #e2e8f0;
 }
 
 /* Light mode for details/summary (Advanced Settings) */
 html.light details summary {
-  color: #3a3a3a !important;
+  color: #0f172a !important;
 }
 
 html.light details summary span {
-  color: #3a3a3a !important;
+  color: #0f172a !important;
 }
 
 html.light details summary i {
-  color: #888888 !important;
+  color: #64748b !important;
 }
 
 /* Light mode for alert/warning boxes */
 html.light .bg-amber-900 {
-  background-color: rgba(217, 119, 6, 0.15) !important;
+  background-color: #fffbeb !important;
+  border: 1px solid #fcd34d;
 }
 
 html.light .border-amber-700 {
-  border-color: #d9954a !important;
+  border-color: #f59e0b !important;
 }
 
 html.light .text-amber-400 {
-  color: #d9954a !important;
+  color: #d97706 !important;
 }
 
 html.light .text-amber-300 {
-  color: #e8b566 !important;
+  color: #b45309 !important;
 }
 
 /* Sidebar menu - keep gray on hover */
 html.light aside nav a {
-  color: #888888 !important;
-}
-
-html.light aside nav a i {
-  color: #888888 !important;
-}
-
-html.light aside nav a span {
-  color: #888888 !important;
+  color: #64748b !important;
 }
 
 html.light aside nav a:hover {
-  color: #888888 !important;
-  background-color: rgba(200, 200, 200, 0.2) !important;
+  background-color: #f1f5f9;
+  color: #0f172a !important;
+}
+
+html.light aside nav a i {
+  color: #94a3b8 !important;
+}
+
+html.light aside nav a span {
+  color: #64748b !important;
+}
+
+html.light aside nav a:hover {
+  color: #0f172a !important;
+  background-color: #f1f5f9 !important;
 }
 
 html.light aside nav a:hover i {
-  color: #888888 !important;
+  color: #2563eb !important;
 }
 
 html.light aside nav a:hover span {
-  color: #888888 !important;
+  color: #0f172a !important;
 }
 
 /* Sidebar menu - active state should be white */
 html.light aside nav a[class*="bg-blue-600"] {
   color: #ffffff !important;
+  background-color: #2563eb !important;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
 }
 
 html.light aside nav a[class*="bg-blue-600"] i {
@@ -1515,44 +1633,50 @@ html.light aside nav a[class*="bg-blue-600"] span {
 
 /* Mobile bottom nav menu - keep gray text */
 html.light nav[class*="bottom"] a {
-  color: #888888 !important;
+  color: #64748b !important;
 }
 
 html.light nav[class*="bottom"] a:hover {
-  color: #888888 !important;
+  color: #2563eb !important;
 }
 
 /* Mobile profile menu - keep gray text */
 html.light #mobileProfileMenu a {
-  color: #666666 !important;
+  color: #475569 !important;
 }
 
 html.light #mobileProfileMenu a:hover {
-  color: #3a3a3a !important;
+  color: #0f172a !important;
+  background-color: #f1f5f9;
 }
 
-/* Soft light mode for cards */
+/* Modern light mode for cards */
 html.light .feature-card {
-  background: rgba(240, 237, 232, 0.6);
-  border-color: rgba(79, 127, 217, 0.15);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 html.light .feature-card:hover {
-  background: rgba(240, 237, 232, 0.9);
-  border-color: rgba(79, 127, 217, 0.3);
-  box-shadow: 0 20px 40px rgba(79, 127, 217, 0.1);
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 html.light .hero-card {
-  background: rgba(250, 249, 247, 0.8);
-  border-color: rgba(79, 127, 217, 0.2);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(8px);
 }
 
 html.light .auth-card {
-  background: #fef9f5;
-  border-color: #e8e3da;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 /* Light Mode - Override for Icons, Badges, and Action Colors */
@@ -1561,61 +1685,61 @@ html.light .ti {
 }
 
 html.light [class*="text-green"] {
-  color: #10b981 !important;
+  color: #059669 !important;
 }
 
 html.light [class*="text-red"] {
-  color: #ef4444 !important;
+  color: #dc2626 !important;
 }
 
 html.light [class*="text-blue"] {
-  color: #3b82f6 !important;
+  color: #2563eb !important;
 }
 
 html.light [class*="text-cyan"] {
-  color: #06b6d4 !important;
+  color: #0891b2 !important;
 }
 
 html.light [class*="text-yellow"] {
-  color: #f59e0b !important;
+  color: #d97706 !important;
 }
 
 html.light [class*="text-amber"] {
-  color: #f59e0b !important;
+  color: #d97706 !important;
 }
 
 html.light [class*="text-gray"] {
-  color: #6b7280 !important;
+  color: #475569 !important;
 }
 
 /* Badge Colors - Keep Dark Colors */
 html.light .badge-active,
 html.light .bg-green-600 {
-  background-color: #10b981 !important;
-  color: #fff !important;
+  background-color: #059669 !important;
+  color: #ffffff !important;
 }
 
 html.light .badge-failed,
 html.light .bg-red-600 {
-  background-color: #ef4444 !important;
-  color: #fff !important;
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
 }
 
 html.light .badge-completed,
 html.light .bg-blue-600 {
-  background-color: #3b82f6 !important;
-  color: #fff !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
 }
 
 html.light .badge-scheduled,
 html.light .bg-yellow-600 {
-  background-color: #f59e0b !important;
-  color: #fff !important;
+  background-color: #d97706 !important;
+  color: #ffffff !important;
 }
 
 html.light .bg-gray-600 {
-  background-color: #4b5563 !important;
-  color: #fff !important;
+  background-color: #475569 !important;
+  color: #ffffff !important;
 }
 
 /* Action Button Colors */
@@ -1628,38 +1752,39 @@ html.light button[class*="text-amber"] {
 }
 
 html.light button.hover\:bg-gray-600:hover {
-  background-color: rgba(0, 0, 0, 0.1) !important;
+  background-color: #e2e8f0 !important;
 }
 
 /* Button Cancel - Red on Light Mode */
 html.light .btn-cancel {
-  background-color: #d64a4a !important;
-  color: #fff !important;
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
 }
 
 html.light .btn-cancel:hover {
-  background-color: #a13a3a !important;
-  color: #fff !important;
+  background-color: #b91c1c !important;
+  color: #ffffff !important;
 }
 
 /* Card View Button and Content Card Styling */
 html.light #cardViewBtn,
 html.light #tableViewBtn {
-  color: #fff !important;
+  color: #64748b !important;
   background-color: transparent !important;
+  border: 1px solid #e2e8f0;
 }
 
 html.light #cardViewBtn:hover,
 html.light #tableViewBtn:hover {
-  background-color: rgba(79, 127, 217, 0.2) !important;
-  color: #fff !important;
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
 }
 
 html.light #cardViewBtn.bg-gray-600,
 html.light #tableViewBtn.bg-gray-600 {
-  background-color: #4f7fd9 !important;
-  color: #fff !important;
-  border-color: #4f7fd9 !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
 }
 
 /* Ensure blue button text stays white in light mode */
@@ -1678,26 +1803,26 @@ html.light a.hover\:bg-blue-700:hover {
 /* Pagination link text white in light mode */
 html.light a.text-white,
 html.light span.text-white {
-  color: #ffffff !important;
+  color: #0f172a !important;
 }
 
 html.light .pagination a,
 html.light .pagination a:hover {
-  color: #ffffff !important;
+  color: #0f172a !important;
 }
 
 /* Override bg-gray-800 for pagination in light mode */
 html.light a.bg-gray-800,
 html.light button.bg-gray-800 {
-  background-color: #f0ede8 !important;
-  border-color: #e0d9ce !important;
-  color: #ffffff !important;
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
 }
 
 html.light a.hover\:bg-gray-700:hover,
 html.light button.hover\:bg-gray-700:hover {
-  background-color: #e8e3da !important;
-  color: #ffffff !important;
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
 }
 
 /* Icon buttons in light mode - keep original colors */
@@ -1723,67 +1848,67 @@ html.light button.bg-blue-600.text-white:hover {
 /* Ensure gray button text stays gray in light mode */
 html.light button.bg-gray-700,
 html.light button.bg-gray-600 {
-  color: #888888 !important;
+  color: #475569 !important;
 }
 
 html.light button.bg-gray-700:hover,
 html.light button.hover\:bg-gray-600:hover,
 html.light button.bg-gray-600:hover {
-  color: #666666 !important;
+  color: #0f172a !important;
 }
 
 html.light button[class*="text-green-"] {
-  color: #10b981 !important;
+  color: #059669 !important;
 }
 
 html.light button[class*="text-red-"] {
-  color: #ef4444 !important;
+  color: #dc2626 !important;
 }
 
 html.light button[class*="text-blue-"] {
-  color: #3b82f6 !important;
+  color: #2563eb !important;
 }
 
 html.light button[class*="text-cyan-"] {
-  color: #06b6d4 !important;
+  color: #0891b2 !important;
 }
 
 html.light button[class*="text-amber-"] {
-  color: #f59e0b !important;
+  color: #d97706 !important;
 }
 
 /* Content Card - Ensure Text is Readable */
 html.light .content-card {
-  background-color: #fef9f5 !important;
-  border-color: #e8e3da !important;
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
 }
 
 html.light .content-info h4 {
-  color: #3a3a3a !important;
+  color: #0f172a !important;
 }
 
 html.light .content-info p {
-  color: #7a7a7a !important;
+  color: #64748b !important;
 }
 
 /* Badge text on cards - Keep white */
 html.light .content-card .badge {
-  color: #fff !important;
+  color: #ffffff !important;
 }
 
 html.light .content-card .badge-active {
-  background-color: #10b981 !important;
-  color: #fff !important;
+  background-color: #059669 !important;
+  color: #ffffff !important;
 }
 
 html.light .content-card .badge-failed {
-  background-color: #ef4444 !important;
-  color: #fff !important;
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
 }
 
 html.light .content-card .badge-completed {
-  background-color: #3b82f6 !important;
-  color: #fff !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
 }
 
 /* Pagination Styles */
@@ -1823,27 +1948,76 @@ html.light .content-card .badge-completed {
 /* Light mode pagination */
 html.light .pagination a,
 html.light .pagination span {
-  color: #3a3a3a;
-  background: #f0ede8;
-  border-color: #e8e3da;
+  color: #475569;
+  background: #ffffff;
+  border-color: #e2e8f0;
 }
 
 html.light .pagination a:hover {
-  color: #4f7fd9;
-  background: rgba(79, 127, 217, 0.08);
-  border-color: #4f7fd9;
+  color: #2563eb;
+  background: #f1f5f9;
+  border-color: #2563eb;
 }
 
 html.light .pagination .active,
 html.light .pagination a.active,
 html.light .pagination span.active {
   color: #ffffff !important;
-  background-color: #4f7fd9 !important;
-  border-color: #4f7fd9 !important;
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
 }
 
 html.light .pagination .active a,
 html.light .pagination a.active,
 html.light .pagination span.active {
   color: #ffffff !important;
+}
+
+/* Light mode tabs */
+html.light .tab-btn {
+  color: #64748b !important; /* Default state: Slate-500 */
+  background-color: transparent;
+}
+
+html.light .tab-btn:not(.active):not(:hover) {
+  color: #64748b !important; /* Ensure non-active non-hover is visible */
+}
+
+html.light .tab-btn:hover {
+  color: #0f172a !important; /* Hover state: Slate-900 */
+  background-color: rgba(241, 245, 249, 0.5); /* Slight background on hover */
+}
+
+html.light .tab-btn.active {
+  color: #2563eb !important; /* Active state: Blue-600 */
+  border-color: #2563eb !important;
+}
+
+html.light .tab-button {
+  color: #64748b !important;
+}
+
+html.light .tab-button:hover {
+  color: #0f172a !important;
+}
+
+html.light .tab-button.active,
+html.light .tab-button[class*="text-blue-400"] {
+  color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+/* Hide scrollbar utility class */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+/* Fix platform button border in light mode */
+html.light .platform-btn.border-gray-600:not(:hover) {
+  border-color: #475569 !important;
 }

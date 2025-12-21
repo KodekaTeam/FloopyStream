@@ -9,31 +9,42 @@ services:
     container_name: floopystream-app
     ports:
       - "${APP_PORT:-6060}:6060"
+    env_file:
+      - .env.docker
     environment:
+      # All variables from .env.docker will be loaded
+      # Override any specific ones here if needed
       - NODE_ENV=production
       - PORT=6060
       - TZ=Asia/Jakarta
       - TIMEZONE=Asia/Jakarta
-      - SESSION_SECRET=${SESSION_SECRET:-your-super-secret-key-here-change-this}
+      # Storage paths for container
       - DB_PATH=/app/storage/database/floopystream.db
       - UPLOAD_DIR=/app/storage/uploads
       - MEDIA_DIR=/app/storage/media
       - THUMBNAIL_DIR=/app/storage/thumbnails
       - TEMP_DIR=/app/storage/temp
       - LOG_DIR=/app/storage/logs
+      # Media and performance settings
       - MAX_FILE_SIZE=5368709120
       - ALLOWED_FORMATS=mp4,avi,mov,mkv,flv,wmv,webm
       - RATE_LIMIT_WINDOW_MS=900000
       - RATE_LIMIT_MAX_REQUESTS=100
       - MAX_CONCURRENT_BROADCASTS=5
       - BROADCAST_TIMEOUT=43200000
-      - APP_NAME=FLoopyStream
-      - APP_URL=http://localhost:6060
-      - GOOGLE_DRIVE_ENABLED=${GOOGLE_DRIVE_ENABLED:-false}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
-      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-}
-      - GOOGLE_REFRESH_TOKEN=${GOOGLE_REFRESH_TOKEN:-}
+      - APP_NAME=FloopyStream
+
+      # Deprecated Google OAuth settings (uncomment and set if needed), move to .env.docker file
+      # ⚠️ CRITICAL: Update APP_URL to your deployment domain (must be https:// for production)
+      # - APP_URL=${APP_URL:-http://localhost:6060}
+      # - GOOGLE_DRIVE_ENABLED=${GOOGLE_DRIVE_ENABLED:-false}
+      # - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      # - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      # ⚠️ CRITICAL: GOOGLE_REDIRECT_URI must match exactly with Google Cloud Console
+      # Format: https://yourdomain.com/api/oauth/google/callback
+      # - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI:-http://localhost:6060/api/oauth/google/callback}
+      # - GOOGLE_REFRESH_TOKEN=${GOOGLE_REFRESH_TOKEN:-}
+
       # FFmpeg specific settings for stability
       - FFMPEG_PATH=/usr/bin/ffmpeg
       - FFPROBE_PATH=/usr/bin/ffprobe
@@ -77,7 +88,8 @@ services:
     container_name: floopystream-db
     volumes:
       - ./app/storage/database:/data
-    command: sh -c "mkdir -p /data && echo 'Database volume ready'"
+    # command: sh -c "mkdir -p /data && echo 'Database volume ready'"
+    command: sh -c "mkdir -p /data"
     networks:
       - floopystream-network
     restart: unless-stopped

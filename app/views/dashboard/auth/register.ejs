@@ -1,14 +1,106 @@
-<% layout('dashboard/layout') %>
-
+<% layout('dashboard/layout') %> <% if (!allowRegistration) { %>
+<div
+  class="closed-registration-container"
+  style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  "
+>
+  <div style="max-width: 500px; width: 100%">
+    <div
+      class="alert alert-warning"
+      style="
+        background-color: #fef3c7;
+        border-color: #fcd34d;
+        padding: 40px;
+        border-radius: 12px;
+      "
+    >
+      <div style="text-align: center">
+        <i
+          class="ti ti-lock-check"
+          style="
+            font-size: 64px;
+            color: #d97706;
+            margin-bottom: 16px;
+            display: block;
+          "
+        ></i>
+        <p
+          style="
+            font-size: 24px;
+            font-weight: 700;
+            color: #92400e;
+            margin: 0 0 16px 0;
+          "
+        >
+          Registration Closed
+        </p>
+        <p
+          style="
+            color: #b45309;
+            margin: 12px 0;
+            line-height: 1.6;
+            font-size: 15px;
+          "
+        >
+          An administrator account has already been created. New registrations
+          are no longer available for security reasons.
+        </p>
+        <div
+          style="
+            margin-top: 32px;
+            border-top: 1px solid #fcd34d;
+            padding-top: 24px;
+          "
+        >
+          <p
+            style="
+              color: #92400e;
+              margin-bottom: 20px;
+              font-weight: 500;
+              font-size: 14px;
+            "
+          >
+            If you have credentials, please log in:
+          </p>
+          <a
+            href="/login"
+            style="
+              display: inline-block;
+              background-color: #d97706;
+              color: white;
+              padding: 12px 32px;
+              border-radius: 8px;
+              text-decoration: none;
+              font-weight: 600;
+              transition: all 0.3s ease;
+              font-size: 15px;
+            "
+          >
+            <i class="ti ti-login" style="margin-right: 8px"></i>Go to Login
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<% } else { %>
 <div class="auth-container">
   <div class="auth-card">
-    <h2>Create Account</h2>
+    <h2>
+      <img
+        src="/images/favicon.ico"
+        alt="Logo"
+        class="w-16 h-16 inline-block align-middle mr-1"
+      /><%= appName %>
+      <p class="text-sm text-gray-500 mt-0">Sign up to manage your account.</p>
+    </h2>
 
-    <% if (!allowRegistration) { %>
-    <div class="alert alert-warning">
-      <p>Registration is currently closed. Please contact an administrator.</p>
-    </div>
-    <% } else { %> <% if (error) { %>
+    <% if (error) { %>
     <div class="alert alert-error"><%= error %></div>
     <% } %>
 
@@ -92,6 +184,6 @@
     <div class="auth-footer">
       <p>Already have an account? <a href="/login">Login here</a></p>
     </div>
-    <% } %>
   </div>
 </div>
+<% } %>

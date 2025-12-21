@@ -1,0 +1,172 @@
+<!-- New Project Modal -->
+<div
+  id="newProjectModal"
+  class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+>
+  <div class="bg-gray-800 rounded-lg max-w-md w-full border border-gray-700">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between p-6 border-b border-gray-700">
+      <h3 class="text-xl font-semibold text-white">Create New Project</h3>
+      <button
+        onclick="closeNewProjectModal()"
+        class="text-gray-400 hover:text-white transition"
+      >
+        <i class="ti ti-x text-xl"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <form id="newProjectForm" class="p-6 space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Project Name *
+        </label>
+        <input
+          type="text"
+          id="project_name"
+          name="projectName"
+          required
+          placeholder="My YouTube Project"
+          class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Description
+        </label>
+        <textarea
+          id="project_description"
+          name="projectDescription"
+          rows="3"
+          placeholder="Optional description for this project..."
+          class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+        ></textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Project Type
+        </label>
+        <select
+          id="project_type"
+          name="projectType"
+          class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Select platform...</option>
+          <!-- <option value="multi-platform" selected>Multi-Platform</option> -->
+          <option value="channel-youtube">YouTube Only</option>
+          <option value="channel-facebook">Facebook Only</option>
+          <option value="channel-instagram">Instagram Only</option>
+          <option value="channel-twitch">Twitch Only</option>
+          <option value="channel-tiktok">TikTok Only</option>
+        </select>
+      </div>
+    </form>
+
+    <!-- Modal Footer -->
+    <div
+      class="flex items-center justify-end gap-3 p-6 border-t border-gray-700"
+    >
+      <button
+        type="button"
+        onclick="closeNewProjectModal()"
+        class="px-4 py-2 sm:px-6 sm:py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition flex items-center gap-2 text-sm sm:text-base"
+      >
+        <i class="ti ti-x"></i>
+        <span>Cancel</span>
+      </button>
+      <button
+        onclick="createProject()"
+        class="px-4 py-2 sm:px-6 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2 text-sm sm:text-base"
+      >
+        <i class="ti ti-folder"></i>
+        <span>Create Project</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openNewProjectModal() {
+    document.getElementById("newProjectModal").classList.remove("hidden");
+    document.getElementById("newProjectForm").reset();
+  }
+
+  function closeNewProjectModal() {
+    document.getElementById("newProjectModal").classList.add("hidden");
+  }
+
+  async function createProject() {
+    const form = document.getElementById("newProjectForm");
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create project");
+      }
+
+      const result = await response.json();
+
+      // Show success message with SweetAlert
+      if (typeof Swal !== "undefined") {
+        Swal.fire({
+          toast: true,
+          position: "top",
+          icon: "success",
+          title: "Project created successfully!",
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+        }).then(() => {
+          window.location.reload();
+        });
+      } else {
+        alert("Project created successfully!");
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error creating project:", error);
+
+      // Show error message with SweetAlert
+      if (typeof Swal !== "undefined") {
+        Swal.fire({
+          toast: true,
+          position: "top",
+          icon: "error",
+          title: "Error creating project: " + error.message,
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+      } else {
+        alert("Error creating project: " + error.message);
+      }
+    }
+  }
+
+  // Close modal when clicking outside
+  document
+    .getElementById("newProjectModal")
+    ?.addEventListener("click", function (e) {
+      if (e.target === this) {
+        closeNewProjectModal();
+      }
+    });
+
+  // Close modal with Escape key
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      closeNewProjectModal();
+    }
+  });
+</script>

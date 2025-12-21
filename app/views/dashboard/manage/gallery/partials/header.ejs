@@ -1,0 +1,48 @@
+<!-- Header -->
+<div class="bg-gray-800 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+  <% if (gallery) { %>
+  <div class="flex items-center gap-4 mb-4">
+    <a
+      href="/channels/<%= channelInfo ? channelInfo.channel_uuid : '' %>"
+      class="text-gray-400 hover:text-white transition"
+    >
+      <i class="ti ti-arrow-left text-2xl"></i>
+    </a>
+    <div class="flex-1">
+      <h1 class="text-xl sm:text-2xl font-bold">
+        <%= gallery.gallery_title %>
+      </h1>
+      <p class="text-sm sm:text-base text-gray-400 mt-1">
+        <%= gallery.gallery_description || 'No description' %>
+      </p>
+    </div>
+  </div>
+  <div class="flex items-center gap-6 text-sm text-gray-400 mb-4">
+    <span
+      ><i class="ti ti-video mr-2"></i><%= contentList && contentList.length ||
+      0 %> videos</span
+    >
+  </div>
+  <% } else { %>
+  <div class="flex items-center gap-4 mb-4">
+    <% if (channelInfo) { %>
+    <a
+      href="/channels/<%= channelInfo.channel_uuid %>"
+      class="text-gray-400 hover:text-white transition"
+    >
+      <i class="ti ti-arrow-left text-2xl"></i>
+    </a>
+    <% } %>
+    <div class="flex-1">
+      <h1 class="text-xl sm:text-2xl font-bold mb-2">
+        <% if (channelInfo) { %> <%= channelInfo.channel_name %> - Video Gallery
+        <% } else { %> Video Gallery <% } %>
+      </h1>
+      <p class="text-sm sm:text-base text-gray-400">
+        <% if (channelInfo) { %> Manage videos for <%= channelInfo.channel_name
+        %> <% } else { %> Manage your videos for streaming <% } %>
+      </p>
+    </div>
+  </div>
+  <% } %>
+</div>

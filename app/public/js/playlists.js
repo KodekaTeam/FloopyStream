@@ -237,10 +237,32 @@ document.getElementById('playlistForm')?.addEventListener('submit', async (e) =>
 
 // Delete playlist
 async function deletePlaylist(id, name) {
-  if (!confirm(`Are you sure you want to delete "${name}"?\n\nThis will remove all videos from the playlist (videos themselves won't be deleted).`)) {
-    return;
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      toast: true,
+      position: "top",
+      title: "Delete Playlist?",
+      html: `Are you sure you want to delete <strong>"${name}"</strong>?<br><br><small class="text-gray-400">This will remove all videos from the playlist (videos themselves won't be deleted).</small>`,
+      icon: "error",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deletePlaylistProcess(id, name);
+      }
+    });
+  } else {
+    if (!confirm(`Are you sure you want to delete "${name}"?\n\nThis will remove all videos from the playlist (videos themselves won't be deleted).`)) {
+      return;
+    }
+    deletePlaylistProcess(id, name);
   }
-  
+}
+
+async function deletePlaylistProcess(id, name) {
   try {
     const response = await fetch(`/api/playlist/${id}`, {
       method: 'DELETE'
@@ -249,14 +271,52 @@ async function deletePlaylist(id, name) {
     const result = await response.json();
     
     if (result.success) {
-      showNotification('Playlist deleted successfully!', 'success');
-      setTimeout(() => location.reload(), 1000);
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'success',
+          title: 'Playlist deleted successfully!',
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true
+        }).then(() => {
+          setTimeout(() => location.reload(), 500);
+        });
+      } else {
+        showNotification('Playlist deleted successfully!', 'success');
+        setTimeout(() => location.reload(), 1000);
+      }
     } else {
-      showNotification(result.message || 'Failed to delete playlist', 'error');
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'error',
+          title: result.message || 'Failed to delete playlist',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true
+        });
+      } else {
+        showNotification(result.message || 'Failed to delete playlist', 'error');
+      }
     }
   } catch (error) {
     console.error('Error:', error);
-    showNotification('Failed to delete playlist', 'error');
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: 'Failed to delete playlist',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    } else {
+      showNotification('Failed to delete playlist', 'error');
+    }
   }
 }
 

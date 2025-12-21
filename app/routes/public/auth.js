@@ -3,7 +3,7 @@ const { body, validationResult } = require('express-validator');
 const csrf = require('csrf');
 const router = express.Router();
 
-const Account = require('../../models/Account');
+const UserAdapter = require('../../models/UserAdapter');
 const { redirectIfAuth } = require('../../middleware/authGuard');
 const { logInfo, logError } = require('../../services/activityLogger');
 
@@ -19,12 +19,17 @@ router.get('/', (req, res) => {
 });
 
 // GET - Login page
-router.get('/login', redirectIfAuth, (req, res) => {
+router.get('/login', redirectIfAuth, async (req, res) => {
   const csrfToken = tokens.create(tokens.secretSync());
+  
+  // Check if admin already exists
+  const adminExists = await UserAdapter.hasAdminUser();
+  
   res.render('dashboard/auth/login', { 
     title: 'Login',
     csrfToken,
-    error: null 
+    error: null,
+    allowRegistration: !adminExists
   });
 });
 
@@ -45,7 +50,7 @@ router.post('/login', [
     }
 
     const { username, password } = req.body;
-    const account = await Account.findByUsername(username);
+    const account = await UserAdapter.findByUsername(username);
 
     if (!account) {
       const csrfToken = tokens.create(tokens.secretSync());
@@ -56,7 +61,7 @@ router.post('/login', [
       });
     }
 
-    const isValidPassword = await Account.verifyPassword(password, account.password_hash);
+    const isValidPassword = await UserAdapter.verifyPassword(password, account.password_hash);
     
     if (!isValidPassword) {
       const csrfToken = tokens.create(tokens.secretSync());
@@ -90,11 +95,14 @@ router.post('/login', [
 router.get('/register', redirectIfAuth, async (req, res) => {
   const csrfToken = tokens.create(tokens.secretSync());
   
+  // Check if admin already exists
+  const adminExists = await UserAdapter.hasAdminUser();
+  
   res.render('dashboard/auth/register', {
     title: 'Register',
     csrfToken,
     error: null,
-    allowRegistration: true // Always allow registration
+    allowRegistration: !adminExists // Only allow registration if no admin exists
   });
 });
 
@@ -111,6 +119,18 @@ router.post('/register', [
   })
 ], async (req, res) => {
   try {
+    // Check if admin already exists - prevent registration if true
+    const adminExists = await UserAdapter.hasAdminUser();
+    if (adminExists) {
+      const csrfToken = tokens.create(tokens.secretSync());
+      return res.render('dashboard/auth/register', {
+        title: 'Register',
+        csrfToken,
+        error: 'Registration is currently closed. Please contact an administrator.',
+        allowRegistration: false
+      });
+    }
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const csrfToken = tokens.create(tokens.secretSync());
@@ -125,7 +145,7 @@ router.post('/register', [
     const { username, email, password } = req.body;
 
     // Check if username exists
-    const existingUser = await Account.findByUsername(username);
+    const existingUser = await UserAdapter.findByUsername(username);
     if (existingUser) {
       const csrfToken = tokens.create(tokens.secretSync());
       return res.render('dashboard/auth/register', {
@@ -137,7 +157,7 @@ router.post('/register', [
     }
 
     // Check if email exists
-    const existingEmail = await Account.findByEmail(email);
+    const existingEmail = await UserAdapter.findByEmail(email);
     if (existingEmail) {
       const csrfToken = tokens.create(tokens.secretSync());
       return res.render('dashboard/auth/register', {
@@ -149,7 +169,7 @@ router.post('/register', [
     }
 
     // Create account
-    await Account.createNew(username, email, password);
+    await UserAdapter.createNew(username, email, password);
     await logInfo('New account created', { username, email });
 
     res.redirect('/login');

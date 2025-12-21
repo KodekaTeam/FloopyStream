@@ -14,27 +14,19 @@
       href="/dashboard"
       class="w-16 h-16 flex flex-col items-center justify-center gap-1 rounded-lg <%= currentPage === 'dashboard' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white' %> transition"
       title="dashboard"
-      aria-label="Streams"
+      aria-label="Dashboard"
     >
-      <i class="ti ti-broadcast text-xl"></i>
-      <span class="text-xs leading-tight">Streams</span>
+      <i class="ti ti-home text-xl"></i>
+      <span class="text-xs leading-tight">Home</span>
     </a>
     <a
-      href="/content"
-      class="w-16 h-16 flex flex-col items-center justify-center gap-1 rounded-lg <%= currentPage === 'content' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white' %> transition"
-      title="Gallery"
-      aria-label="Gallery"
+      href="/projects"
+      class="w-16 h-16 flex flex-col items-center justify-center gap-1 rounded-lg <%= currentPage === 'projects' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white' %> transition"
+      title="Projects"
+      aria-label="Projects"
     >
-      <i class="ti ti-video text-xl"></i>
-      <span class="text-xs leading-tight">Gallery</span>
-    </a>
-    <a
-      href="/playlists"
-      class="w-16 h-16 flex flex-col items-center justify-center gap-1 rounded-lg <%= currentPage === 'playlists' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white' %> transition"
-      title="Playlists"
-    >
-      <i class="ti ti-playlist text-xl"></i>
-      <span class="text-xs leading-tight">Playlists</span>
+      <i class="ti ti-folders text-xl"></i>
+      <span class="text-xs leading-tight">Projects</span>
     </a>
     <a
       href="/history"
@@ -44,14 +36,6 @@
       <i class="ti ti-history text-xl"></i>
       <span class="text-xs leading-tight">History</span>
     </a>
-    <!-- <a
-      href="/channel-management"
-      class="w-16 h-16 flex flex-col items-center justify-center gap-1 rounded-lg <%= currentPage === 'channel-management' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white' %> transition"
-      title="Channel Management"
-    >
-      <i class="ti ti-device-tv text-xl"></i>
-      <span class="text-xs leading-tight">Channel</span>
-    </a> -->
     <% if (session.accountRole === 'admin') { %>
     <a
       href="/user-management"
@@ -65,13 +49,13 @@
   </nav>
 
   <!-- Settings Button -->
-  <a
+  <!-- <a
     href="/settings"
     class="w-12 h-12 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition"
     title="Settings"
   >
     <i class="ti ti-settings text-xl"></i>
-  </a>
+  </a> -->
 </aside>
 
 <!-- Mobile Bottom Navigation -->
@@ -83,22 +67,15 @@
       href="/dashboard"
       class="flex-1 flex flex-col items-center justify-center gap-1 <%= currentPage === 'dashboard' ? 'text-blue-500' : 'text-gray-400' %> transition"
     >
-      <i class="ti ti-broadcast text-xl"></i>
-      <span class="text-xs">Streams</span>
+      <i class="ti ti-home text-xl"></i>
+      <span class="text-xs">Home</span>
     </a>
     <a
-      href="/content"
-      class="flex-1 flex flex-col items-center justify-center gap-1 <%= currentPage === 'content' ? 'text-blue-500' : 'text-gray-400' %> transition"
+      href="/projects"
+      class="flex-1 flex flex-col items-center justify-center gap-1 <%= currentPage === 'projects' ? 'text-blue-500' : 'text-gray-400' %> transition"
     >
-      <i class="ti ti-video text-xl"></i>
-      <span class="text-xs">Gallery</span>
-    </a>
-    <a
-      href="/playlists"
-      class="flex-1 flex flex-col items-center justify-center gap-1 <%= currentPage === 'playlists' ? 'text-blue-500' : 'text-gray-400' %> transition"
-    >
-      <i class="ti ti-playlist text-xl"></i>
-      <span class="text-xs">Playlist</span>
+      <i class="ti ti-folders text-xl"></i>
+      <span class="text-xs">Projects</span>
     </a>
     <a
       href="/history"
@@ -113,11 +90,11 @@
       class="flex-1 flex flex-col items-center justify-center mt-1.5 gap-1 text-gray-400 transition relative"
     >
       <div
-        class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold"
+        class="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold"
       >
         <%= session.username.charAt(0).toUpperCase() %>
       </div>
-      <span class="text-xs">Profile</span>
+      <span class="text-xs">Account</span>
     </a>
   </div>
 </nav>
@@ -139,13 +116,6 @@
     <% } %>
   </div>
   <div class="p-2">
-    <!-- <a
-      href="/channel-management"
-      class="flex items-center gap-2 px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors block"
-    >
-      <i class="ti ti-device-tv text-lg"></i>
-      <span>Channel</span>
-    </a> -->
     <% if (session.accountRole === 'admin') { %>
     <a
       href="/user-management"
@@ -157,7 +127,7 @@
     <% } %>
     <!-- Please, do not change the donate link below unless you have to. -->
     <a
-      href="http://lynk.id/kodekateam/65jd40mxqpln/checkout"
+      href="https://lynk.id/kodekateam/"
       class="flex items-center gap-2 px-4 py-2.5 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors block"
     >
       <i class="ti ti-gift text-lg"></i>

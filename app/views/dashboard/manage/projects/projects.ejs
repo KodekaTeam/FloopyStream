@@ -1,0 +1,190 @@
+<% layout('dashboard/layout') %>
+
+<div class="flex h-screen bg-gray-900 overflow-hidden">
+  <%- include('../../partials/navbar') %> <%- include('../../partials/sidebar')
+  %>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-auto lg:ml-20 pt-16">
+    <div class="p-4 sm:p-6 lg:p-8">
+      <!-- Header -->
+      <div class="mb-6 sm:mb-8">
+        <div
+          class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        >
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-white">Projects</h2>
+            <p class="text-gray-400 mt-1 text-sm sm:text-base">
+              Manage your channel projects and workspaces
+            </p>
+          </div>
+
+          <div
+            class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto"
+          >
+            <div class="relative w-full sm:w-64">
+              <span
+                class="absolute inset-y-0 left-3 flex items-center text-gray-400"
+              >
+                <i class="ti ti-search"></i>
+              </span>
+              <input
+                type="text"
+                name="search"
+                id="search"
+                class="pl-9 pr-4 py-2 rounded-lg bg-gray-800 text-gray-200 border border-gray-700 focus:outline-none focus:border-blue-500 transition w-full sm:w-64"
+                placeholder="Search projects..."
+                oninput="filterProjects(this.value)"
+                autocomplete="off"
+              />
+            </div>
+            <button
+              onclick="openNewProjectModal()"
+              class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm sm:text-base whitespace-nowrap w-full sm:w-auto"
+            >
+              <i class="ti ti-plus"></i>
+              <span>New Project</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects Grid -->
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        id="projectGrid"
+      >
+        <% if (projects.length === 0) { %>
+        <!-- Empty State -->
+        <div
+          class="col-span-full bg-gray-800 rounded-lg p-12 text-center border border-gray-700"
+        >
+          <i class="ti ti-folders text-6xl text-gray-600 mb-4"></i>
+          <h3 class="text-xl font-semibold text-white mb-2">No Projects Yet</h3>
+          <p class="text-gray-400 mb-6">
+            Create your first project to organize your channels
+          </p>
+          <button
+            onclick="openNewProjectModal()"
+            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
+          >
+            <i class="ti ti-plus"></i>
+            <span>Create Project</span>
+          </button>
+        </div>
+        <% } else { %> <% projects.forEach(function(project) { %>
+        <!-- Project Card -->
+        <a
+          href="/projects/detail/<%= project.project_uuid %>"
+          class="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20 transition-all group"
+        >
+          <!-- Project Header -->
+          <div class="p-6">
+            <div class="flex items-start justify-between mb-4">
+              <div
+                class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center"
+              >
+                <i class="ti ti-folder text-2xl text-white"></i>
+              </div>
+              <% const statusConfig = { active: { color: 'bg-green-500', text:
+              'Active' }, inactive: { color: 'bg-gray-500', text: 'Inactive' },
+              banned: { color: 'bg-red-500', text: 'Banned' } }; const status =
+              statusConfig[project.status] || statusConfig.active; %>
+              <span
+                class="px-2 py-1 rounded-full text-xs font-medium text-white <%= status.color %>"
+              >
+                <%= status.text %>
+              </span>
+            </div>
+
+            <h3
+              class="text-lg font-semibold text-white mb-2 group-hover:text-blue-400 transition"
+            >
+              <%= project.project_name %>
+            </h3>
+
+            <!-- <% if (project.description) { %> -->
+            <p class="text-sm text-gray-400 mb-4 line-clamp-2">
+              <%= project.description ? project.description : project.type %>
+            </p>
+            <!-- <% } %> -->
+
+            <!-- Project Stats -->
+            <div class="flex items-center gap-4 text-sm text-gray-400">
+              <div class="flex items-center gap-1">
+                <i class="ti ti-device-tv"></i>
+                <span><%= project.channel_count || 0 %> Channels</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <i class="ti ti-tag"></i>
+                <span class="capitalize">
+                  <%= project.type || 'Unknown' %>
+                  <!-- <% const typeLabels = { 'multi-platform': 'Multi-Platform',
+                  'channel-youtube': 'YouTube Only', 'channel-facebook':
+                  'Facebook Only', 'channel-twitch': 'Twitch Only',
+                  'channel-tiktok': 'TikTok Only' }; const displayType =
+                  typeLabels[project.type] || project.type || 'Unknown'; %> <%=
+                  displayType %> -->
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Project Footer -->
+          <div
+            class="px-6 py-3 bg-gray-900 border-t border-gray-700 flex items-center justify-between text-xs text-gray-500"
+          >
+            <span>
+              <i class="ti ti-clock"></i>
+              <%= new Date(project.created_at).toLocaleDateString() %>
+            </span>
+            <i
+              class="ti ti-chevron-right text-gray-600 group-hover:text-blue-500 transition"
+            ></i>
+          </div>
+        </a>
+        <% }) %> <% } %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (projects.length > 0) { %>
+      <div
+        class="mt-6 space-y-3"
+        style="display: none"
+        id="projectPaginationContainer"
+      >
+        <div class="flex items-center justify-center gap-2 flex-wrap">
+          <!-- Pagination Buttons -->
+          <button
+            onclick="changePage('prev')"
+            class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            id="projectPrevBtn"
+          >
+            <i class="ti ti-chevron-left"></i>
+          </button>
+
+          <div id="projectPaginationNumbers" class="flex items-center gap-2">
+            <!-- Page numbers will be generated by JavaScript -->
+          </div>
+
+          <button
+            onclick="changePage('next')"
+            class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            id="projectNextBtn"
+          >
+            <i class="ti ti-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Showing Info -->
+        <p class="text-center text-sm text-gray-400" id="projectShowingInfo">
+          <!-- Info will be updated by JavaScript -->
+        </p>
+      </div>
+      <% } %>
+    </div>
+  </main>
+</div>
+
+<script src="/js/projects.js"></script>
+<%- include('./modals/add-project') %>

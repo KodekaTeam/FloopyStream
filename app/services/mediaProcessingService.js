@@ -1,5 +1,5 @@
 const { extractMediaInfo, createThumbnail } = require('../utilities/mediaProcessor');
-const Content = require('../models/Content');
+const Video = require('../models/Video');
 const { executeQuery } = require('../core/database');
 const { logInfo, logError } = require('./activityLogger');
 
@@ -12,60 +12,58 @@ class MediaProcessingService {
   /**
    * Process media file in background
    */
-  static async processMediaFile(contentId, filePath) {
+  static async processMediaFile(videoId, filePath) {
     try {
-      console.log(`🔄 Starting background processing for content ${contentId}`);
+      console.log(`🔄 Starting background processing for video ${videoId}`);
 
       // Update status to processing
       await executeQuery(
-        "UPDATE content SET status = 'processing' WHERE content_id = ?",
-        [contentId]
+        "UPDATE videos SET status = 'processing' WHERE video_id = ?",
+        [videoId]
       );
 
       // Extract media information
       const mediaInfo = await extractMediaInfo(filePath);
 
       // Generate thumbnail
-      const content = await Content.findById(contentId);
-      const thumbnailFilename = `thumb_${content.filename.replace(/\.[^/.]+$/, "")}.jpg`;
+      const video = await Video.findById(videoId);
+      const thumbnailFilename = `thumb_${video.filename.replace(/\.[^/.]+$/, "")}.jpg`;
       const thumbnailPath = `./storage/thumbnails/${thumbnailFilename}`;
       await createThumbnail(filePath, thumbnailPath);
 
-      // Calculate resolution
+      // Calculate resolution (optional, not in videos table but could be useful)
       const resolution = mediaInfo.width && mediaInfo.height
         ? `${mediaInfo.width}×${mediaInfo.height}`
         : null;
 
-      // Update content with processed data
+      // Update video with processed data
       await executeQuery(
-        `UPDATE content SET
+        `UPDATE videos SET
           duration_seconds = ?,
           thumbnail_path = ?,
-          resolution = ?,
           status = 'ready'
-         WHERE content_id = ?`,
+         WHERE video_id = ?`,
         [
           mediaInfo.durationSeconds,
           thumbnailFilename,
-          resolution,
-          contentId
+          videoId
         ]
       );
 
-      console.log(`✅ Background processing completed for content ${contentId}`);
-      await logInfo('Media processing completed', { contentId });
+      console.log(`✅ Background processing completed for video ${videoId}`);
+      await logInfo('Media processing completed', { videoId });
 
     } catch (error) {
-      console.error(`❌ Background processing failed for content ${contentId}:`, error);
+      console.error(`❌ Background processing failed for video ${videoId}:`, error);
 
       // Update status to error
       await executeQuery(
-        "UPDATE content SET status = 'error' WHERE content_id = ?",
-        [contentId]
+        "UPDATE videos SET status = 'error' WHERE video_id = ?",
+        [videoId]
       );
 
       await logError('Media processing failed', {
-        contentId,
+        videoId,
         error: error.message,
         stack: error.stack
       });
@@ -75,11 +73,11 @@ class MediaProcessingService {
   /**
    * Queue media processing job
    */
-  static queueProcessing(contentId, filePath) {
+  static queueProcessing(videoId, filePath) {
     // Use setTimeout for simple background processing
     // In production, consider using a proper job queue like Bull or Agenda
     setTimeout(() => {
-      this.processMediaFile(contentId, filePath);
+      this.processMediaFile(videoId, filePath);
     }, 100); // Small delay to ensure database transaction completes
   }
 }

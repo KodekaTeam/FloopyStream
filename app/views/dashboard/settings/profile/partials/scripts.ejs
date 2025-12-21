@@ -1,24 +1,59 @@
 <script>
+  // Load notification channels on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    console.log("DOMContentLoaded fired"); // Debug log
+    if (document.getElementById("notificationContent")) {
+      console.log("Loading notification channels..."); // Debug log
+      loadNotificationChannels();
+    } else {
+      console.log("Notification content not found"); // Debug log
+    }
+  });
+
   // Tab switching functionality
   function switchTab(tabName) {
-    // Hide all tab contents
-    document.querySelectorAll(".tab-content").forEach((content) => {
-      content.classList.add("hidden");
-    });
+    console.log("Switching to tab:", tabName); // Debug log
 
-    // Remove active state from all tabs
-    document.querySelectorAll(".tab-button").forEach((button) => {
-      button.classList.remove("bg-blue-600", "text-white");
-      button.classList.add("bg-gray-700", "text-gray-300");
-    });
+    try {
+      // Hide all tab contents
+      const allContents = document.querySelectorAll(".tab-content");
+      console.log("Found tab contents:", allContents.length); // Debug log
 
-    // Show selected tab content
-    document.getElementById(tabName + "Content").classList.remove("hidden");
+      allContents.forEach((content) => {
+        content.classList.add("hidden");
+      });
 
-    // Add active state to selected tab
-    const activeTab = document.getElementById(tabName + "Tab");
-    activeTab.classList.remove("bg-gray-700", "text-gray-300");
-    activeTab.classList.add("bg-blue-600", "text-white");
+      // Remove active state from all tabs
+      const allButtons = document.querySelectorAll(".tab-button");
+      console.log("Found tab buttons:", allButtons.length); // Debug log
+
+      allButtons.forEach((button) => {
+        button.classList.remove("bg-blue-600", "text-white");
+        button.classList.add("bg-gray-700", "text-gray-300");
+      });
+
+      // Show selected tab content
+      const targetContent = document.getElementById(tabName + "Content");
+      if (targetContent) {
+        targetContent.classList.remove("hidden");
+        console.log("Tab content shown:", tabName + "Content"); // Debug log
+      } else {
+        console.error("Tab content not found:", tabName + "Content"); // Debug log
+        return;
+      }
+
+      // Add active state to selected tab
+      const activeTab = document.getElementById(tabName + "Tab");
+      if (activeTab) {
+        activeTab.classList.remove("bg-gray-700", "text-gray-300");
+        activeTab.classList.add("bg-blue-600", "text-white");
+        console.log("Tab button activated:", tabName + "Tab"); // Debug log
+      } else {
+        console.error("Tab button not found:", tabName + "Tab"); // Debug log
+      }
+    } catch (error) {
+      console.error("Error in switchTab:", error); // Debug log
+    }
   }
 
   // Toggle password visibility
@@ -114,10 +149,413 @@
       }
     });
 
+  // Function to load and display notification channels
+  async function loadNotificationChannels() {
+    try {
+      const response = await fetch("/api/notifications/channels");
+      const result = await response.json();
+
+      if (result.success) {
+        displayNotificationChannels(result.channels);
+      }
+    } catch (error) {
+      console.error("Load notification channels error:", error);
+    }
+  }
+
+  // Function to display notification channels
+  function displayNotificationChannels(channels) {
+    const channelsList = document.getElementById("channelsList");
+
+    if (channels.length === 0) {
+      channelsList.innerHTML = `
+        <div class="text-center py-8 text-gray-400">
+          <i class="ti ti-bell-off text-4xl mb-2"></i>
+          <p>No notification channels configured</p>
+        </div>
+      `;
+      return;
+    }
+
+    channelsList.innerHTML = channels
+      .map(
+        (channel) => `
+      <div class="bg-gray-900 rounded-lg p-4 border border-gray-700">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+          <div class="flex items-center gap-3 min-w-0 flex-1">
+            <i class="ti ti-${
+              channel.provider === "telegram"
+                ? "brand-telegram"
+                : channel.provider === "discord"
+                ? "brand-discord"
+                : "webhook"
+            } text-2xl flex-shrink-0 ${
+          channel.provider === "telegram"
+            ? "text-blue-400"
+            : channel.provider === "discord"
+            ? "text-indigo-400"
+            : "text-green-400"
+        }"></i>
+            <div class="min-w-0 flex-1">
+              <h5 class="font-medium text-white capitalize truncate">${
+                channel.provider === "webhook" ? "Webhook" : channel.provider
+              } Channel</h5>
+              <p class="text-sm text-gray-400 truncate">${
+                channel.external_username || "No username"
+              }</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button onclick="toggleChannelStatus('${
+              channel.notification_id
+            }', ${channel.is_active})" 
+                    class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                      channel.is_active ? "bg-green-600" : "bg-gray-600"
+                    }" title="${
+          channel.is_active ? "Deactivate" : "Activate"
+        } channel">
+              <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                channel.is_active ? "translate-x-6" : "translate-x-1"
+              }"></span>
+            </button>
+            <button onclick="testNotificationChannel('${
+              channel.notification_id
+            }')" class="text-green-400 hover:text-green-300 p-1" title="Test Channel">
+              <i class="ti ti-send"></i>
+            </button>
+            <button onclick="editNotificationChannel('${
+              channel.notification_id
+            }')" class="text-blue-400 hover:text-blue-300 p-1" title="Edit">
+              <i class="ti ti-edit"></i>
+            </button>
+            <button onclick="deleteNotificationChannel('${
+              channel.notification_id
+            }')" class="text-red-400 hover:text-red-300 p-1" title="Delete">
+              <i class="ti ti-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mb-3">
+          <div>
+            <span class="text-gray-400">Chat ID:</span>
+            <span class="text-white ml-2 break-all">${
+              channel.provider === "webhook"
+                ? "Webhook"
+                : channel.external_chat_id
+            }</span>
+          </div>
+          <div>
+            <span class="text-gray-400">Created:</span>
+            <span class="text-white ml-2">${new Date(
+              channel.created_at
+            ).toLocaleDateString()}</span>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-700 pt-3">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <label class="flex items-center gap-2 text-sm">
+              <input type="checkbox" ${
+                channel.notify_on_upload ? "checked" : ""
+              } onchange="updateChannelSetting('${
+          channel.notification_id
+        }', 'notify_on_upload', this.checked)" class="rounded">
+              <span class="text-gray-300">Upload</span>
+            </label>
+            <label class="flex items-center gap-2 text-sm">
+              <input type="checkbox" ${
+                channel.notify_on_stream ? "checked" : ""
+              } onchange="updateChannelSetting('${
+          channel.notification_id
+        }', 'notify_on_stream', this.checked)" class="rounded">
+              <span class="text-gray-300">Stream</span>
+            </label>
+            <label class="flex items-center gap-2 text-sm">
+              <input type="checkbox" ${
+                channel.notify_on_error ? "checked" : ""
+              } onchange="updateChannelSetting('${
+          channel.notification_id
+        }', 'notify_on_error', this.checked)" class="rounded">
+              <span class="text-gray-300">Error</span>
+            </label>
+            <label class="flex items-center gap-2 text-sm">
+              <input type="checkbox" ${
+                channel.notify_on_schedule ? "checked" : ""
+              } onchange="updateChannelSetting('${
+          channel.notification_id
+        }', 'notify_on_schedule', this.checked)" class="rounded">
+              <span class="text-gray-300">Schedule</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    `
+      )
+      .join("");
+  }
+
+  // Function to update channel setting
+  async function updateChannelSetting(channelId, setting, value) {
+    try {
+      const response = await fetch(`/api/notifications/channels/${channelId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ [setting]: value }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("Setting updated", "success");
+      } else {
+        showToast(result.message || "Failed to update setting", "error");
+        // Revert checkbox
+        event.target.checked = !value;
+      }
+    } catch (error) {
+      console.error("Update channel setting error:", error);
+      showToast("Error updating setting", "error");
+      // Revert checkbox
+      event.target.checked = !value;
+    }
+  }
+
+  // Function to toggle channel status
+  async function toggleChannelStatus(channelId, currentStatus) {
+    const newStatus = !currentStatus;
+
+    try {
+      const response = await fetch(`/api/notifications/channels/${channelId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isActive: newStatus }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast(
+          `Channel ${newStatus ? "activated" : "deactivated"}`,
+          "success"
+        );
+        loadNotificationChannels(); // Reload channels list to update UI
+      } else {
+        showToast(result.message || "Failed to update channel status", "error");
+      }
+    } catch (error) {
+      console.error("Toggle channel status error:", error);
+      showToast("Error updating channel status", "error");
+    }
+  }
+
+  // Function to delete notification channel
+  async function deleteNotificationChannel(channelId) {
+    if (
+      !confirm("Are you sure you want to delete this notification channel?")
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/notifications/channels/${channelId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("Notification channel deleted", "success");
+        loadNotificationChannels(); // Reload channels list
+      } else {
+        showToast(result.message || "Failed to delete channel", "error");
+      }
+    } catch (error) {
+      console.error("Delete notification channel error:", error);
+      showToast("Error deleting channel", "error");
+    }
+  }
+
+  // Function to test notification channel
+  async function testNotificationChannel(channelId) {
+    // Show immediate feedback that test is being sent
+    showToast("Sending test notification...", "info");
+
+    try {
+      const response = await fetch(
+        `/api/notifications/channels/${channelId}/test`,
+        {
+          method: "POST",
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast("Test notification sent successfully!", "success");
+      } else {
+        showToast(
+          result.message || "Failed to send test notification",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Test notification channel error:", error);
+      showToast("Error testing notification channel", "error");
+    }
+  }
+
+  // Modal functions
+  function openNotificationModal(channelId = null) {
+    const modal = document.getElementById("notificationModal");
+    const form = document.getElementById("notificationModalForm");
+    const title = document.getElementById("modalTitle");
+    const saveButton = document.getElementById("saveButtonText");
+
+    if (channelId) {
+      // Edit mode
+      title.textContent = "Edit Notification Channel";
+      saveButton.textContent = "Update Channel";
+      loadChannelData(channelId);
+    } else {
+      // Add mode
+      title.textContent = "Add Notification Channel";
+      saveButton.textContent = "Save Channel";
+      form.reset();
+      document.getElementById("channelId").value = "";
+      // Set default checkboxes
+      document.getElementById("modalNotifyOnUpload").checked = true;
+      document.getElementById("modalNotifyOnStream").checked = true;
+      document.getElementById("modalNotifyOnError").checked = true;
+      document.getElementById("modalNotifyOnSchedule").checked = false;
+    }
+
+    modal.classList.remove("hidden");
+  }
+
+  function closeNotificationModal() {
+    const modal = document.getElementById("notificationModal");
+    modal.classList.add("hidden");
+  }
+
+  // Load channel data for editing
+  async function loadChannelData(channelId) {
+    try {
+      const response = await fetch(`/api/notifications/channels/${channelId}`);
+      const result = await response.json();
+
+      if (result.success && result.channel) {
+        const channel = result.channel;
+        document.getElementById("channelId").value = channel.notification_id;
+        document.getElementById("modalProvider").value = channel.provider;
+        document.getElementById("modalBotToken").value =
+          channel.bot_token || "";
+        document.getElementById("modalExternalChatId").value =
+          channel.external_chat_id || "";
+        document.getElementById("modalExternalUsername").value =
+          channel.external_username || "";
+        document.getElementById("modalNotifyOnUpload").checked =
+          channel.notify_on_upload === 1;
+        document.getElementById("modalNotifyOnStream").checked =
+          channel.notify_on_stream === 1;
+        document.getElementById("modalNotifyOnError").checked =
+          channel.notify_on_error === 1;
+        document.getElementById("modalNotifyOnSchedule").checked =
+          channel.notify_on_schedule === 1;
+      }
+    } catch (error) {
+      console.error("Load channel data error:", error);
+      showToast("Error loading channel data", "error");
+    }
+  }
+
+  // Edit notification channel
+  function editNotificationChannel(channelId) {
+    openNotificationModal(channelId);
+  }
+
+  // Save notification channel (add or update)
+  async function saveNotificationChannel() {
+    const form = document.getElementById("notificationModalForm");
+    const formData = new FormData(form);
+    const channelId = formData.get("channelId");
+
+    const data = {
+      provider: formData.get("provider"),
+      botToken: formData.get("botToken"),
+      externalChatId: formData.get("externalChatId"),
+      externalUsername: formData.get("externalUsername"),
+      notify_on_upload: document.getElementById("modalNotifyOnUpload").checked,
+      notify_on_stream: document.getElementById("modalNotifyOnStream").checked,
+      notify_on_error: document.getElementById("modalNotifyOnError").checked,
+      notify_on_schedule: document.getElementById("modalNotifyOnSchedule")
+        .checked,
+    };
+
+    try {
+      const method = channelId ? "PUT" : "POST";
+      const url = channelId
+        ? `/api/notifications/channels/${channelId}`
+        : "/api/notifications/channels";
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showToast(
+          `Notification channel ${
+            channelId ? "updated" : "added"
+          } successfully`,
+          "success"
+        );
+        closeNotificationModal();
+        loadNotificationChannels(); // Reload channels list
+      } else {
+        showToast(
+          result.message ||
+            `Failed to ${channelId ? "update" : "add"} notification channel`,
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Save notification channel error:", error);
+      showToast(
+        `Error ${channelId ? "updating" : "adding"} notification channel`,
+        "error"
+      );
+    }
+  }
+
+  // Close modal when clicking outside
+  document.addEventListener("click", function (event) {
+    const modal = document.getElementById("notificationModal");
+    if (event.target === modal) {
+      closeNotificationModal();
+    }
+  });
+
+  // Close modal on Escape key
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      closeNotificationModal();
+    }
+  });
+
   // Toast notification function
   function showToast(message, type = "info") {
     const toast = document.createElement("div");
-    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 transform transition-all duration-300 ${
+    toast.className = `fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-sm z-50 p-4 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 ${
       type === "success"
         ? "bg-green-600"
         : type === "error"
@@ -133,8 +571,8 @@
         : "ti-info-circle";
 
     toast.innerHTML = `
-      <i class="ti ${icon} text-white text-xl"></i>
-      <span class="text-white font-medium">${message}</span>
+      <i class="ti ${icon} text-white text-xl flex-shrink-0"></i>
+      <span class="text-white font-medium text-sm sm:text-base break-words">${message}</span>
     `;
 
     document.body.appendChild(toast);

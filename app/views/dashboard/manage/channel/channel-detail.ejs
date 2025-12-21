@@ -1,0 +1,395 @@
+<% layout('dashboard/layout') %>
+
+<div class="flex h-screen bg-gray-900 overflow-hidden">
+  <%- include('../../partials/navbar') %>
+  <%- include('../../partials/sidebar') %>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-auto lg:ml-20 pt-16">
+    <div class="p-4 sm:p-6 lg:p-8">
+    <!-- Header with Back Button -->
+    <div class="bg-gradient-to-br from-gray-800 to-gray-900 border-b border-gray-700 rounded-2xl shadow-lg mb-8">
+        <div class="p-4 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
+                    <a href="/projects/detail/<%= channel.project_uuid %>" class="text-gray-400 hover:text-white transition-colors rounded-full p-2 bg-gray-700 hover:bg-gray-600 shadow flex-shrink-0 w-10 h-10 flex items-center justify-center">
+                        <i class="ti ti-arrow-left text-2xl"></i>
+                    </a>
+                    <div class="flex items-center gap-3 w-full">
+                        <!-- Platform Icon -->
+                        <div class="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br 
+                            <%= channel.channel_platform === 'youtube' ? 'from-red-500 to-red-600' : 
+                                channel.channel_platform === 'facebook' ? 'from-blue-500 to-blue-600' :
+                                channel.channel_platform === 'instagram' ? 'from-pink-500 to-pink-600' :
+                                channel.channel_platform === 'twitch' ? 'from-purple-500 to-purple-600' :
+                                channel.channel_platform === 'tiktok' ? 'from-pink-500 to-pink-600' :
+                                'from-gray-500 to-gray-600' %> 
+                            rounded-xl flex items-center justify-center shadow-lg border-2 border-white/10">
+                            <i class="ti 
+                                <%= channel.channel_platform === 'youtube' ? 'ti-brand-youtube' : 
+                                    channel.channel_platform === 'facebook' ? 'ti-brand-facebook' :
+                                    channel.channel_platform === 'instagram' ? 'ti-brand-instagram' :
+                                    channel.channel_platform === 'twitch' ? 'ti-brand-twitch' :
+                                    channel.channel_platform === 'tiktok' ? 'ti-brand-tiktok' :
+                                    'ti-broadcast' %> 
+                                text-white text-2xl sm:text-3xl"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h1 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2 truncate">
+                                <span class="truncate"><%= channel.channel_name %></span>
+                                <% if (channel.is_verified) { %>
+                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-600 text-white shadow">
+                                        <i class="ti ti-check mr-1"></i> Verified
+                                    </span>
+                                <% } %>
+                            </h1>
+                            <span class="inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full shadow
+                                <% const platformName = channel.channel_platform || 'unknown'; %>
+                                <%= platformName === 'youtube' ? 'bg-red-900/60 text-red-300 border border-red-700' : 
+                                    platformName === 'facebook' ? 'bg-blue-900/60 text-blue-300 border border-blue-700' :
+                                    platformName === 'twitch' ? 'bg-purple-900/60 text-purple-300 border border-purple-700' :
+                                    platformName === 'tiktok' ? 'bg-pink-900/60 text-pink-300 border border-pink-700' :
+                                    'bg-gray-700 text-gray-300 border border-gray-600' %>">
+                                <%= platformName.charAt(0).toUpperCase() + platformName.slice(1) %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center mt-3 sm:mt-0 sm:ml-4 w-full sm:w-auto">
+                    <button onclick="editChannel()" class="inline-flex justify-center items-center px-4 py-2 border border-gray-600 rounded-lg text-sm font-semibold text-gray-100 bg-gradient-to-br from-gray-700 to-gray-800 hover:bg-gray-600 hover:text-blue-400 transition-colors shadow w-full sm:w-40">
+                        <i class="ti ti-edit mr-2"></i>
+                        Edit Channel
+                    </button>
+                </div>
+            </div>
+            <!-- Channel Stats -->
+            <div class="flex flex-wrap items-center gap-3 sm:gap-6 mt-4 sm:mt-6">
+                <div class="flex items-center text-sm text-gray-300 bg-gray-800 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow">
+                    <i class="ti ti-folder mr-2 text-blue-400"></i>
+                    <span><%= galleries.length %> Gallery<%= galleries.length !== 1 ? 'ies' : '' %></span>
+                </div>
+                <div class="flex items-center text-sm text-gray-300 bg-gray-800 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow">
+                    <i class="ti ti-playlist mr-2 text-green-400"></i>
+                    <span><%= playlists.length %> Playlist<%= playlists.length !== 1 ? 's' : '' %></span>
+                </div>
+                <div class="flex items-center text-sm text-gray-300 bg-gray-800 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow">
+                    <i class="ti ti-calendar mr-2 text-yellow-400"></i>
+                    <span>Created <%= new Date(channel.created_at).toLocaleDateString() %></span>
+                </div>
+                <% if (oauth && oauth.length > 0) { %>
+                    <div class="flex items-center bg-green-100 px-3 py-1 sm:px-4 sm:py-2 rounded-lg text-xs font-semibold text-green-800 shadow">
+                        <i class="ti ti-check mr-1"></i>
+                        OAuth Connected
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!--  Youtube Analytics  -->
+    <% if (channel.channel_platform === 'youtube' && oauth && oauth.length > 0) { %>
+        <div class="mt-8 mb-6" hidden>
+            <h2 class="text-lg font-semibold text-white mb-4 flex items-center">
+                <i class="ti ti-brand-youtube text-red-500 mr-2"></i>
+                YouTube Channel Analytics
+            </h2>
+            <% if (youtubeData) { %>
+                <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4"> -->
+                    <!-- Subscribers -->
+                    <!-- <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 flex flex-col items-center shadow-lg">
+                        <i class="ti ti-user text-4xl text-red-400 mb-3"></i>
+                        <span class="text-gray-400 text-sm mb-1">Subscribers</span>
+                        <span class="text-3xl font-bold text-white"><%= youtubeData.subscriberCount %></span>
+                    </div> -->
+                    <!-- Videos -->
+                    <!-- <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 flex flex-col items-center shadow-lg">
+                        <i class="ti ti-video text-4xl text-red-400 mb-3"></i>
+                        <span class="text-gray-400 text-sm mb-1">Total Videos</span>
+                        <span class="text-3xl font-bold text-white"><%= youtubeData.videoCount %></span>
+                    </div> -->
+                    <!-- Views -->
+                    <!-- <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 flex flex-col items-center shadow-lg">
+                        <i class="ti ti-eye text-4xl text-red-400 mb-3"></i>
+                        <span class="text-gray-400 text-sm mb-1">Total Views</span>
+                        <span class="text-3xl font-bold text-white"><%= youtubeData.viewCount %></span>
+                    </div> -->
+                <!-- </div> -->
+
+                <div class="mt-8 bg-gray-900 rounded-xl p-8 border border-gray-800 shadow-lg" hi>
+                    <div class="flex items-center space-x-6 mb-6">
+                        <img src="<%= youtubeData.thumbnailUrl %>" alt="Channel Thumbnail" class="w-20 h-20 rounded-full border-4 border-red-500 shadow">
+                        <div>
+                            <a href="https://www.youtube.com/channel/<%= youtubeData.channelId %>" target="_blank" class="text-2xl font-bold text-white hover:text-red-400 transition-colors">
+                                <%= youtubeData.title %>
+                                <i class="ti ti-external-link ml-2 text-base text-gray-400"></i>
+                            </a>
+                            <div class="flex items-center mt-2 space-x-4">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-900/50 text-red-400 border border-red-700">
+                                    <i class="ti ti-user mr-1"></i> <%= youtubeData.subscriberCount %> Subs
+                                </span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-800 text-gray-300 border border-gray-700">
+                                    <i class="ti ti-calendar mr-1"></i> Published <%= new Date(youtubeData.publishedAt).toLocaleDateString() %>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                        <!-- Channel Info -->
+                        <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 shadow flex flex-col justify-center">
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                                <i class="ti ti-info-circle mr-2 text-blue-400"></i>
+                                Channel Info
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <span class="font-medium text-gray-300 w-32">Name:</span>
+                                    <span class="text-gray-100"><%= youtubeData.title %></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="font-medium text-gray-300 w-32">Channel ID:</span>
+                                    <span class="text-gray-100"><%= youtubeData.channelId %></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="font-medium text-gray-300 w-32">Published:</span>
+                                    <span class="text-gray-100"><%= new Date(youtubeData.publishedAt).toLocaleDateString() %></span>
+                                </div>
+                                <% if (youtubeData.country) { %>
+                                <div class="flex items-center">
+                                    <span class="font-medium text-gray-300 w-32">Country:</span>
+                                    <span class="text-gray-100"><%= youtubeData.country %></span>
+                                </div>
+                                <% } %>
+                            </div>
+                        </div>
+                        <!-- Channel Stats -->
+                        <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 shadow flex flex-col justify-center">
+                            <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                                <i class="ti ti-chart-bar mr-2 text-green-400"></i>
+                                Channel Stats
+                            </h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <span class="font-medium text-gray-300 w-32">Subscribers:</span>
+                                    <span class="text-gray-100"><%= youtubeData.subscriberCount %></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="font-medium text-gray-300 w-32">Total Videos:</span>
+                                    <span class="text-gray-100"><%= youtubeData.videoCount %></span>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="font-medium text-gray-300 w-32">Total Views:</span>
+                                    <span class="text-gray-100"><%= youtubeData.viewCount.toLocaleString('id-ID') %></span>
+                                </div>
+                                <% if (youtubeData.customUrl) { %>
+                                <div class="flex items-center">
+                                    <span class="font-medium text-gray-300 w-32">Custom URL:</span>
+                                    <a href="https://www.youtube.com/<%= youtubeData.customUrl %>" target="_blank" class="text-blue-400 hover:underline"><%= youtubeData.customUrl %></a>
+                                </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    <% if (youtubeData.description) { %>
+                        <div class="mt-4">
+                            <h4 class="text-base font-semibold text-white mb-2">Description</h4>
+                            <p class="text-gray-400 text-sm leading-relaxed"><%= youtubeData.description %></p>
+                        </div>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <div class="bg-gray-800 rounded-lg p-6 border border-gray-700 text-center">
+                    <div class="flex justify-center mb-4">
+                        <i class="ti ti-brand-youtube text-red-400 text-5xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">No YouTube Data Available</h3>
+                    <p class="text-gray-400 mb-2">Unable to fetch channel analytics. Please check your OAuth connection.</p>
+                    <button onclick="refreshYouTubeData()" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
+                        <i class="ti ti-refresh mr-2"></i>
+                        Refresh Data
+                    </button>
+                </div>
+            <% } %>
+        </div>
+    <% } %>
+
+    <!-- Tabs -->
+    <div class="w-full px-0 sm:px-0 lg:px-0 mt-6">
+        <div class="border-b border-gray-700">
+            <nav class="-mb-px flex space-x-6 overflow-x-auto scrollbar-hide pb-1" style="scroll-behavior: smooth;">
+                <% if (channel.channel_platform == 'youtube') { %>
+                <button onclick="switchTab('channel')"
+                        id="tab-channel"
+                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-blue-500 text-blue-400 hover:text-blue-300">
+                    <i class="ti ti-chart-bar mr-1 sm:mr-2 text-sm sm:text-base"></i>
+                    <span class="hidden sm:inline">Channel</span>
+                    <span class="sm:hidden">Channel</span>
+                </button>
+                <% } %>
+                <button onclick="switchTab('galleries')"
+                        id="tab-galleries"
+                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-600">
+                    <i class="ti ti-folder mr-1 sm:mr-2 text-sm sm:text-base"></i>
+                    <span class="hidden sm:inline">Galleries</span>
+                    <span class="sm:hidden">Gallery</span>
+                </button>
+                <button onclick="switchTab('playlists')"
+                        id="tab-playlists"
+                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-600">
+                    <i class="ti ti-playlist mr-1 sm:mr-2 text-sm sm:text-base"></i>
+                    <span class="hidden sm:inline">Playlists</span>
+                    <span class="sm:hidden">Playists</span>
+                </button>
+                <% if (channel.channel_platform == 'youtube') { %>
+                <button onclick="switchTab('streamkeys')"
+                        id="tab-streamkeys"
+                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-600">
+                    <i class="ti ti-key mr-1 sm:mr-2 text-sm sm:text-base"></i>
+                    <span class="hidden sm:inline">Stream Keys</span>
+                    <span class="sm:hidden">StreamKeys</span>
+                </button>
+                <button onclick="switchTab('upload-templates')"
+                        id="tab-upload-templates"
+                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-600">
+                    <i class="ti ti-template mr-1 sm:mr-2 text-sm sm:text-base"></i>
+                    <span class="hidden sm:inline">Upload Templates</span>
+                    <span class="sm:hidden">Templates</span>
+                </button>
+                <button onclick="switchTab('oauth')"
+                        id="tab-oauth"
+                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-600">
+                    <i class="ti ti-plug mr-1 sm:mr-2 text-sm sm:text-base"></i>
+                    <span class="hidden sm:inline">OAuth Settings</span>
+                    <span class="sm:hidden">OAuth</span>
+                </button>
+                <% } %>
+            </nav>
+        </div>
+    </div>
+
+        <!-- Tab Content -->
+        <div class="mt-6">
+            <!-- Channel Tab -->
+            <div id="content-channel" class="tab-content">
+                <!--  Youtube Analytics  -->
+                <%- include('partials/tabs/channel-tab') %>
+            </div>
+            
+            <!-- Galleries Tab -->
+            <div id="content-galleries" class="tab-content">
+                <!-- Galleries Content -->
+                <%- include('partials/tabs/galleries-tabs') %>
+            </div>
+
+            <!-- Playlists Tab -->
+            <div id="content-playlists" class="tab-content hidden">
+                <!-- Playlists Content -->
+                <%- include('partials/tabs/playlists-tabs') %>
+            </div>
+
+            <!-- Stream Keys Tab -->
+            <div id="content-streamkeys" class="tab-content hidden">
+                <!-- Stream Keys Content -->
+                <%- include('./partials/tabs/streamkeys-tabs') %>
+            </div>
+
+            <!-- Upload Templates Tab -->
+            <div id="content-upload-templates" class="tab-content hidden">
+                <!-- Upload Templates Content -->
+                <%- include('partials/tabs/upload-templates-tabs') %>
+            </div>
+
+            <!-- OAuth Tab -->
+            <div id="content-oauth" class="tab-content hidden">
+                <!-- OAuth Content -->
+                <%- include('partials/tabs/oauth-tabs') %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Tab Switching
+function switchTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+
+    // Remove active state from all tabs
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('border-blue-500', 'text-blue-400', 'hover:text-blue-300');
+        button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-400', 'hover:border-gray-600');
+    });
+
+    // Show selected tab content
+    document.getElementById('content-' + tabName).classList.remove('hidden');
+
+    // Add active state to selected tab
+    const activeTab = document.getElementById('tab-' + tabName);
+    activeTab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-400', 'hover:border-gray-600');
+    activeTab.classList.add('border-blue-500', 'text-blue-400', 'hover:text-blue-300');
+
+    // Auto-scroll active tab into view on mobile
+    if (window.innerWidth < 768) {
+        activeTab.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center'
+        });
+    }
+}
+
+// Initialize tabs on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set default active tab (channel)
+    // switchTab('channel');
+    const platform = '<%= channel.channel_platform %>';
+    
+    // Use setTimeout to ensure all elements are fully rendered
+    setTimeout(() => {
+        if (platform === 'youtube') {
+            const channelTab = document.getElementById('tab-channel');
+            if (channelTab) {
+                switchTab('channel');
+            } else {
+                switchTab('galleries');
+            }
+        } else {
+            switchTab('galleries');
+        }
+    }, 100);
+
+    // Add touch/swipe support for mobile tabs
+    const tabNav = document.querySelector('nav');
+    if (tabNav) {
+        let startX;
+        let scrollLeft;
+
+        tabNav.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].pageX - tabNav.offsetLeft;
+            scrollLeft = tabNav.scrollLeft;
+        });
+
+        tabNav.addEventListener('touchmove', (e) => {
+            if (!startX) return;
+            const x = e.touches[0].pageX - tabNav.offsetLeft;
+            const walk = (x - startX) * 2; // Scroll speed multiplier
+            tabNav.scrollLeft = scrollLeft - walk;
+        });
+
+        tabNav.addEventListener('touchend', () => {
+            startX = null;
+        });
+    }
+});
+
+// All functions moved to /js/channel-detail.js
+</script>
+
+<!-- Channel Detail Functions -->
+<script src="/js/channel-detail.js"></script>
+
+    </div>
+  </main>
+</div>
+
