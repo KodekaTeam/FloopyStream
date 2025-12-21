@@ -1,0 +1,260 @@
+<!-- Edit Template Modal -->
+<div
+  id="edit-template-modal"
+  class="fixed inset-0 bg-black bg-opacity-50 hidden z-50"
+>
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div
+      class="bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+    >
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h3 id="edit-modal-title" class="text-xl font-bold text-white">
+            Edit Upload Template
+          </h3>
+          <button
+            onclick="closeEditTemplateModal()"
+            class="text-gray-400 hover:text-white transition-colors"
+          >
+            <i class="ti ti-x text-2xl"></i>
+          </button>
+        </div>
+
+        <form id="edit-template-form" class="space-y-6">
+          <input type="hidden" id="edit-template-uuid" />
+
+          <!-- Template Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2"
+              >Template Name *</label
+            >
+            <input
+              type="text"
+              id="edit-template-name"
+              name="template_name"
+              required
+              class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <!-- Video Title -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2"
+              >Default Video Title</label
+            >
+            <div class="relative">
+              <input
+                type="text"
+                id="edit-template-title"
+                name="template_title"
+                maxlength="100"
+                class="w-full px-3 py-2 pr-16 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter default video title"
+                oninput="updateEditTemplateTitleCounter(this)"
+              />
+              <span
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"
+                id="editTemplateTitleCounter"
+                >0/100</span
+              >
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+              Maximum 100 characters. This will be used as the default broadcast
+              title.
+            </p>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2"
+              >Default Description</label
+            >
+            <textarea
+              id="edit-template-description"
+              name="template_description"
+              rows="4"
+              class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter default video description"
+            ></textarea>
+          </div>
+
+          <!-- Tags -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2"
+              >Default Tags</label
+            >
+            <input
+              type="text"
+              id="edit-template-tags"
+              name="template_tags"
+              class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="tag1, tag2, tag3"
+            />
+            <p class="text-xs text-gray-500 mt-1">Separate tags with commas</p>
+          </div>
+
+          <!-- Category and License -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2"
+                >Category</label
+              >
+              <select
+                id="edit-template-category"
+                name="template_category"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Select category</option>
+                <option value="1">Film & Animation</option>
+                <option value="2">Autos & Vehicles</option>
+                <option value="10">Music</option>
+                <option value="15">Pets & Animals</option>
+                <option value="17">Sports</option>
+                <option value="18">Short Movies</option>
+                <option value="19">Travel & Events</option>
+                <option value="20">Gaming</option>
+                <option value="21">Videoblogging</option>
+                <option value="22">People & Blogs</option>
+                <option value="23">Comedy</option>
+                <option value="24">Entertainment</option>
+                <option value="25">News & Politics</option>
+                <option value="26">Howto & Style</option>
+                <option value="27">Education</option>
+                <option value="28">Science & Technology</option>
+                <option value="29">Nonprofits & Activism</option>
+                <option value="30">Movies</option>
+                <option value="31">Anime/Animation</option>
+                <option value="32">Action/Adventure</option>
+                <option value="33">Classics</option>
+                <option value="34">Comedy</option>
+                <option value="35">Documentary</option>
+                <option value="36">Drama</option>
+                <option value="37">Family</option>
+                <option value="38">Foreign</option>
+                <option value="39">Horror</option>
+                <option value="40">Sci-Fi/Fantasy</option>
+                <option value="41">Thriller</option>
+                <option value="42">Shorts</option>
+                <option value="43">Shows</option>
+                <option value="44">Trailers</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2"
+                >License</label
+              >
+              <select
+                id="edit-template-license"
+                name="template_license"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="youtube">Standard YouTube License</option>
+                <option value="creativeCommon">
+                  Creative Commons - Attribution
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Visibility and Audience -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2"
+                >Visibility</label
+              >
+              <select
+                id="edit-template-visibility"
+                name="template_visibility"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="private">Private</option>
+                <option value="unlisted">Unlisted</option>
+                <option value="public">Public</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2"
+                >Audience</label
+              >
+              <select
+                id="edit-template-audience"
+                name="template_audience"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="not_for_kids">Not made for kids</option>
+                <option value="made_for_kids">Made for kids</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Comments and Moderation -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2"
+                >Comments</label
+              >
+              <select
+                id="edit-template-comment"
+                name="template_comment"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="active">Allow all comments</option>
+                <option value="hold">
+                  Hold potentially inappropriate comments
+                </option>
+                <option value="disabled">Disable comments</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-300 mb-2"
+                >Moderation</label
+              >
+              <select
+                id="edit-template-moderation"
+                name="template_moderation"
+                class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="none">No moderation</option>
+                <option value="moderate">Moderate comments</option>
+                <option value="strict">Strict moderation</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Auto Schedule -->
+          <div class="flex items-center">
+            <input
+              type="checkbox"
+              id="edit-auto-schedule"
+              name="auto_schedule"
+              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-600 rounded bg-gray-700"
+            />
+            <label
+              for="edit-auto-schedule"
+              class="ml-2 block text-sm text-gray-300"
+            >
+              Enable auto-scheduling for uploads using this template
+            </label>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onclick="closeEditTemplateModal()"
+              class="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              <span id="edit-submit-text">Update Template</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -6,7 +6,7 @@
     class="tab-button flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white transition-colors whitespace-nowrap"
   >
     <i class="ti ti-user"></i>
-    <span>Profile Information</span>
+    <span>Profile</span>
   </button>
   <button
     onclick="switchTab('security')"
@@ -15,5 +15,13 @@
   >
     <i class="ti ti-lock"></i>
     <span>Security</span>
+  </button>
+  <button
+    onclick="switchTab('notification')"
+    id="notificationTab"
+    class="tab-button flex items-center gap-2 px-4 py-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors whitespace-nowrap"
+  >
+    <i class="ti ti-bell"></i>
+    <span>Notification</span>
   </button>
 </div>

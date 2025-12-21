@@ -20,6 +20,9 @@ const { formatDuration } = require('./utilities/mediaProcessor');
 const { formatFileSize } = require('./utilities/fileManager');
 const { formatTimestamp, getTimezoneInfo, parseTimestampToDate } = require('./utils/datetime');
 
+// Import database for initialization
+const { initializeSchema } = require('./core/database');
+
 // Initialize Express app
 const app = express();
 const port = process.env.PORT || 8080;
@@ -172,6 +175,18 @@ app.locals.formatDuration = formatDuration;
 app.locals.appName = process.env.APP_NAME || 'FLoopyStream';
 app.locals.formatTimestamp = formatTimestamp;
 app.locals.tzInfo = getTimezoneInfo();
+// Helper: build thumbnail URL robustly from stored thumbnail_path
+app.locals.getThumbnailUrl = function(thumbnailPath) {
+  if (!thumbnailPath) return '/images/default-thumb.png';
+  // If already an absolute path, return as-is
+  if (thumbnailPath.startsWith('/')) return thumbnailPath;
+  // If starts with storage/ (no leading slash) -> prefix with '/'
+  if (thumbnailPath.startsWith('storage/')) return '/' + thumbnailPath;
+  // If starts with thumbnails/ -> prefix with /storage/
+  if (thumbnailPath.startsWith('thumbnails/')) return '/storage/' + thumbnailPath;
+  // Otherwise assume it's a filename stored in storage/thumbnails
+  return '/storage/thumbnails/' + thumbnailPath;
+};
 
 // ============================================
 // ROUTES - All modular routes
@@ -183,28 +198,42 @@ app.use(routes);
 // START SERVER
 // ============================================
 
-app.listen(port, () => {
-  const { getTimezoneInfo } = require('./utils/datetime');
-  const tzInfo = getTimezoneInfo();
-  
-  console.log('='.repeat(50));
-  console.log(`🚀 ${process.env.APP_NAME || 'FLoopyStream'} is running`);
-  console.log(`📡 Server: http://localhost:${port}`);
-  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🕐 Timezone: ${tzInfo.timezone} (${tzInfo.offset})`);
-  console.log(`🕗 Server time: ${formatTimestamp(new Date(), 'datetime')}`);
-  console.log('='.repeat(50));
-  
-  // Start monitoring and scheduler
-  startMonitoring(5);
-  startScheduler(30);
-  
-  logInfo('Application started', { 
-    port, 
-    env: process.env.NODE_ENV || 'development',
-    timezone: tzInfo.timezone 
-  });
-});
+// Async IIFE to ensure database is initialized before server starts
+(async () => {
+  try {
+    // Initialize database schema FIRST
+    await initializeSchema();
+    console.log('✓ Database schema initialization complete\n');
+    
+    // THEN start the server
+    app.listen(port, () => {
+      const { getTimezoneInfo } = require('./utils/datetime');
+      const tzInfo = getTimezoneInfo();
+      
+      console.log('='.repeat(50));
+      console.log(`🚀 ${process.env.APP_NAME || 'FLoopyStream'} is running`);
+      console.log(`📡 Server: http://localhost:${port}`);
+      console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🕐 Timezone: ${tzInfo.timezone} (${tzInfo.offset})`);
+      console.log(`🕗 Server time: ${formatTimestamp(new Date(), 'datetime')}`);
+      console.log('='.repeat(50));
+      
+      // Start monitoring and scheduler AFTER server is listening
+      startMonitoring(5);
+      startScheduler(30);
+      
+      logInfo('Application started', { 
+        port, 
+        env: process.env.NODE_ENV || 'development',
+        timezone: tzInfo.timezone 
+      });
+    });
+  } catch (err) {
+    console.error('❌ Failed to start server:', err.message);
+    console.error('Error details:', err);
+    process.exit(1);
+  }
+})();
 
 // Graceful shutdown
 process.on('SIGINT', () => {

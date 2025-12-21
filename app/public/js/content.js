@@ -33,12 +33,17 @@ function initializeGalleryPagination() {
   console.log('DEBUG: container.children.length =', container.children.length);
   console.log('DEBUG: container.querySelectorAll("div").length =', container.querySelectorAll('div').length);
 
-  // Collect all video cards - Get direct children that are video items
-  const cards = Array.from(container.children).filter(card => {
-    const hasH3 = card.querySelector('h3');
-    console.log('DEBUG: Checking card, hasH3 =', hasH3 ? 'YES' : 'NO');
-    return hasH3;
-  });
+  // Collect all video cards - prefer explicit '.video-card' elements rendered by EJS
+  const cardsSelection = container.querySelectorAll('.video-card');
+  let cards = Array.from(cardsSelection);
+
+  // Fallback: if no explicit .video-card markers were rendered, try direct children as before
+  if (cards.length === 0) {
+    console.log('DEBUG: No .video-card elements found, falling back to container.children');
+    cards = Array.from(container.children).filter(card => card.querySelector && card.querySelector('h3'));
+  } else {
+    console.log('DEBUG: Found', cards.length, '.video-card items');
+  }
   
   console.log('DEBUG: Total cards after filter:', cards.length);
   
@@ -224,20 +229,18 @@ function closeUploadModal() {
   document.getElementById("uploadForm").reset();
   document.getElementById("filesList").classList.add("hidden");
   document.getElementById("filesListContainer").innerHTML = "";
-
+  
   // Reset progress display
   const progressContainer = document.getElementById("progressContentContainer");
   const formContainer = document.getElementById("formContentContainer");
   const uploadButton = document.getElementById("uploadButton");
-  const cancelButton = document.querySelector(
-    'button[onclick="closeUploadModal()"]'
-  );
-
+  const cancelButton = document.querySelector('button[onclick="closeUploadModal()"]');
+  
   progressContainer.classList.add("hidden");
   formContainer.classList.remove("hidden");
   uploadButton.disabled = false;
   uploadButton.textContent = "Upload";
-
+  
   // Reset progress bars
   document.getElementById("overallProgressBar").style.width = "0%";
   document.getElementById("overallPercent").textContent = "0%";
@@ -285,22 +288,21 @@ fileInput?.addEventListener("change", (e) => {
 function updateFilesList(files) {
   const filesListContainer = document.getElementById("filesListContainer");
   const filesList = document.getElementById("filesList");
-
+  
   filesListContainer.innerHTML = "";
-
+  
   if (files.length === 0) {
     filesList.classList.add("hidden");
     return;
   }
-
+  
   let totalSize = 0;
   Array.from(files).forEach((file, index) => {
     const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
     totalSize += file.size;
-
+    
     const fileItem = document.createElement("div");
-    fileItem.className =
-      "flex items-center justify-between p-2 bg-gray-700 rounded text-gray-300";
+    fileItem.className = "flex items-center justify-between p-2 bg-gray-700 rounded text-gray-300";
     fileItem.innerHTML = `
       <div class="flex items-center gap-2 flex-1 min-w-0">
         <i class="ti ti-video text-blue-400 flex-shrink-0"></i>
@@ -319,28 +321,27 @@ function updateFilesList(files) {
     `;
     filesListContainer.appendChild(fileItem);
   });
-
+  
   // Show total
   const totalMB = (totalSize / (1024 * 1024)).toFixed(2);
   const totalDiv = document.createElement("div");
-  totalDiv.className =
-    "text-xs text-gray-400 mt-2 pt-2 border-t border-gray-600";
+  totalDiv.className = "text-xs text-gray-400 mt-2 pt-2 border-t border-gray-600";
   totalDiv.textContent = `Total: ${files.length} file(s) - ${totalMB} MB`;
   filesListContainer.appendChild(totalDiv);
-
+  
   filesList.classList.remove("hidden");
 }
 
 function removeFileFromList(index) {
   const fileInput = document.getElementById("videoFileInput");
   const dataTransfer = new DataTransfer();
-
+  
   Array.from(fileInput.files).forEach((file, i) => {
     if (i !== index) {
       dataTransfer.items.add(file);
     }
   });
-
+  
   fileInput.files = dataTransfer.files;
   updateFilesList(fileInput.files);
 }
@@ -357,29 +358,26 @@ document.getElementById("uploadForm")?.addEventListener("submit", async (e) => {
 
   const fileInput = document.getElementById("videoFileInput");
   const files = fileInput.files;
-
+  
   if (!files || files.length === 0) {
     showNotification("Please select at least one video file", "error");
     return;
   }
 
-  const description =
-    document.querySelector('input[name="description"]')?.value || "";
+  const description = document.querySelector('input[name="description"]')?.value || "";
   const uploadButton = document.getElementById("uploadButton");
-
+  
   // Hide form and show progress
   const formContainer = document.getElementById("formContentContainer");
   const progressContainer = document.getElementById("progressContentContainer");
   formContainer.classList.add("hidden");
   progressContainer.classList.remove("hidden");
-
+  
   const overallProgressBar = document.getElementById("overallProgressBar");
   const overallPercent = document.getElementById("overallPercent");
-  const filesProgressContainer = document.getElementById(
-    "filesProgressContainer"
-  );
+  const filesProgressContainer = document.getElementById("filesProgressContainer");
   filesProgressContainer.innerHTML = "";
-
+  
   uploadButton.disabled = true;
   uploadButton.textContent = "Uploading...";
 
@@ -388,7 +386,7 @@ document.getElementById("uploadForm")?.addEventListener("submit", async (e) => {
     const fileProgresses = {};
     Array.from(files).forEach((file, index) => {
       fileProgresses[file.name] = { loaded: 0, total: file.size };
-
+      
       const progressItem = document.createElement("div");
       progressItem.id = `progress-${index}`;
       progressItem.className = "bg-gray-700 rounded p-3";
@@ -412,35 +410,32 @@ document.getElementById("uploadForm")?.addEventListener("submit", async (e) => {
       return new Promise((resolve, reject) => {
         const formData = new FormData();
         formData.append("videoFiles", file);
-        formData.append(
-          "title",
-          file.name.substring(0, file.name.lastIndexOf(".")) || file.name
-        );
+        formData.append("title", file.name.substring(0, file.name.lastIndexOf('.')) || file.name);
         formData.append("description", description);
 
-        const xhr = new XMLHttpRequest();
+        // Check if we're on a specific gallery page and add galleryUuid
+        const urlPath = window.location.pathname;
+        const galleryMatch = urlPath.match(/^\/gallery\/([a-f0-9-]+)$/);
+        if (galleryMatch) {
+          const galleryUuid = galleryMatch[1];
+          formData.append("galleryUuid", galleryUuid);
+          console.log("Uploading to specific gallery:", galleryUuid);
+        }
 
+        const xhr = new XMLHttpRequest();
+        
         xhr.upload.addEventListener("progress", (e) => {
           if (e.lengthComputable) {
             const filePercent = Math.round((e.loaded / e.total) * 100);
             const progressItem = document.getElementById(`progress-${index}`);
             if (progressItem) {
-              progressItem.querySelector(".filePercent").textContent =
-                filePercent;
-              progressItem.querySelector(".fileBar").style.width =
-                filePercent + "%";
+              progressItem.querySelector(".filePercent").textContent = filePercent;
+              progressItem.querySelector(".fileBar").style.width = filePercent + "%";
             }
 
             // Update overall progress
-            const totalLoaded =
-              Object.values(fileProgresses).reduce(
-                (sum, p) => sum + p.loaded,
-                0
-              ) + e.loaded;
-            const totalSize = Object.values(fileProgresses).reduce(
-              (sum, p) => sum + p.total,
-              0
-            );
+            const totalLoaded = Object.values(fileProgresses).reduce((sum, p) => sum + p.loaded, 0) + e.loaded;
+            const totalSize = Object.values(fileProgresses).reduce((sum, p) => sum + p.total, 0);
             const overallPercent2 = Math.round((totalLoaded / totalSize) * 100);
             overallProgressBar.style.width = overallPercent2 + "%";
             overallPercent.textContent = overallPercent2 + "%";
@@ -454,42 +449,26 @@ document.getElementById("uploadForm")?.addEventListener("submit", async (e) => {
               completed++;
               const progressItem = document.getElementById(`progress-${index}`);
               if (progressItem) {
-                progressItem
-                  .querySelector(".fileBar")
-                  .classList.add("bg-blue-500");
-                progressItem
-                  .querySelector(".fileBar")
-                  .classList.remove("bg-green-500");
+                progressItem.querySelector(".fileBar").classList.add("bg-blue-500");
+                progressItem.querySelector(".fileBar").classList.remove("bg-green-500");
                 progressItem.querySelector(".filePercent").textContent = "100";
               }
             } else {
               failed++;
-              console.warn(
-                `File ${file.name} upload failed: ${result.message}`
-              );
+              console.warn(`File ${file.name} upload failed: ${result.message}`);
               const progressItem = document.getElementById(`progress-${index}`);
               if (progressItem) {
-                progressItem
-                  .querySelector(".fileBar")
-                  .classList.add("bg-red-500");
-                progressItem
-                  .querySelector(".fileBar")
-                  .classList.remove("bg-green-500");
+                progressItem.querySelector(".fileBar").classList.add("bg-red-500");
+                progressItem.querySelector(".fileBar").classList.remove("bg-green-500");
               }
             }
           } else {
             failed++;
-            console.warn(
-              `File ${file.name} upload failed with status ${xhr.status}`
-            );
+            console.warn(`File ${file.name} upload failed with status ${xhr.status}`);
             const progressItem = document.getElementById(`progress-${index}`);
             if (progressItem) {
-              progressItem
-                .querySelector(".fileBar")
-                .classList.add("bg-red-500");
-              progressItem
-                .querySelector(".fileBar")
-                .classList.remove("bg-green-500");
+              progressItem.querySelector(".fileBar").classList.add("bg-red-500");
+              progressItem.querySelector(".fileBar").classList.remove("bg-green-500");
             }
           }
           resolve();
@@ -500,9 +479,7 @@ document.getElementById("uploadForm")?.addEventListener("submit", async (e) => {
           const progressItem = document.getElementById(`progress-${index}`);
           if (progressItem) {
             progressItem.querySelector(".fileBar").classList.add("bg-red-500");
-            progressItem
-              .querySelector(".fileBar")
-              .classList.remove("bg-green-500");
+            progressItem.querySelector(".fileBar").classList.remove("bg-green-500");
           }
           reject(new Error(`Upload failed for ${file.name}`));
         });
@@ -517,10 +494,7 @@ document.getElementById("uploadForm")?.addEventListener("submit", async (e) => {
 
     // Show final message
     if (completed > 0 && failed === 0) {
-      showNotification(
-        `${completed} video(s) uploaded successfully!`,
-        "success"
-      );
+      showNotification(`${completed} video(s) uploaded successfully!`, "success");
       setTimeout(() => location.reload(), 1500);
     } else if (completed > 0 && failed > 0) {
       // Show form again on partial failure
@@ -574,7 +548,7 @@ async function playVideo(contentId) {
       source.type = "video/mp4";
 
       // Update modal content
-      document.getElementById("previewTitle").textContent = content.title;
+      document.getElementById("previewTitle").textContent = content.video_title;
       document.getElementById("previewDuration").textContent = formatDuration(
         content.duration_seconds
       );
@@ -652,10 +626,11 @@ async function editVideo(contentId) {
       const content = result.content;
 
       // Populate form
-      document.getElementById("editContentId").value = content.content_id;
-      document.getElementById("editTitle").value = content.title;
+      // Use the original identifier passed in (supports UUID or numeric id)
+      document.getElementById("editContentId").value = contentId;
+      document.getElementById("editTitle").value = content.video_title;
       document.getElementById("editDescription").value =
-        content.description || "";
+        content.video_description || "";
       document.getElementById("editDuration").value = formatDuration(
         content.duration_seconds
       );
@@ -668,12 +643,44 @@ async function editVideo(contentId) {
       // Set video preview instead of thumbnail
       const videoPreview = document.getElementById("editVideoPreview");
       const videoSource = document.getElementById("editVideoSource");
-      const videoPath = `/storage/uploads/${content.filename}`;
+      if (videoPreview && videoSource && content.filename) {
+        const videoPath = `/storage/uploads/${content.filename}`;
+        videoSource.src = videoPath;
+        // reload video element
+        try { videoPreview.load(); } catch (e) { /* ignore */ }
+      }
 
-      videoSource.src = videoPath;
-      videoPreview.load();
+      // Set thumbnail preview
+      const thumbnailPreview = document.getElementById("thumbnailPreview");
+      const thumbnailPlaceholder = document.getElementById("thumbnailPlaceholder");
+      if (thumbnailPreview && content.thumbnail_path) {
+        // Handle both prefixed and non-prefixed paths
+        let thumbnailPath = content.thumbnail_path;
+        // If path doesn't start with /, assume it needs /storage/ prefix
+        if (!thumbnailPath.startsWith('/')) {
+          // If path already includes 'thumbnails/', use /storage/ prefix only
+          if (thumbnailPath.startsWith('thumbnails/')) {
+            thumbnailPath = `/storage/${thumbnailPath}`;
+          } else {
+            // Otherwise, add full /storage/thumbnails/ prefix
+            thumbnailPath = `/storage/thumbnails/${thumbnailPath}`;
+          }
+        }
+        thumbnailPreview.src = thumbnailPath;
+        thumbnailPreview.classList.remove("hidden");
+        thumbnailPreview.onerror = function() {
+          console.error('Failed to load thumbnail:', thumbnailPath);
+          this.classList.add("hidden");
+          if (thumbnailPlaceholder) thumbnailPlaceholder.classList.remove("hidden");
+        };
+        if (thumbnailPlaceholder) thumbnailPlaceholder.classList.add("hidden");
+      } else if (thumbnailPreview) {
+        thumbnailPreview.src = '';
+        thumbnailPreview.classList.add("hidden");
+        if (thumbnailPlaceholder) thumbnailPlaceholder.classList.remove("hidden");
+      }
 
-      console.log("Edit modal - Video path:", videoPath);
+      console.log("Edit modal - Video data:", content.filename, content.resolution);
       console.log("Edit modal - Resolution:", content.resolution);
 
       // Show modal
@@ -700,8 +707,30 @@ function closeEditModal() {
 }
 
 async function deleteVideo(contentId) {
-  if (!confirm("Delete this video? This action cannot be undone.")) return;
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      toast: true,
+      position: 'top',
+      title: 'Delete Video?',
+      text: 'Delete this video? This action cannot be undone.',
+      icon: 'error',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteVideoProcess(contentId);
+      }
+    });
+  } else {
+    if (!confirm("Delete this video? This action cannot be undone.")) return;
+    deleteVideoProcess(contentId);
+  }
+}
 
+async function deleteVideoProcess(contentId) {
   try {
     const response = await fetch(`/api/content/${contentId}`, {
       method: "DELETE",
@@ -710,14 +739,52 @@ async function deleteVideo(contentId) {
     const result = await response.json();
 
     if (result.success) {
-      showNotification("Video deleted", "success");
-      setTimeout(() => location.reload(), 500);
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'success',
+          title: 'Video deleted',
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true
+        }).then(() => {
+          setTimeout(() => location.reload(), 500);
+        });
+      } else {
+        showNotification("Video deleted", "success");
+        setTimeout(() => location.reload(), 500);
+      }
     } else {
-      showNotification(result.message || "Failed to delete video", "error");
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'error',
+          title: result.message || 'Failed to delete video',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true
+        });
+      } else {
+        showNotification(result.message || "Failed to delete video", "error");
+      }
     }
   } catch (error) {
     console.error("Error:", error);
-    showNotification("Failed to delete video", "error");
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: 'Failed to delete video',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    } else {
+      showNotification("Failed to delete video", "error");
+    }
   }
 }
 
@@ -788,14 +855,19 @@ document.getElementById("editForm")?.addEventListener("submit", async (e) => {
   const contentId = document.getElementById("editContentId").value;
   const title = document.getElementById("editTitle").value;
   const description = document.getElementById("editDescription").value;
+  const thumbnail = document.getElementById("editThumbnail").files[0];
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('description', description);
+  if (thumbnail) {
+    formData.append('thumbnail', thumbnail);
+  }
 
   try {
     const response = await fetch(`/api/content/${contentId}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ title, description }),
+      body: formData,
     });
 
     const result = await response.json();
@@ -851,16 +923,27 @@ document
     importBtn.querySelector("span").textContent = "Importing...";
 
     try {
+      const requestBody = {
+        driveUrl,
+        title,
+        description,
+      };
+
+      // Check if we're on a specific gallery page and add galleryUuid
+      const urlPath = window.location.pathname;
+      const galleryMatch = urlPath.match(/^\/gallery\/([a-f0-9-]+)$/);
+      if (galleryMatch) {
+        const galleryUuid = galleryMatch[1];
+        requestBody.galleryUuid = galleryUuid;
+        console.log("Importing to specific gallery:", galleryUuid);
+      }
+
       const response = await fetch("/api/content/drive/import-url", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          driveUrl,
-          title,
-          description,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const result = await response.json();
@@ -934,5 +1017,62 @@ document.getElementById("importDriveModal")?.addEventListener("click", (e) => {
     closeImportDriveModal();
   }
 });
+
+// Thumbnail drop zone handling
+const thumbnailDropZone = document.getElementById("thumbnailDropZone");
+const thumbnailInput = document.getElementById("editThumbnail");
+
+// Remove inline onclick and handle click via event listener
+if (thumbnailDropZone) {
+  thumbnailDropZone.addEventListener("click", (e) => {
+    // Don't trigger if clicking on the image itself
+    if (e.target.id !== 'thumbnailPreview') {
+      thumbnailInput?.click();
+    }
+  });
+}
+
+thumbnailDropZone?.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  thumbnailDropZone.classList.add("border-blue-500", "bg-gray-700");
+});
+
+thumbnailDropZone?.addEventListener("dragleave", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  thumbnailDropZone.classList.remove("border-blue-500", "bg-gray-700");
+});
+
+thumbnailDropZone?.addEventListener("drop", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  thumbnailDropZone.classList.remove("border-blue-500", "bg-gray-700");
+
+  const files = e.dataTransfer.files;
+  if (files.length > 0 && files[0].type.startsWith('image/')) {
+    thumbnailInput.files = files;
+    updateThumbnailPreview(files[0]);
+  } else {
+    showNotification('Please drop an image file', 'error');
+  }
+});
+
+thumbnailInput?.addEventListener("change", (e) => {
+  if (e.target.files.length > 0) {
+    updateThumbnailPreview(e.target.files[0]);
+  }
+});
+
+function updateThumbnailPreview(file) {
+  const thumbnailPreview = document.getElementById("thumbnailPreview");
+  const thumbnailPlaceholder = document.getElementById("thumbnailPlaceholder");
+  if (thumbnailPreview && file) {
+    const url = URL.createObjectURL(file);
+    thumbnailPreview.src = url;
+    thumbnailPreview.classList.remove("hidden");
+    if (thumbnailPlaceholder) thumbnailPlaceholder.classList.add("hidden");
+  }
+}
 
 console.log("Content gallery initialized");

@@ -19,8 +19,8 @@
         <p class="text-white font-medium text-lg"><%= session.username %></p>
         <p class="text-xs text-gray-400">
           Member since <%= typeof formatTimestamp === 'function' ?
-          formatTimestamp(account.created_at, 'date') : new
-          Date(account.created_at).toLocaleDateString() %>
+          formatTimestamp(userAccount.created_at, 'date') : new
+          Date(userAccount.created_at).toLocaleDateString() %>
         </p>
         <% if (session.accountRole === 'admin') { %>
         <span
@@ -37,29 +37,29 @@
         <div class="py-2 border-b border-gray-700">
           <span class="text-xs text-gray-400">Account ID</span>
           <p class="text-white font-mono text-sm mt-1">
-            <%= account.account_id %>
+            <%= userAccount.account_id %>
           </p>
         </div>
         <div class="py-2 border-b border-gray-700">
           <span class="text-xs text-gray-400">Role</span>
           <p class="text-white capitalize text-sm mt-1">
-            <%= account.account_role %>
+            <%= userAccount.account_role %>
           </p>
         </div>
         <div class="py-2 border-b border-gray-700">
           <span class="text-xs text-gray-400">Status</span>
           <p
-            class="<%= account.is_active ? 'text-green-400' : 'text-red-400' %> text-sm mt-1"
+            class="<%= userAccount.is_active ? 'text-green-400' : 'text-red-400' %> text-sm mt-1"
           >
-            <%= account.is_active ? 'Active' : 'Inactive' %>
+            <%= userAccount.is_active ? 'Active' : 'Inactive' %>
           </p>
         </div>
         <div class="py-2">
           <span class="text-xs text-gray-400">Created</span>
           <p class="text-white text-sm mt-1">
             <%= typeof formatTimestamp === 'function' ?
-            formatTimestamp(account.created_at, 'datetime') : new
-            Date(account.created_at).toLocaleString() %>
+            formatTimestamp(userAccount.created_at, 'datetime') : new
+            Date(userAccount.created_at).toLocaleString() %>
           </p>
         </div>
       </div>

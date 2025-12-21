@@ -24,25 +24,21 @@ function toggleVideoSelection(videoId) {
 async function addSelectedVideos() {
   const selectedVideos = Array.from(document.querySelectorAll('.video-checkbox:checked'))
     .map(cb => cb.id.replace('video-', ''));
-  
   if (selectedVideos.length === 0) {
     showNotification('Please select at least one video', 'error');
     return;
   }
-  
   try {
-    const response = await fetch(`/api/playlist/${playlistId}/videos`, {
+    const response = await fetch(`/api/playlists/${playlistId}/videos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        videoIds: selectedVideos
+        videoUuids: selectedVideos // API expects "videoUuids" array
       })
     });
-    
     const result = await response.json();
-    
     if (result.success) {
       showNotification(`Added ${selectedVideos.length} video(s) to playlist!`, 'success');
       closeAddVideosModal();
@@ -56,21 +52,33 @@ async function addSelectedVideos() {
   }
 }
 
-// Move video up or down in playlist
-async function moveVideo(videoId, direction) {
+// Move video up or down in playlist (by reordering itemUuids and sending to backend)
+async function moveVideo(videoUuid, direction) {
+  const videosList = document.getElementById('videosList');
+  if (!videosList) return;
+  // Get array of item_uuids in current order
+  const items = Array.from(videosList.children);
+  const idx = items.findIndex(el => el.getAttribute('data-video-id') === videoUuid);
+  if (idx === -1) return;
+  let newIdx = idx;
+  if (direction === 'up' && idx > 0) newIdx = idx - 1;
+  if (direction === 'down' && idx < items.length - 1) newIdx = idx + 1;
+  if (newIdx === idx) return;
+  // Swap the items
+  const temp = items[idx];
+  items[idx] = items[newIdx];
+  items[newIdx] = temp;
+  // Build new itemUuids order
+  const itemUuids = items.map(el => el.getAttribute('data-item-uuid'));
   try {
-    const response = await fetch(`/api/playlist/${playlistId}/videos/${videoId}/move`, {
+    const response = await fetch(`/api/playlists/${playlistId}/reorder`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        direction: direction
-      })
+      body: JSON.stringify({ itemUuids })
     });
-    
     const result = await response.json();
-    
     if (result.success) {
       showNotification(`Video moved ${direction}!`, 'success');
       setTimeout(() => location.reload(), 500);
@@ -85,26 +93,84 @@ async function moveVideo(videoId, direction) {
 
 // Remove video from playlist
 async function removeFromPlaylist(videoId) {
-  if (!confirm('Remove this video from playlist?')) {
-    return;
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      title: 'Remove Video?',
+      text: 'Remove this video from playlist?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, remove it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        removeFromPlaylistProcess(videoId);
+      }
+    });
+  } else {
+    if (!confirm('Remove this video from playlist?')) {
+      return;
+    }
+    removeFromPlaylistProcess(videoId);
   }
-  
+}
+
+async function removeFromPlaylistProcess(videoId) {
   try {
-    const response = await fetch(`/api/playlist/${playlistId}/videos/${videoId}`, {
+    const response = await fetch(`/api/playlists/${playlistId}/videos/${videoId}`, {
       method: 'DELETE'
     });
     
     const result = await response.json();
     
     if (result.success) {
-      showNotification('Video removed from playlist!', 'success');
-      setTimeout(() => location.reload(), 1000);
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'success',
+          title: 'Video removed from playlist!',
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true
+        }).then(() => {
+          setTimeout(() => location.reload(), 500);
+        });
+      } else {
+        showNotification('Video removed from playlist!', 'success');
+        setTimeout(() => location.reload(), 1000);
+      }
     } else {
-      showNotification(result.message || 'Failed to remove video', 'error');
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'error',
+          title: result.message || 'Failed to remove video',
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true
+        });
+      } else {
+        showNotification(result.message || 'Failed to remove video', 'error');
+      }
     }
   } catch (error) {
     console.error('Error:', error);
-    showNotification('Failed to remove video', 'error');
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        toast: true,
+        position: 'top',
+        icon: 'error',
+        title: 'Failed to remove video',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    } else {
+      showNotification('Failed to remove video', 'error');
+    }
   }
 }
 
@@ -136,7 +202,6 @@ function showNotification(message, type = 'info') {
 // Initialize drag and drop for reordering with SortableJS
 function initializeDragAndDrop() {
   const videosList = document.getElementById('videosList');
-  
   if (videosList && typeof Sortable !== 'undefined') {
     new Sortable(videosList, {
       animation: 150,
@@ -144,43 +209,33 @@ function initializeDragAndDrop() {
       ghostClass: 'bg-blue-900',
       dragClass: 'opacity-50',
       onEnd: async function(evt) {
-        const videoId = evt.item.getAttribute('data-video-id');
-        const oldIndex = evt.oldIndex;
-        const newIndex = evt.newIndex;
-        
-        if (oldIndex === newIndex) return;
-        
-        // Calculate direction and number of moves needed
-        const direction = newIndex > oldIndex ? 'down' : 'up';
-        const moves = Math.abs(newIndex - oldIndex);
-        
+        // Collect new order of item_uuids
+        const itemUuids = Array.from(videosList.children).map(
+          el => el.getAttribute('data-item-uuid')
+        );
         try {
-          // Move video step by step
-          for (let i = 0; i < moves; i++) {
-            const response = await fetch(`/api/playlist/${playlistId}/videos/${videoId}/move`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ direction })
-            });
-            
-            const result = await response.json();
-            if (!result.success) {
-              throw new Error(result.message);
-            }
+          const response = await fetch(`/api/playlists/${playlistId}/reorder`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ itemUuids })
+          });
+          const result = await response.json();
+          if (result.success) {
+            showNotification('Video order updated!', 'success');
+            setTimeout(() => location.reload(), 500);
+          } else {
+            showNotification(result.message || 'Failed to update order', 'error');
+            location.reload();
           }
-          
-          showNotification('Video order updated!', 'success');
-          setTimeout(() => location.reload(), 500);
         } catch (error) {
           console.error('Error reordering:', error);
           showNotification('Failed to update order', 'error');
-          location.reload(); // Reload to restore original order
+          location.reload();
         }
       }
     });
-    
     console.log('Drag and drop initialized');
   }
 }

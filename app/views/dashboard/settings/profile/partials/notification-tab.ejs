@@ -1,0 +1,211 @@
+<!-- Tab Content: Notification Settings -->
+<div id="notificationContent" class="tab-content hidden">
+  <div class="bg-gray-800 rounded-lg border border-gray-700">
+    <div class="p-4 sm:p-6 border-b border-gray-700">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+      >
+        <div>
+          <h3 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="ti ti-bell"></i>
+            Notification Settings
+          </h3>
+          <p class="text-xs text-gray-400 mt-1">
+            Configure notifications to Telegram Bot, Discord, or JSON Webhooks
+          </p>
+        </div>
+        <button
+          onclick="openNotificationModal()"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium w-full sm:w-auto"
+        >
+          <i class="ti ti-bell"></i>
+          <span>Add Channel</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="p-4 sm:p-6">
+      <!-- Existing Channels -->
+      <div id="existingChannels">
+        <h4 class="text-md font-semibold text-white mb-4">
+          Your Notification Channels
+        </h4>
+        <div id="channelsList" class="space-y-4">
+          <!-- Channels will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notification Modal -->
+<div
+  id="notificationModal"
+  class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto"
+>
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div
+      class="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-md mx-auto my-8"
+    >
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-6 border-b border-gray-700">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-white" id="modalTitle">
+            Add Notification Channel
+          </h3>
+          <button
+            onclick="closeNotificationModal()"
+            class="text-gray-400 hover:text-white p-1"
+          >
+            <i class="ti ti-x text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-4 sm:p-6 max-h-96 overflow-y-auto">
+        <form id="notificationModalForm" class="space-y-4">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <input type="hidden" name="channelId" id="channelId" />
+
+          <!-- Provider Selection -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              Notification Provider
+            </label>
+            <select
+              name="provider"
+              id="modalProvider"
+              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Select Provider</option>
+              <option value="telegram">Telegram Bot</option>
+              <option value="discord">Discord Webhook</option>
+              <option value="webhook">JSON Webhook</option>
+            </select>
+          </div>
+
+          <!-- Bot Token -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              Bot Token / Webhook URL
+            </label>
+            <input
+              type="text"
+              name="botToken"
+              id="modalBotToken"
+              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter bot token or webhook URL"
+            />
+            <p class="text-xs text-gray-500 mt-1">
+              <i class="ti ti-info-circle"></i>
+              For Telegram: Get token from @BotFather. For Discord: Webhook URL
+              from channel settings. For Webhook: JSON endpoint URL (e.g.,
+              webhook.site).
+            </p>
+          </div>
+
+          <!-- Chat ID -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              Chat ID / Channel ID
+            </label>
+            <input
+              type="text"
+              name="externalChatId"
+              id="modalExternalChatId"
+              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter chat ID or channel ID"
+            />
+            <p class="text-xs text-gray-500 mt-1">
+              <i class="ti ti-info-circle"></i>
+              For Telegram: Send /start to your bot and check bot logs, or use
+              @userinfobot. For Discord/Webhook: Not required.
+            </p>
+          </div>
+
+          <!-- Username (Optional) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              Username (Optional)
+            </label>
+            <input
+              type="text"
+              name="externalUsername"
+              id="modalExternalUsername"
+              class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter username (optional)"
+            />
+          </div>
+
+          <!-- Notification Settings -->
+          <div class="space-y-3">
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+              Notification Types
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <label class="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="notifyOnUpload"
+                  id="modalNotifyOnUpload"
+                  checked
+                  class="rounded"
+                />
+                <span class="text-gray-300 text-sm">Video Upload</span>
+              </label>
+              <label class="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="notifyOnStream"
+                  id="modalNotifyOnStream"
+                  checked
+                  class="rounded"
+                />
+                <span class="text-gray-300 text-sm">Stream Events</span>
+              </label>
+              <label class="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="notifyOnError"
+                  id="modalNotifyOnError"
+                  checked
+                  class="rounded"
+                />
+                <span class="text-gray-300 text-sm">System Errors</span>
+              </label>
+              <label class="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="notifyOnSchedule"
+                  id="modalNotifyOnSchedule"
+                  class="rounded"
+                />
+                <span class="text-gray-300 text-sm">Schedule Reminders</span>
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Modal Footer -->
+      <div
+        class="p-4 sm:p-6 border-t border-gray-700 flex flex-col sm:flex-row gap-3 sm:justify-end"
+      >
+        <button
+          onclick="closeNotificationModal()"
+          class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors order-2 sm:order-1"
+        >
+          Cancel
+        </button>
+        <button
+          onclick="saveNotificationChannel()"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 order-1 sm:order-2"
+        >
+          <i class="ti ti-device-floppy"></i>
+          <span id="saveButtonText">Save Channel</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

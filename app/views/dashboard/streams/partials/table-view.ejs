@@ -60,15 +60,15 @@
             <td class="px-6 py-4">
               <div class="flex items-center gap-4">
                 <div
-                  class="w-28 h-16 rounded overflow-hidden flex-shrink-0 <%= broadcast.content_type === 'playlist' ? 'bg-gradient-to-br from-purple-600 to-blue-600' : 'bg-gray-700' %>"
+                  class="w-28 h-16 rounded overflow-hidden flex-shrink-0 <%= broadcast.broadcast_type === 'playlist' ? 'bg-gradient-to-br from-purple-600 to-blue-600' : 'bg-gray-700' %>"
                 >
                   <% if (broadcast.thumbnail_path) { %>
                   <img
-                    src="/storage/thumbnails/<%= broadcast.thumbnail_path %>"
+                    src="<%= getThumbnailUrl(broadcast.thumbnail_path) %>"
                     alt="Thumbnail"
                     class="w-full h-full object-cover"
                   />
-                  <% } else if (broadcast.content_type === 'playlist') {
+                  <% } else if (broadcast.broadcast_type === 'playlist') {
                   %>
                   <div
                     class="w-full h-full flex items-center justify-center"
@@ -89,7 +89,7 @@
                     %>
                   </p>
                   <p class="text-sm text-gray-400">
-                    <% if (broadcast.content_type === 'playlist' &&
+                    <% if (broadcast.broadcast_type === 'playlist' &&
                     broadcast.playlist_name) { %>
                     <i class="ti ti-playlist text-blue-400"></i> <%=
                     broadcast.playlist_name %> <% if
@@ -101,7 +101,7 @@
                   </p>
                   <p class="text-xs text-gray-500">
                     <% if (broadcast.resolution) { %> <%=
-                    broadcast.resolution %> â€¢ <%= broadcast.bitrate ||
+                    broadcast.resolution %> â€¢ <%= broadcast.frame_rate ||
                     'N/A' %> kbps â€¢ <%= broadcast.frame_rate || 30 %> FPS
                     <% } else { %> 1920Ã—1080 â€¢ 2500 kbps â€¢ 30 FPS <% } %>
                   </p>
@@ -205,7 +205,7 @@
                   <i class="ti ti-info-circle"></i>
                 </button>
                 <button
-                  onclick="openEditStreamModal('<%= broadcast.broadcast_id %>')"
+                  onclick="openEditStreamModal('<%= broadcast.broadcast_uuid %>')"
                   class="p-2 text-blue-400 hover:bg-gray-600 rounded transition-colors"
                   title="Edit Stream"
                 >
@@ -219,9 +219,9 @@
                   <i class="ti ti-settings"></i>
                 </button> -->
                 <button
-                  onclick="deleteBroadcast('<%= broadcast.broadcast_id %>')"
+                  onclick="deleteBroadcast('<%= broadcast.broadcast_uuid %>')"
                   class="p-2 text-red-400 hover:bg-gray-600 rounded transition-colors"
-                  title="Delete"
+                  title="Delete Stream"
                 >
                   <i class="ti ti-trash"></i>
                 </button>

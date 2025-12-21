@@ -1,383 +1,665 @@
 <!-- Edit Stream Modal -->
-<div id="editStreamModal" class="fixed inset-0 z-50 hidden" style="pointer-events: none;">
+<div
+  id="editStreamModal"
+  class="fixed inset-0 z-50 hidden"
+  style="pointer-events: none"
+>
   <!-- Backdrop with static behavior -->
-  <div class="absolute inset-0 bg-black/60" style="pointer-events: auto;"></div>
-  
+  <div class="absolute inset-0 bg-black/60" style="pointer-events: auto"></div>
+
   <!-- Modal Container -->
-  <div class="fixed inset-0 flex items-center justify-center p-4" style="pointer-events: none;">
+  <div
+    class="fixed inset-0 flex items-center justify-center p-4"
+    style="pointer-events: none"
+  >
     <div
-      class="bg-gray-900 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
-      style="pointer-events: auto;"
+      class="bg-gray-900 rounded-lg w-full max-w-6xl max-h-[95vh] overflow-hidden flex flex-col"
+      style="pointer-events: auto"
     >
       <!-- Header -->
-      <div class="flex items-center justify-between p-6 border-b border-gray-700">
-      <h3 class="text-xl font-bold text-white">Edit Stream</h3>
-      <button
-        onclick="closeEditStreamModal()"
-        class="text-gray-400 hover:text-white p-2"
+      <div
+        class="flex items-center justify-between p-4 border-b border-gray-700"
       >
-        <i class="ti ti-x text-2xl"></i>
-      </button>
-    </div>
-
-    <form
-      id="editStreamForm"
-      onsubmit="updateStream(event)"
-      class="flex-1 overflow-y-auto"
-    >
-      <input type="hidden" id="editBroadcastId" />
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-        <!-- Left Column: Form -->
-        <div class="space-y-4 order-2 lg:order-1">
-          <!-- Broadcast Name -->
+        <div class="flex items-center gap-3">
+          <div
+            class="flex items-center justify-center w-10 h-10 bg-blue-600/20 rounded-lg"
+          >
+            <i class="ti ti-broadcast text-blue-400 text-xl"></i>
+          </div>
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">
-              Broadcast Name
-            </label>
-            <input
-              type="text"
-              id="editStreamName"
-              placeholder="Enter broadcast name..."
-              class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <h3 class="text-md font-bold text-white">Edit Stream</h3>
+            <p class="text-xs text-gray-400">Set up your live broadcast</p>
           </div>
-
-          <!-- Platform Selection -->
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">
-              Streaming Platform
-            </label>
-            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-              <button
-                type="button"
-                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="youtube"
-                data-url="rtmp://a.rtmp.youtube.com/live2/"
-                onclick="selectEditPlatform(this)"
-              >
-                <i class="ti ti-brand-youtube text-2xl text-red-500"></i>
-                <span class="text-xs text-gray-300">YouTube</span>
-              </button>
-
-              <button
-                type="button"
-                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="facebook"
-                data-url="rtmps://live-api-s.facebook.com:443/rtmp/"
-                onclick="selectEditPlatform(this)"
-              >
-                <i class="ti ti-brand-facebook text-2xl text-blue-500"></i>
-                <span class="text-xs text-gray-300">Facebook</span>
-              </button>
-
-              <button
-                type="button"
-                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="twitch"
-                data-url="rtmp://live.twitch.tv/app/"
-                onclick="selectEditPlatform(this)"
-              >
-                <i class="ti ti-brand-twitch text-2xl text-purple-500"></i>
-                <span class="text-xs text-gray-300">Twitch</span>
-              </button>
-
-              <button
-                type="button"
-                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="tiktok"
-                data-url="rtmp://push.tiktok.com/live/"
-                onclick="selectEditPlatform(this)"
-              >
-                <i class="ti ti-brand-tiktok text-2xl text-gray-300"></i>
-                <span class="text-xs text-gray-300">TikTok</span>
-              </button>
-
-              <button
-                type="button"
-                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="instagram"
-                data-url="rtmps://live-upload.instagram.com:443/rtmp/"
-                onclick="selectEditPlatform(this)"
-              >
-                <i class="ti ti-brand-instagram text-2xl text-pink-500"></i>
-                <span class="text-xs text-gray-300">Instagram</span>
-              </button>
-
-              <button
-                type="button"
-                class="edit-platform-btn flex flex-col items-center gap-2 p-3 bg-gray-700 border-2 border-blue-500 rounded-lg hover:border-blue-500 transition-colors"
-                data-platform="custom"
-                data-url=""
-                onclick="selectEditPlatform(this)"
-              >
-                <i class="ti ti-cast text-2xl text-gray-300"></i>
-                <span class="text-xs text-gray-300">Custom</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Stream Configuration -->
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">
-              Stream Configuration
-            </label>
-
-            <!-- RTMP URL -->
-            <div class="relative mb-3">
-              <i
-                class="ti ti-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              ></i>
-              <input
-                type="text"
-                id="editDestinationUrl"
-                required
-                placeholder="RTMP URL"
-                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <!-- Stream Key -->
-            <div class="relative">
-              <i
-                class="ti ti-key absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              ></i>
-              <input
-                type="password"
-                id="editStreamKey"
-                placeholder="Stream Key"
-                class="w-full bg-gray-700 border border-gray-600 text-white px-4 py-3 pl-10 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                type="button"
-                onclick="toggleEditStreamKeyVisibility()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-              >
-                <i class="ti ti-eye" id="editToggleKeyIcon"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Schedule Settings -->
-          <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
-            <div class="mb-3">
-              <label class="text-sm font-medium text-gray-300"
-                >Schedule Settings</label
-              >
-            </div>
-
-            <div class="flex flex-col gap-3">
-              <!-- Loop Video Toggle -->
-              <div
-                class="flex items-center justify-between sm:justify-start gap-2"
-              >
-                <label class="text-sm text-gray-400">Loop Video</label>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    id="editLoopVideo"
-                    class="sr-only peer"
-                    checked
-                    disabled
-                  />
-                  <div
-                    class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
-                  ></div>
-                </label>
-              </div>
-
-              <p class="text-xs text-gray-500">
-                <i class="ti ti-info-circle"></i>
-                Loop and schedule settings cannot be changed after broadcast
-                creation
-              </p>
-            </div>
-          </div>
-
-          <!-- Advanced Settings -->
-          <details class="bg-gray-800 border border-gray-700 rounded-lg">
-            <summary
-              class="cursor-pointer p-4 flex items-center justify-between"
-            >
-              <div class="flex items-center gap-2">
-                <i class="ti ti-settings text-gray-400"></i>
-                <span class="text-sm font-medium text-white"
-                  >Advanced Settings</span
-                >
-              </div>
-              <i class="ti ti-chevron-down text-gray-400"></i>
-            </summary>
-
-            <div class="px-4 pb-4">
-              <p class="text-xs text-gray-500 mb-3">
-                <i class="ti ti-info-circle"></i>
-                Advanced settings are applied during broadcast creation and
-                cannot be modified
-              </p>
-            </div>
-          </details>
         </div>
+        <button
+          onclick="closeEditStreamModal()"
+          class="text-gray-400 hover:text-white p-2"
+        >
+          <i class="ti ti-x text-2xl"></i>
+        </button>
+      </div>
 
-        <!-- Right Column: Preview -->
-        <div class="order-1 lg:order-2">
-          <div class="bg-gray-800 rounded-lg p-4 sticky top-0">
-            <!-- Video Preview Player -->
-            <div
-              class="bg-black rounded-lg overflow-hidden aspect-video mb-4"
-              id="editVideoPreviewContainer"
-            >
-              <video
-                id="editPreviewVideo"
-                class="w-full h-full hidden"
-                controls
-                controlsList="nodownload"
-              >
-                <source id="editPreviewSource" src="" type="video/mp4" />
-                Your browser does not support video tag.
-              </video>
-              <div
-                id="editNoVideoSelected"
-                class="w-full h-full flex flex-col items-center justify-center text-gray-500"
-              >
-                <i class="ti ti-video-off text-4xl mb-2"></i>
-                <p class="text-sm">Video Preview</p>
-                <p class="text-xs" id="editVideoInfo">Loading...</p>
-              </div>
-            </div>
+      <form
+        id="editStreamForm"
+        onsubmit="updateStream(event)"
+        class="flex-1 overflow-y-auto"
+      >
+        <input type="hidden" id="editBroadcastId" />
 
-            <!-- Schedule Settings Preview (Read-only) -->
-            <div
-              class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4"
-              id="editScheduleSettingsPreview"
-              style="display: none"
-            >
-              <div class="mb-3">
-                <label
-                  class="text-sm font-medium text-gray-300 flex items-center gap-2"
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-2">
+          <!-- Left Column: Form -->
+          <div class="space-y-4 order-2 lg:order-1">
+            <!-- Broadcast Name -->
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="flex items-center justify-center w-8 h-8 bg-orange-600/20 rounded-lg"
                 >
-                  <i class="ti ti-lock text-gray-500"></i>
-                  Schedule Settings (Read-only)
-                </label>
-              </div>
-              <div class="space-y-2 text-sm">
-                <div class="flex justify-between">
-                  <span class="text-gray-400">Loop Video:</span>
-                  <span class="text-white" id="editPreviewLoopVideo">-</span>
+                  <i class="ti ti-edit text-orange-400"></i>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-400">Schedule Time:</span>
-                  <span class="text-white" id="editPreviewScheduleTime">-</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-400">Duration Timeout:</span>
-                  <span class="text-white" id="editPreviewDurationTimeout"
-                    >-</span
-                  >
-                </div>
-              </div>
-              <p class="text-xs text-gray-500 mt-3 flex items-center gap-1">
-                <i class="ti ti-info-circle"></i>
-                Schedule settings cannot be changed after broadcast creation
-              </p>
-            </div>
-
-            <!-- Advanced Settings Preview (Read-only) -->
-            <div
-              class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4"
-              id="editAdvancedSettingsPreview"
-              style="display: none"
-            >
-              <div class="mb-3">
-                <label
-                  class="text-sm font-medium text-gray-300 flex items-center gap-2"
-                  id="editAdvancedSettingsTitle"
-                >
-                  <i class="ti ti-lock text-gray-500"></i>
-                  Advanced Settings (Read-only)
-                </label>
-              </div>
-              <div class="grid grid-cols-2 gap-3 text-sm">
-                <div class="bg-gray-900 rounded p-3">
-                  <p class="text-xs text-gray-500 mb-1">Bitrate</p>
-                  <p class="text-white font-medium" id="editPreviewBitrate">
-                    -
+                <div>
+                  <h4 class="text-sm font-medium text-white">
+                    Broadcast Details
+                  </h4>
+                  <p class="text-xs text-gray-400">
+                    Configure your broadcast information
                   </p>
                 </div>
-                <div class="bg-gray-900 rounded p-3">
-                  <p class="text-xs text-gray-500 mb-1">Frame Rate</p>
-                  <p class="text-white font-medium" id="editPreviewFrameRate">
-                    -
-                  </p>
-                </div>
-                <div class="bg-gray-900 rounded p-3">
-                  <p class="text-xs text-gray-500 mb-1">Resolution</p>
-                  <p class="text-white font-medium" id="editPreviewResolution">
-                    -
-                  </p>
-                </div>
-                <div class="bg-gray-900 rounded p-3">
-                  <p class="text-xs text-gray-500 mb-1">Orientation</p>
-                  <p class="text-white font-medium" id="editPreviewOrientation">
-                    -
-                  </p>
-                </div>
-              </div>
-              <p class="text-xs text-gray-500 mt-3 flex items-center gap-1">
-                <i class="ti ti-info-circle"></i>
-                Advanced settings are applied during broadcast and cannot be
-                changed
-              </p>
-            </div>
-
-            <!-- Broadcast Info -->
-            <div class="space-y-3">
-              <div>
-                <label class="text-xs text-gray-400">Broadcast ID</label>
-                <p class="text-sm text-white" id="editBroadcastIdDisplay">-</p>
               </div>
 
               <div>
-                <label class="text-xs text-gray-400">Status</label>
-                <p class="text-sm" id="editBroadcastStatus">
+                <label class="block text-xs text-gray-400 mb-2 font-medium"
+                  >Broadcast Name</label
+                >
+                <div class="relative">
+                  <i
+                    class="ti ti-tag absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  ></i>
+                  <input
+                    type="text"
+                    id="editStreamName"
+                    placeholder="Enter broadcast name..."
+                    maxlength="100"
+                    class="w-full bg-gray-900 border border-gray-600 text-white px-4 py-3 pl-10 pr-16 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    oninput="updateEditStreamNameCounter(this)"
+                    required
+                  />
                   <span
-                    class="inline-flex items-center gap-1 px-2 py-1 bg-gray-700 rounded text-xs"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"
+                    id="editStreamNameCounter"
+                    >0/100</span
                   >
-                    <i class="ti ti-circle-filled text-xs"></i>
-                    <span>Loading...</span>
-                  </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">
+                  <i class="ti ti-info-circle mr-1"></i>
+                  This name will be used for the title of your broadcast video.
+                  Max. 100 characters.
+                </p>
+              </div>
+            </div>
+
+            <!-- Platform Selection -->
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="flex items-center justify-center w-8 h-8 bg-red-600/20 rounded-lg"
+                >
+                  <i class="ti ti-brand-youtube text-red-400"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-white">
+                    Streaming Platform
+                  </h4>
+                  <p class="text-xs text-gray-400">
+                    Select your broadcast destination
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                <button
+                  type="button"
+                  class="edit-platform-btn group flex flex-col items-center gap-2 p-3 bg-gray-900 border-2 border-gray-600 rounded-lg hover:border-red-500 transition-all duration-200 hover:bg-red-500/10"
+                  data-platform="youtube"
+                  data-url="rtmp://a.rtmp.youtube.com/live2/"
+                  onclick="selectEditPlatform(this)"
+                >
+                  <i
+                    class="ti ti-brand-youtube text-2xl text-red-500 group-hover:scale-110 transition-transform"
+                  ></i>
+                  <span class="text-xs text-gray-300 font-medium">YouTube</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="edit-platform-btn group flex flex-col items-center gap-2 p-3 bg-gray-900 border-2 border-gray-600 rounded-lg hover:border-blue-500 transition-all duration-200 hover:bg-blue-500/10"
+                  data-platform="facebook"
+                  data-url="rtmps://live-api-s.facebook.com:443/rtmp/"
+                  onclick="selectEditPlatform(this)"
+                >
+                  <i
+                    class="ti ti-brand-facebook text-2xl text-blue-500 group-hover:scale-110 transition-transform"
+                  ></i>
+                  <span class="text-xs text-gray-300 font-medium"
+                    >Facebook</span
+                  >
+                </button>
+
+                <button
+                  type="button"
+                  class="edit-platform-btn group flex flex-col items-center gap-2 p-3 bg-gray-900 border-2 border-gray-600 rounded-lg hover:border-purple-500 transition-all duration-200 hover:bg-purple-500/10"
+                  data-platform="twitch"
+                  data-url="rtmp://live.twitch.tv/app/"
+                  onclick="selectEditPlatform(this)"
+                >
+                  <i
+                    class="ti ti-brand-twitch text-2xl text-purple-500 group-hover:scale-110 transition-transform"
+                  ></i>
+                  <span class="text-xs text-gray-300 font-medium">Twitch</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="edit-platform-btn group flex flex-col items-center gap-2 p-3 bg-gray-900 border-2 border-gray-600 rounded-lg hover:border-gray-400 transition-all duration-200 hover:bg-gray-400/10"
+                  data-platform="tiktok"
+                  data-url="rtmp://push.tiktok.com/live/"
+                  onclick="selectEditPlatform(this)"
+                >
+                  <i
+                    class="ti ti-brand-tiktok text-2xl text-gray-300 group-hover:scale-110 transition-transform"
+                  ></i>
+                  <span class="text-xs text-gray-300 font-medium">TikTok</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="edit-platform-btn group flex flex-col items-center gap-2 p-3 bg-gray-900 border-2 border-gray-600 rounded-lg hover:border-pink-500 transition-all duration-200 hover:bg-pink-500/10"
+                  data-platform="instagram"
+                  data-url="rtmps://live-upload.instagram.com:443/rtmp/"
+                  onclick="selectEditPlatform(this)"
+                >
+                  <i
+                    class="ti ti-brand-instagram text-2xl text-pink-500 group-hover:scale-110 transition-transform"
+                  ></i>
+                  <span class="text-xs text-gray-300 font-medium"
+                    >Instagram</span
+                  >
+                </button>
+
+                <button
+                  type="button"
+                  class="edit-platform-btn group flex flex-col items-center gap-2 p-3 bg-gray-900 border-2 border-blue-500 rounded-lg hover:border-blue-400 transition-all duration-200 hover:bg-blue-400/10"
+                  data-platform="custom"
+                  data-url=""
+                  onclick="selectEditPlatform(this)"
+                >
+                  <i
+                    class="ti ti-cast text-2xl text-blue-400 group-hover:scale-110 transition-transform"
+                  ></i>
+                  <span class="text-xs text-gray-300 font-medium">Custom</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Stream Configuration -->
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="flex items-center justify-center w-8 h-8 bg-purple-600/20 rounded-lg"
+                >
+                  <i class="ti ti-cast text-purple-400"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-white">
+                    Stream Configuration
+                  </h4>
+                  <p class="text-xs text-gray-400">
+                    RTMP endpoint and authentication
+                  </p>
+                </div>
+              </div>
+
+              <!-- RTMP URL -->
+              <div class="mb-4">
+                <label class="block text-xs text-gray-400 mb-2 font-medium"
+                  >RTMP URL</label
+                >
+                <div class="relative">
+                  <i
+                    class="ti ti-link absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  ></i>
+                  <input
+                    type="text"
+                    id="editDestinationUrl"
+                    required
+                    placeholder="rtmp://stream.example.com/live/"
+                    class="w-full bg-gray-900 border border-gray-600 text-white px-4 py-3 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <!-- Stream Key -->
+              <div>
+                <label class="block text-xs text-gray-400 mb-2 font-medium"
+                  >Stream Key</label
+                >
+                <div class="relative">
+                  <i
+                    class="ti ti-key absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  ></i>
+                  <input
+                    type="password"
+                    id="editStreamKey"
+                    placeholder="Enter your stream key..."
+                    class="w-full bg-gray-900 border border-gray-600 text-white px-4 py-3 pl-10 pr-12 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onclick="toggleEditStreamKeyVisibility()"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  >
+                    <i class="ti ti-eye" id="editToggleKeyIcon"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Schedule Settings -->
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+              <div class="flex items-center gap-3 mb-3">
+                <div
+                  class="flex items-center justify-center w-8 h-8 bg-green-600/20 rounded-lg"
+                >
+                  <i class="ti ti-calendar-time text-green-400"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-white">
+                    Schedule Settings
+                  </h4>
+                  <p class="text-xs text-gray-400">
+                    Broadcast timing configuration
+                  </p>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <!-- Loop Video Toggle -->
+                <div
+                  class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-600"
+                >
+                  <div class="flex items-center gap-3">
+                    <i class="ti ti-repeat text-gray-400"></i>
+                    <div>
+                      <label class="text-sm text-gray-300 font-medium"
+                        >Loop Video</label
+                      >
+                      <p class="text-xs text-gray-400">
+                        Automatically restart video when finished
+                      </p>
+                    </div>
+                  </div>
+                  <label
+                    class="relative inline-flex items-center cursor-not-allowed"
+                  >
+                    <input
+                      type="checkbox"
+                      id="editLoopVideo"
+                      class="sr-only peer"
+                      checked
+                      disabled
+                    />
+                    <div
+                      class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"
+                    ></div>
+                  </label>
+                </div>
+
+                <!-- Info Message -->
+                <div
+                  class="bg-amber-900/20 border border-amber-700/50 rounded-lg p-3"
+                >
+                  <div class="flex items-start gap-3">
+                    <i
+                      class="ti ti-alert-triangle text-amber-500 mt-0.5 flex-shrink-0"
+                    ></i>
+                    <div>
+                      <p class="text-xs text-amber-300 font-medium mb-1">
+                        Settings Locked
+                      </p>
+                      <p class="text-xs text-amber-200/70">
+                        Loop and schedule settings cannot be changed after
+                        broadcast creation.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Advanced Settings -->
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-4">
+              <div class="flex items-center gap-3 mb-3">
+                <div
+                  class="flex items-center justify-center w-8 h-8 bg-blue-600/20 rounded-lg"
+                >
+                  <i class="ti ti-settings text-blue-400"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium text-white">
+                    Advanced Settings
+                  </h4>
+                  <p class="text-xs text-gray-400">
+                    Configured during broadcast creation
+                  </p>
+                </div>
+              </div>
+
+              <div class="bg-gray-900/50 rounded-lg p-3 border border-gray-600">
+                <div class="flex items-start gap-3">
+                  <i
+                    class="ti ti-info-circle text-amber-500 mt-0.5 flex-shrink-0"
+                  ></i>
+                  <div>
+                    <p class="text-xs text-gray-300 font-medium mb-1">
+                      Settings Locked
+                    </p>
+                    <p class="text-xs text-gray-400">
+                      Advanced settings are applied during broadcast creation
+                      and cannot be modified
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Preview -->
+          <div class="order-1 lg:order-2">
+            <div class="bg-gray-800 rounded-lg p-4 sticky top-0">
+              <!-- Video Preview Player -->
+              <div
+                class="bg-black rounded-lg overflow-hidden aspect-video mb-4"
+                id="editVideoPreviewContainer"
+              >
+                <video
+                  id="editPreviewVideo"
+                  class="w-full h-full hidden"
+                  controls
+                  controlsList="nodownload"
+                >
+                  <source id="editPreviewSource" src="" type="video/mp4" />
+                  Your browser does not support video tag.
+                </video>
+                <div
+                  id="editNoVideoSelected"
+                  class="w-full h-full flex flex-col items-center justify-center text-gray-500"
+                >
+                  <i class="ti ti-video-off text-4xl mb-2"></i>
+                  <p class="text-sm">Video Preview</p>
+                  <p class="text-xs" id="editVideoInfo">Loading...</p>
+                </div>
+              </div>
+
+              <!-- Schedule Settings Preview (Read-only) -->
+              <div
+                class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4"
+                id="editScheduleSettingsPreview"
+                style="display: none"
+              >
+                <div class="mb-3">
+                  <label
+                    class="text-sm font-medium text-gray-300 flex items-center gap-2"
+                  >
+                    <i class="ti ti-lock text-gray-500"></i>
+                    Schedule Settings (Read-only)
+                  </label>
+                </div>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-400">Loop Video:</span>
+                    <span class="text-white" id="editPreviewLoopVideo">-</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-400">Schedule Time:</span>
+                    <span class="text-white" id="editPreviewScheduleTime"
+                      >-</span
+                    >
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-400">Duration Timeout:</span>
+                    <span class="text-white" id="editPreviewDurationTimeout"
+                      >-</span
+                    >
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-400">Repeat Stream:</span>
+                    <span class="text-white" id="editPreviewRepeatStream"
+                      >-</span
+                    >
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3 flex items-center gap-1">
+                  <i class="ti ti-info-circle"></i>
+                  Schedule settings cannot be changed after broadcast creation
                 </p>
               </div>
 
-              <div>
-                <label class="text-xs text-gray-400">Content Type</label>
-                <p class="text-sm text-white" id="editContentType">-</p>
+              <!-- Additional Settings Preview (Read-only) -->
+              <div
+                class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4"
+                id="editAdditionalSettingsPreview"
+                style="display: none"
+              >
+                <div class="mb-3">
+                  <label
+                    class="text-sm font-medium text-gray-300 flex items-center gap-2"
+                  >
+                    <i class="ti ti-settings text-gray-500"></i>
+                    Additional Settings (Read-only)
+                  </label>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">Auto-start</p>
+                    <p class="text-white font-medium" id="editPreviewAutostart">
+                      Disabled
+                    </p>
+                  </div>
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">Auto-end</p>
+                    <p class="text-white font-medium" id="editPreviewAutoend">
+                      Disabled
+                    </p>
+                  </div>
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">DVR</p>
+                    <p class="text-white font-medium" id="editPreviewDvr">
+                      Disabled
+                    </p>
+                  </div>
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">360° Video</p>
+                    <p class="text-white font-medium" id="editPreview360">
+                      Disabled
+                    </p>
+                  </div>
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">Private Replay</p>
+                    <p
+                      class="text-white font-medium"
+                      id="editPreviewPrivateReplay"
+                    >
+                      Disabled
+                    </p>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3 flex items-center gap-1">
+                  <i class="ti ti-info-circle"></i>
+                  Additional settings are applied during broadcast creation and
+                  cannot be changed
+                </p>
+              </div>
+
+              <!-- Advanced Settings Preview (Read-only) -->
+              <div
+                class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4"
+                id="editAdvancedSettingsPreview"
+                style="display: none"
+              >
+                <div class="mb-3">
+                  <label
+                    class="text-sm font-medium text-gray-300 flex items-center gap-2"
+                    id="editAdvancedSettingsTitle"
+                  >
+                    <i class="ti ti-lock text-gray-500"></i>
+                    Advanced Settings (Read-only)
+                  </label>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">Bitrate</p>
+                    <p class="text-white font-medium" id="editPreviewBitrate">
+                      -
+                    </p>
+                  </div>
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">Frame Rate</p>
+                    <p class="text-white font-medium" id="editPreviewFrameRate">
+                      -
+                    </p>
+                  </div>
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">Resolution</p>
+                    <p
+                      class="text-white font-medium"
+                      id="editPreviewResolution"
+                    >
+                      -
+                    </p>
+                  </div>
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">Orientation</p>
+                    <p
+                      class="text-white font-medium"
+                      id="editPreviewOrientation"
+                    >
+                      -
+                    </p>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3 flex items-center gap-1">
+                  <i class="ti ti-info-circle"></i>
+                  Advanced settings are applied during broadcast and cannot be
+                  changed
+                </p>
+              </div>
+
+              <!-- Advanced Settings Preview (Read-only) -->
+              <div
+                class="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4"
+                id="editAdvancedSettingsPreview"
+                style="display: none"
+              >
+                <div class="mb-3">
+                  <label
+                    class="text-sm font-medium text-gray-300 flex items-center gap-2"
+                    id="editAdvancedSettingsTitle"
+                  >
+                    <i class="ti ti-lock text-gray-500"></i>
+                    Advanced Settings (Read-only)
+                  </label>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">Bitrate</p>
+                    <p class="text-white font-medium" id="editPreviewBitrate">
+                      -
+                    </p>
+                  </div>
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">Frame Rate</p>
+                    <p class="text-white font-medium" id="editPreviewFrameRate">
+                      -
+                    </p>
+                  </div>
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">Resolution</p>
+                    <p
+                      class="text-white font-medium"
+                      id="editPreviewResolution"
+                    >
+                      -
+                    </p>
+                  </div>
+                  <div class="bg-gray-900 rounded p-3">
+                    <p class="text-xs text-gray-500 mb-1">Orientation</p>
+                    <p
+                      class="text-white font-medium"
+                      id="editPreviewOrientation"
+                    >
+                      -
+                    </p>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3 flex items-center gap-1">
+                  <i class="ti ti-info-circle"></i>
+                  Advanced settings are applied during broadcast and cannot be
+                  changed
+                </p>
+              </div>
+
+              <!-- Broadcast Info -->
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <label class="text-xs text-gray-400">Broadcast ID</label>
+                  <p class="text-sm text-white" id="editBroadcastIdDisplay">
+                    -
+                  </p>
+                </div>
+
+                <div>
+                  <label class="text-xs text-gray-400">Status</label>
+                  <p class="text-sm" id="editBroadcastStatus">
+                    <span
+                      class="inline-flex items-center gap-1 px-2 py-1 bg-gray-700 rounded text-xs"
+                    >
+                      <i class="ti ti-circle-filled text-xs"></i>
+                      <span>Loading...</span>
+                    </span>
+                  </p>
+                </div>
+
+                <div>
+                  <label class="text-xs text-gray-400">Content Type</label>
+                  <p class="text-sm text-white" id="editContentType">-</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Footer Actions -->
-      <div
-        class="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-6 flex gap-3 justify-end"
-      >
-        <button
-          type="button"
-          onclick="closeEditStreamModal()"
-          class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition flex items-center gap-2"
+        <!-- Footer Actions -->
+        <div
+          class="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-2 flex gap-3 justify-end"
         >
-          <i class="ti ti-x"></i>
-          <span>Cancel</span>
-        </button>
-        <button
-          type="submit"
-          class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2"
-        >
-          <i class="ti ti-device-floppy"></i>
-          <span>Save Changes</span>
-        </button>
-      </div>
+          <button
+            type="button"
+            onclick="closeEditStreamModal()"
+            class="px-4 py-2 sm:px-6 sm:py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition flex items-center gap-2 text-sm sm:text-base"
+          >
+            <i class="ti ti-x"></i>
+            <span>Cancel</span>
+          </button>
+          <button
+            type="submit"
+            id="editStreamBtn"
+            class="px-4 py-2 sm:px-6 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2 text-sm sm:text-base"
+          >
+            <i class="ti ti-device-floppy"></i>
+            <span>Save Changes</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

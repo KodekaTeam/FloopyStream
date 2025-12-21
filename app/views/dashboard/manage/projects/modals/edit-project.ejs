@@ -1,0 +1,205 @@
+<!-- Edit Project Modal -->
+<div id="editProjectModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-lg bg-gray-800 border-gray-700">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-white">Edit Project</h3>
+            <button onclick="closeEditProjectModal()" class="text-gray-400 hover:text-white transition-colors">
+                <i class="ti ti-x text-2xl"></i>
+            </button>
+        </div>
+        <!-- Tabs -->
+        <div class="mb-6 border-b border-gray-700">
+            <nav class="flex space-x-4" id="editProjectTabs">
+            <button type="button" class="tab-btn text-gray-300 py-2 px-4 border-b-2 border-transparent focus:outline-none active flex items-center gap-2" data-tab="editTab">
+                <i class="ti ti-edit"></i>
+                Edit
+            </button>
+            <button type="button" class="tab-btn text-gray-300 py-2 px-4 border-b-2 border-transparent focus:outline-none flex items-center gap-2" data-tab="removeTab">
+                <i class="ti ti-trash"></i>
+                Remove
+            </button>
+            </nav>
+        </div>
+        <!-- Tab Contents -->
+        <div id="editTab" class="tab-content">
+            <form id="editProjectForm" class="space-y-4">
+            <div>
+                <label for="edit_project_name" class="block text-sm font-medium text-gray-300 mb-2"></label>
+                Project Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text"
+                   id="edit_project_name"
+                   name="edit_project_name"
+                   required
+                   class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   value="<%= project.project_name %>">
+            </div>
+            <div>
+                <label for="edit_project_description" class="block text-sm font-medium text-gray-300 mb-2">
+                Description
+                </label>
+                <textarea id="edit_project_description"
+                      name="edit_project_description"
+                      rows="3"
+                      class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"><%= project.description || '' %></textarea>
+            </div>
+            <div>
+                <label for="edit_project_status" class="block text-sm font-medium text-gray-300 mb-2">
+                Status
+                </label>
+                <select id="edit_project_status"
+                    name="edit_project_status"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="active" <%= project.status === 'active' ? 'selected' : '' %>>Active</option>
+                <option value="inactive" <%= project.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                <option value="archived" <%= project.status === 'archived' ? 'selected' : '' %>>Archived</option>
+                </select>
+            </div>
+            <div class="flex items-center space-x-3 pt-4">
+                <button type="button"
+                    onclick="closeEditProjectModal()"
+                    class="flex-1 px-4 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors">
+                Cancel
+                </button>
+                <button type="submit"
+                    class="flex-1 px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+                Save Changes
+                </button>
+            </div>
+            </form>
+        </div>
+        <div id="removeTab" class="tab-content hidden">
+            <div class="text-gray-300 mb-4">
+            <p>Are you sure you want to remove this project? This action cannot be undone.</p>
+            </div>
+            <div class="flex items-center space-x-3 pt-4">
+            <button type="button"
+                onclick="closeEditProjectModal()"
+                class="flex-1 px-4 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors">
+                Cancel
+            </button>
+            <form id="removeProjectForm" class="flex-1">
+                <button type="submit"
+                    class="w-full px-4 py-2 bg-red-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-red-700 transition-colors">
+                Remove Project
+                </button>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+
+
+<script>
+// Tabs logic
+document.addEventListener('DOMContentLoaded', function() {
+    // Set Edit tab as default active
+    const editTabBtn = document.querySelector('#editProjectTabs .tab-btn[data-tab="editTab"]');
+    const editTabContent = document.getElementById('editTab');
+    editTabBtn.classList.add('active', 'border-blue-500');
+    editTabContent.classList.remove('hidden');
+
+    // Tabs logic
+    document.querySelectorAll('#editProjectTabs .tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'border-blue-500'));
+            this.classList.add('active', 'border-blue-500');
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(this.dataset.tab).classList.remove('hidden');
+        });
+    });
+});
+
+// Modal Controls
+function openEditProjectModal() {
+    document.getElementById('editProjectModal').classList.remove('hidden');
+}
+function closeEditProjectModal() {
+    document.getElementById('editProjectModal').classList.add('hidden');
+    document.getElementById('editProjectForm').reset();
+}
+// Open modal on edit button click
+function editProject() {
+    openEditProjectModal();
+}
+// Close modal when clicking outside
+document.getElementById('editProjectModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeEditProjectModal();
+    }
+});
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('editProjectModal').classList.contains('hidden')) {
+        closeEditProjectModal();
+    }
+});
+
+
+// Handle Edit Project Form Submission
+document.getElementById('editProjectForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = {
+        project_name: document.getElementById('edit_project_name').value,
+        description: document.getElementById('edit_project_description').value,
+        status: document.getElementById('edit_project_status').value
+    };
+    try {
+        const response = await fetch(`/api/projects/<%= project.project_uuid %>`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        const result = await response.json();
+        if (response.ok) {
+            showNotification('Project updated successfully!', 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showNotification('Error: ' + (result.message || 'Failed to update project'), 'error');
+        }
+    } catch (error) {
+        console.error('Error updating project:', error);
+        showNotification('An error occurred while updating the project', 'error');
+    }
+});
+
+
+// Remove Project Form Submission
+document.getElementById('removeProjectForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const confirmed = await Swal.fire({
+        toast: true,
+        position: 'top',
+        title: 'Are you sure?',
+        text: 'Do you really want to remove this project? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, remove it!',
+        cancelButtonText: 'Cancel'
+    });
+    if (!confirmed.isConfirmed) return;
+    try {
+        const response = await fetch(`/api/projects/<%= project.project_uuid %>`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const result = await response.json();
+        if (response.ok) {
+            showNotification('Project removed successfully!', 'success');
+            setTimeout(() => { window.location.href = '/projects'; }, 1000);
+        } else {
+            showNotification(result.message || 'Failed to remove project', 'error');
+        }
+    } catch (error) {
+        console.error('Error removing project:', error);
+        showNotification('An error occurred while removing the project', 'error');
+    }
+});
+</script>
