@@ -9,6 +9,7 @@ const GalleryVideo = require('../../models/GalleryVideo');
 const Video = require('../../models/Video');
 const Broadcast = require('../../models/Broadcast');
 const Playlist = require('../../models/Playlist');
+const OAuthConfig = require('../../models/OAuthConfig');
 const { requireAuth, requireAdmin } = require('../../middleware/authGuard');
 const { getActiveBroadcastCount } = require('../../services/broadcastEngine');
 const { getPlaylistsByChannel } = require('../helpers/playlistHelpers');
@@ -601,6 +602,12 @@ router.get('/settings', requireAuth, async (req, res) => {
       email: user.user_email,
       display_name: user.user_fullname
     };
+
+    // Get OAuth config
+    const oauthConfig = await OAuthConfig.getByUserUuid(user.user_uuid);
+
+    // Check if Google OAuth is configured in environment
+    const googleEnvSet = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REDIRECT_URI);
     
     res.render("dashboard/settings/settings", {
       title: "Settings",
@@ -608,10 +615,43 @@ router.get('/settings', requireAuth, async (req, res) => {
       userAccount: account,
       currentPage: "settings",
       csrfToken: tokens.create(req.session.csrfSecret),
+      oauthConfig: oauthConfig,
+      googleEnvSet: googleEnvSet,
+      APP_URL: process.env.APP_URL || 'http://localhost:6060',
     });
   } catch (error) {
     console.error('Settings error:', error);
     res.status(500).send('Error loading settings');
+  }
+});
+
+// Save OAuth configuration
+router.post('/settings/oauth', requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.session.accountId);
+    const { googleClientId, googleClientSecret, googleRedirectUri } = req.body;
+
+    // Validate required fields
+    if (!googleClientId || !googleClientSecret || !googleRedirectUri) {
+      return res.status(400).json({
+        success: false,
+        message: 'All OAuth fields are required'
+      });
+    }
+
+    // Save to database
+    await OAuthConfig.upsert(user.user_uuid, googleClientId, googleClientSecret, googleRedirectUri);
+
+    res.json({
+      success: true,
+      message: 'OAuth configuration saved successfully'
+    });
+  } catch (error) {
+    console.error('OAuth save error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to save OAuth configuration'
+    });
   }
 });
 

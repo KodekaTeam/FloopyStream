@@ -1,17 +1,53 @@
 const { google } = require('googleapis');
 const { v4: uuidv4 } = require('uuid');
 const { fetchOne, fetchAll, executeQuery } = require('../core/database');
+const OAuthConfig = require('../models/OAuthConfig');
 
 // ============================================
 // OAUTH CONFIGURATION
 // ============================================
 
-// OAuth configurations for different providers
+// Get OAuth config for a user (prioritizes global env, falls back to user config)
+async function getOAuthConfig(userUuid, provider = 'google') {
+  // First, check if global env config is available
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    return {
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      redirectUri: process.env.GOOGLE_REDIRECT_URI || `${process.env.APP_URL || 'http://localhost:6060'}/api/oauth/google/callback`,
+      scopes: [
+        'https://www.googleapis.com/auth/youtube.readonly',
+        'https://www.googleapis.com/auth/youtube.upload',
+        'https://www.googleapis.com/auth/youtube.force-ssl'
+      ]
+    };
+  }
+
+  // Fallback to user-specific config from database
+  const userConfig = await OAuthConfig.getByUserUuid(userUuid);
+
+  if (userConfig && userConfig.google_client_id && userConfig.google_client_secret && userConfig.google_redirect_uri) {
+    return {
+      clientId: userConfig.google_client_id,
+      clientSecret: userConfig.google_client_secret,
+      redirectUri: userConfig.google_redirect_uri,
+      scopes: [
+        'https://www.googleapis.com/auth/youtube.readonly',
+        'https://www.googleapis.com/auth/youtube.upload',
+        'https://www.googleapis.com/auth/youtube.force-ssl'
+      ]
+    };
+  }
+
+  // No config available
+  return null;
+}
+
+// OAuth configurations for different providers (legacy - kept for backward compatibility)
 const OAUTH_CONFIGS = {
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    // ⚠️ Priority: GOOGLE_REDIRECT_URI env var > falls back to APP_URL + callback path
     redirectUri: process.env.GOOGLE_REDIRECT_URI || `${process.env.APP_URL || 'http://localhost:6060'}/api/oauth/google/callback`,
     scopes: [
       'https://www.googleapis.com/auth/youtube.readonly',
@@ -90,6 +126,17 @@ async function initiateOAuth(req, res) {
       });
     }
 
+    // Get OAuth config for this user
+    const oauthConfig = await getOAuthConfig(user.user_uuid, provider);
+
+    // Validate that we have required config
+    if (!oauthConfig || !oauthConfig.clientId || !oauthConfig.clientSecret) {
+      return res.status(400).json({
+        success: false,
+        message: `OAuth configuration incomplete. Please set up your ${provider} credentials in Settings > OAuth or configure environment variables.`
+      });
+    }
+
     // Generate state parameter for security
     const state = uuidv4();
 
@@ -107,16 +154,16 @@ async function initiateOAuth(req, res) {
 
     if (provider === 'google') {
       const oauth2Client = new google.auth.OAuth2(
-        OAUTH_CONFIGS.google.clientId,
-        OAUTH_CONFIGS.google.clientSecret,
-        OAUTH_CONFIGS.google.redirectUri
+        oauthConfig.clientId,
+        oauthConfig.clientSecret,
+        oauthConfig.redirectUri
       );
 
       authUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         prompt: 'consent',
         include_granted_scopes: true,
-        scope: OAUTH_CONFIGS.google.scopes,
+        scope: oauthConfig.scopes,
         state: state
       });
     } else {
@@ -167,11 +214,21 @@ async function handleOAuthCallback(req, res) {
 
     const { channelUuid } = stateData;
 
+    // Get the user who initiated this OAuth flow
+    const Channel = require('../models/Channel');
+    const channel = await Channel.findByUuid(channelUuid);
+    if (!channel) {
+      return res.redirect('/channels?oauth_error=channel_not_found');
+    }
+
+    // Get OAuth config for this user
+    const oauthConfig = await getOAuthConfig(channel.user_uuid, provider);
+
     if (provider === 'google') {
       const oauth2Client = new google.auth.OAuth2(
-        OAUTH_CONFIGS.google.clientId,
-        OAUTH_CONFIGS.google.clientSecret,
-        OAUTH_CONFIGS.google.redirectUri
+        oauthConfig.clientId,
+        oauthConfig.clientSecret,
+        oauthConfig.redirectUri
       );
 
       // Exchange code for tokens
