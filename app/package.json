@@ -1,6 +1,6 @@
 {
   "name": "floopystream",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Live broadcasting platform with media streaming capabilities",
   "main": "server.js",
   "scripts": {
