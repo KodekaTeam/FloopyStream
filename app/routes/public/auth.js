@@ -42,10 +42,12 @@ router.post('/login', [
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const csrfToken = tokens.create(tokens.secretSync());
+      const adminExists = await UserAdapter.hasAdminUser();
       return res.render('dashboard/auth/login', {
         title: 'Login',
         csrfToken,
-        error: errors.array()[0].msg
+        error: errors.array()[0].msg,
+        allowRegistration: !adminExists
       });
     }
 
@@ -54,10 +56,12 @@ router.post('/login', [
 
     if (!account) {
       const csrfToken = tokens.create(tokens.secretSync());
+      const adminExists = await UserAdapter.hasAdminUser();
       return res.render('dashboard/auth/login', {
         title: 'Login',
         csrfToken,
-        error: 'Invalid username or password'
+        error: 'Invalid username or password',
+        allowRegistration: !adminExists
       });
     }
 
@@ -65,10 +69,12 @@ router.post('/login', [
     
     if (!isValidPassword) {
       const csrfToken = tokens.create(tokens.secretSync());
+      const adminExists = await UserAdapter.hasAdminUser();
       return res.render('dashboard/auth/login', {
         title: 'Login',
         csrfToken,
-        error: 'Invalid username or password'
+        error: 'Invalid username or password',
+        allowRegistration: !adminExists
       });
     }
 
@@ -83,10 +89,12 @@ router.post('/login', [
     console.error('Login error:', error);
     await logError('Login failed', { error: error.message });
     const csrfToken = tokens.create(tokens.secretSync());
+    const adminExists = await UserAdapter.hasAdminUser();
     res.render('dashboard/auth/login', {
       title: 'Login',
       csrfToken,
-      error: 'An error occurred. Please try again.'
+      error: 'An error occurred. Please try again.',
+      allowRegistration: !adminExists
     });
   }
 });

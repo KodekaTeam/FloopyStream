@@ -1,0 +1,195 @@
+<!-- Tab Content: OAuth -->
+<div id="oauthContent" class="tab-content hidden">
+  <div class="bg-gray-800 rounded-lg border border-gray-700">
+    <div class="p-4 sm:p-6 border-b border-gray-700">
+      <h3 class="text-lg font-bold text-white flex items-center gap-2">
+        <i class="ti ti-key"></i>
+        OAuth Configuration
+      </h3>
+      <p class="text-xs text-gray-400 mt-1">
+        Configure Google OAuth credentials for platform integrations
+      </p>
+    </div>
+
+    <% if (googleEnvSet) { %>
+    <!-- Environment Variables Set -->
+    <div class="p-4 sm:p-6">
+      <div class="bg-green-900/20 border border-green-700/30 rounded-lg p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <i class="ti ti-check-circle text-green-400 text-xl"></i>
+          <h4 class="text-green-300 font-medium">
+            OAuth Configured via Environment
+          </h4>
+        </div>
+        <p class="text-sm text-gray-300 mb-3">
+          Google OAuth credentials are configured through environment variables
+          (.env file). This provides better security and is the recommended
+          approach.
+        </p>
+        <div class="bg-gray-900/50 rounded-lg p-3">
+          <p class="text-xs text-gray-400 font-medium mb-2">
+            Configured Variables:
+          </p>
+          <ul class="text-xs text-gray-500 space-y-1">
+            <li>• GOOGLE_CLIENT_ID</li>
+            <li>• GOOGLE_CLIENT_SECRET</li>
+            <li>• GOOGLE_REDIRECT_URI</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <% } else { %>
+    <!-- Manual Configuration Form -->
+    <form id="oauthForm" class="p-4 sm:p-6 space-y-4">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+      <!-- Google Redirect URI -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Google Redirect URI <span class="text-red-400">*</span>
+        </label>
+        <input
+          type="url"
+          name="googleRedirectUri"
+          value="<%= oauthConfig ? oauthConfig.google_redirect_uri : APP_URL + '/api/oauth/google/callback' %>"
+          required
+          readonly
+          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-not-allowed opacity-75"
+          placeholder="<%= APP_URL %>/api/oauth/google/callback"
+        />
+        <p class="text-xs text-gray-500 mt-1">
+          This is the default redirect URI for OAuth callback. Must match Google
+          Cloud Console configuration.
+        </p>
+      </div>
+
+      <!-- Google Client ID -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Google Client ID <span class="text-red-400">*</span>
+        </label>
+        <div class="relative">
+          <input
+            type="password"
+            name="googleClientId"
+            id="googleClientId"
+            value="<%= oauthConfig ? oauthConfig.google_client_id : '' %>"
+            required
+            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter your Google Client ID"
+          />
+          <button
+            type="button"
+            onclick="togglePassword('googleClientId')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+          >
+            <i class="ti ti-eye" id="googleClientIdIcon"></i>
+          </button>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">
+          Get this from Google Cloud Console > APIs & Services > Credentials
+        </p>
+      </div>
+
+      <!-- Google Client Secret -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">
+          Google Client Secret <span class="text-red-400">*</span>
+        </label>
+        <div class="relative">
+          <input
+            type="password"
+            name="googleClientSecret"
+            id="googleClientSecret"
+            value="<%= oauthConfig ? oauthConfig.google_client_secret : '' %>"
+            required
+            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter your Google Client Secret"
+          />
+          <button
+            type="button"
+            onclick="togglePassword('googleClientSecret')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+          >
+            <i class="ti ti-eye" id="googleClientSecretIcon"></i>
+          </button>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">
+          Keep this secret and never share it publicly
+        </p>
+      </div>
+
+      <!-- Info Box -->
+      <div class="bg-blue-900/20 border border-blue-700/30 rounded-lg p-4">
+        <button
+          type="button"
+          onclick="toggleCollapse('setupInstructions')"
+          class="w-full text-left flex items-center justify-between text-xs text-blue-300 font-medium mb-2 hover:text-blue-200"
+        >
+          Setup Instructions:
+          <i class="ti ti-chevron-down" id="setupInstructionsIcon"></i>
+        </button>
+        <div id="setupInstructions" class="space-y-1">
+          <ol class="text-xs text-gray-400 space-y-1 list-decimal list-inside">
+            <li>
+              Go to
+              <a
+                href="https://console.cloud.google.com/"
+                target="_blank"
+                class="text-blue-400 hover:underline"
+                >Google Cloud Console</a
+              >
+            </li>
+            <li>Create or select a project</li>
+            <li>Enable YouTube Data API</li>
+            <li>Create OAuth 2.0 credentials</li>
+            <li>Add authorized redirect URIs</li>
+            <li>Copy Client ID and Client Secret here</li>
+            <br />
+            <li>
+              Best practices: for enhanced security, it is recommended to place
+              OAuth Configuration in the .env and .env.docker files (if using
+              Docker)
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-4">
+        <button
+          type="submit"
+          id="saveOAuthBtn"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-colors flex items-center gap-2 font-medium"
+        >
+          <i class="ti ti-device-floppy"></i>
+          <span>Save Change</span>
+        </button>
+      </div>
+    </form>
+    <% } %>
+  </div>
+</div>
+
+<script>
+  function toggleCollapse(id) {
+    const element = document.getElementById(id);
+    const icon = document.getElementById(id + "Icon");
+    if (element.classList.contains("hidden")) {
+      element.classList.remove("hidden");
+      icon.classList.remove("ti-chevron-right");
+      icon.classList.add("ti-chevron-down");
+    } else {
+      element.classList.add("hidden");
+      icon.classList.remove("ti-chevron-down");
+      icon.classList.add("ti-chevron-right");
+    }
+  }
+  // Initially collapse
+  document.addEventListener("DOMContentLoaded", function () {
+    const element = document.getElementById("setupInstructions");
+    const icon = document.getElementById("setupInstructionsIcon");
+    element.classList.add("hidden");
+    icon.classList.remove("ti-chevron-down");
+    icon.classList.add("ti-chevron-right");
+  });
+</script>

@@ -1,6 +1,6 @@
 {
   "name": "floopystream",
-  "version": "1.0.5",
+  "version": "1.0.0",
   "description": "Live broadcasting platform with media streaming capabilities - Production Docker Build",
   "main": "server.js",
   "scripts": {

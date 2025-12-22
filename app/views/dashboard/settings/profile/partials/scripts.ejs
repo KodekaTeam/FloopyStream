@@ -583,4 +583,143 @@
       setTimeout(() => toast.remove(), 300);
     }, 3000);
   }
+
+  // OAuth form functions
+  function toggleOverrideForm() {
+    const form = document.getElementById("oauthOverrideForm");
+    const btn = document.getElementById("toggleOverrideBtn");
+
+    if (form.classList.contains("hidden")) {
+      form.classList.remove("hidden");
+      btn.textContent = "Hide Form";
+    } else {
+      form.classList.add("hidden");
+      btn.textContent = "Show Form";
+    }
+  }
+
+  // Password toggle function for OAuth fields
+  function togglePassword(fieldId) {
+    const input = document.getElementById(fieldId);
+    const icon = document.getElementById(fieldId + "Icon");
+
+    if (input.type === "password") {
+      input.type = "text";
+      icon.className = "ti ti-eye-off";
+    } else {
+      input.type = "password";
+      icon.className = "ti ti-eye";
+    }
+  }
+
+  // Handle OAuth form submission
+  document.addEventListener("DOMContentLoaded", function () {
+    const oauthForm = document.getElementById("oauthForm");
+    if (oauthForm) {
+      oauthForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // Collect form data as JSON
+        const formData = {
+          _csrf: oauthForm.querySelector('input[name="_csrf"]').value,
+          googleRedirectUri: oauthForm.querySelector(
+            'input[name="googleRedirectUri"]'
+          ).value,
+          googleClientId: oauthForm.querySelector(
+            'input[name="googleClientId"]'
+          ).value,
+          googleClientSecret: oauthForm.querySelector(
+            'input[name="googleClientSecret"]'
+          ).value,
+        };
+
+        const submitBtn = document.getElementById("saveOAuthBtn");
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML =
+          '<i class="ti ti-loader animate-spin mr-2"></i><span>Saving...</span>';
+
+        fetch("/settings/oauth", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        })
+          .then((response) => response.json())
+          .then((result) => {
+            if (result.success) {
+              // Show success toast
+              if (typeof Swal !== "undefined") {
+                Swal.fire({
+                  toast: true,
+                  position: "top",
+                  icon: "success",
+                  title:
+                    result.message || "OAuth configuration saved successfully!",
+                  showConfirmButton: false,
+                  timer: 3000,
+                  timerProgressBar: true,
+                });
+              } else {
+                // Fallback notification
+                showNotification(
+                  result.message || "OAuth configuration saved successfully!",
+                  "success"
+                );
+              }
+
+              // Reload page after short delay to show updated data
+              // setTimeout(() => {
+              //   window.location.reload();
+              // }, 1000);
+            } else {
+              // Show error toast
+              if (typeof Swal !== "undefined") {
+                Swal.fire({
+                  toast: true,
+                  position: "top",
+                  icon: "error",
+                  title: result.message || "Failed to save OAuth configuration",
+                  showConfirmButton: false,
+                  timer: 4000,
+                  timerProgressBar: true,
+                });
+              } else {
+                showNotification(
+                  result.message || "Failed to save OAuth configuration",
+                  "error"
+                );
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("OAuth save error:", error);
+            if (typeof Swal !== "undefined") {
+              Swal.fire({
+                toast: true,
+                position: "top",
+                icon: "error",
+                title: "An error occurred while saving OAuth configuration",
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+              });
+            } else {
+              showNotification(
+                "An error occurred while saving OAuth configuration",
+                "error"
+              );
+            }
+          })
+          .finally(() => {
+            // Reset button state
+            submitBtn.disabled = false;
+            submitBtn.innerHTML =
+              '<i class="ti ti-device-floppy mr-2"></i><span>Save Change</span>';
+          });
+      });
+    }
+  });
 </script>
