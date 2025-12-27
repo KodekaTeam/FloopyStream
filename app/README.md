@@ -104,7 +104,7 @@ Professional live broadcasting platform with media streaming capabilities built 
    http://localhost:8080
    ```
 
-## Project Structure
+<!-- ## Project Structure
 
 ```
 FloopyStream/
@@ -149,7 +149,7 @@ FloopyStream/
 ├── .gitignore        # Git ignore rules
 ├── package.json      # Dependencies
 └── server.js         # Main application file
-```
+``` -->
 
 ## Usage
 
@@ -189,7 +189,7 @@ The system provides:
 - Active broadcast count
 - System logs
 
-## API Endpoints
+<!-- ## API Endpoints
 
 ### Authentication
 
@@ -207,7 +207,7 @@ The system provides:
 
 - `POST /api/broadcast/start` - Start a broadcast
 - `POST /api/broadcast/stop/:id` - Stop a broadcast
-- `GET /api/broadcast/:id` - Get broadcast details
+- `GET /api/broadcast/:id` - Get broadcast details -->
 
 ## Helper Scripts
 
