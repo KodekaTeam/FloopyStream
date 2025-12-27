@@ -389,6 +389,12 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Channel Detail Functions -->
 <script src="/js/channel-detail.js"></script>
 
+<%- include('modals/edit-channel', {channel: channel}) %>
+<%- include('modals/add-gallery') %>
+<%- include('modals/edit-gallery') %>
+<%- include('modals/add-playlist') %>
+<%- include('modals/edit-playlist') %>
+
     </div>
   </main>
 </div>
