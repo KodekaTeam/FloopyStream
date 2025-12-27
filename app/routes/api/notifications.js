@@ -9,7 +9,8 @@ const {
   createNotificationChannel,
   updateNotificationChannel,
   deleteNotificationChannel,
-  testNotificationChannel
+  testNotificationChannel,
+  getNotifications
 } = require('../../controllers/notificationController');
 
 // ============================================
@@ -48,6 +49,9 @@ router.put('/channels/:channelId', requireAuth, [
 
 // Delete notification channel
 router.delete('/channels/:channelId', requireAuth, deleteNotificationChannel);
+
+// Get notifications (GitHub commits)
+router.get('/', getNotifications);
 
 // Test notification channel
 router.post('/channels/:channelId/test', requireAuth, testNotificationChannel);

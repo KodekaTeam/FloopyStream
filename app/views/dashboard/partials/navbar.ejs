@@ -87,38 +87,7 @@
             </div>
 
             <!-- Notification List -->
-            <div class="max-h-80 overflow-y-auto" id="notificationList">
-              <!-- Empty State -->
-              <div class="p-8 text-center text-gray-400">
-                <i class="ti ti-bell-off text-4xl mb-2"></i>
-                <p class="text-sm">No notifications yet</p>
-              </div>
-
-              <!-- Example notification (hidden by default) -->
-              <div
-                class="hidden notification-item p-4 border-b border-gray-700 hover:bg-gray-700 cursor-pointer"
-              >
-                <div class="flex gap-3">
-                  <div class="flex-shrink-0">
-                    <div
-                      class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center"
-                    >
-                      <i class="ti ti-broadcast text-white"></i>
-                    </div>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm text-white font-medium">Stream Started</p>
-                    <p class="text-xs text-gray-400 mt-1">
-                      Your stream "Test Stream" is now live
-                    </p>
-                    <p class="text-xs text-gray-500 mt-1">2 minutes ago</p>
-                  </div>
-                  <div class="flex-shrink-0">
-                    <span class="w-2 h-2 bg-blue-500 rounded-full block"></span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <div class="max-h-80 overflow-y-auto" id="notificationList"></div>
 
             <!-- Footer -->
             <div class="p-3 border-t border-gray-700 text-center">
@@ -297,5 +266,89 @@
         profileDropdown.classList.add("hidden");
       }
     }
+  });
+
+  // Load notifications from API
+  async function loadNotifications() {
+    try {
+      const response = await fetch("/api/notifications");
+      const data = await response.json();
+
+      if (data.success) {
+        showNotifications(data.notifications);
+        updateNotificationBadge(data.hasNew);
+      }
+    } catch (error) {
+      console.error("Failed to load notifications:", error);
+    }
+  }
+
+  // Show notifications in dropdown
+  function showNotifications(notifications) {
+    const notificationList = document.getElementById("notificationList");
+
+    // Clear all existing content
+    notificationList.innerHTML = "";
+
+    if (notifications.length === 0) {
+      // Show empty state
+      const emptyState = document.createElement("div");
+      emptyState.className = "p-8 text-center text-gray-400";
+      emptyState.innerHTML = `
+        <i class="ti ti-bell-off text-4xl mb-2"></i>
+        <p class="text-sm">No notifications yet</p>
+      `;
+      notificationList.appendChild(emptyState);
+      return;
+    }
+
+    // Add notifications
+    notifications.forEach((notification) => {
+      const item = document.createElement("div");
+      item.className =
+        "notification-item p-4 border-b border-gray-700 hover:bg-gray-700 cursor-pointer";
+      item.onclick = () => window.open(notification.url, "_blank");
+
+      item.innerHTML = `
+        <div class="flex gap-3">
+          <div class="flex-shrink-0">
+            ${
+              notification.avatar
+                ? `<img src="${notification.avatar}" alt="${notification.author}" class="w-10 h-10 rounded-full object-cover">`
+                : `<div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                <i class="ti ti-code text-white"></i>
+              </div>`
+            }
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-white font-medium">${notification.title}</p>
+            <p class="text-xs text-gray-400 mt-1">${notification.message}</p>
+            <p class="text-xs text-gray-500 mt-1">by ${notification.author} • ${
+        notification.timeAgo
+      }</p>
+          </div>
+          <div class="flex-shrink-0">
+            <span class="w-2 h-2 bg-blue-500 rounded-full block"></span>
+          </div>
+        </div>
+      `;
+
+      notificationList.appendChild(item);
+    });
+  }
+
+  // Update notification badge
+  function updateNotificationBadge(hasNew) {
+    const badge = document.getElementById("notificationBadge");
+    if (hasNew) {
+      badge.classList.remove("hidden");
+    } else {
+      badge.classList.add("hidden");
+    }
+  }
+
+  // Load notifications on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    loadNotifications();
   });
 </script>
