@@ -1,19 +1,40 @@
 const axios = require('axios');
 
 /**
- * GitHub Service - Handles GitHub API interactions
+ * GitHub Service - Handles GitHub API interactions with caching
  */
 class GitHubService {
+  // Simple in-memory cache
+  static cache = new Map();
+  static CACHE_DURATION = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+
   /**
-   * Get latest commits from a GitHub repository
+   * Get latest commits from a GitHub repository with caching
    * @param {string} owner - Repository owner
    * @param {string} repo - Repository name
    * @param {number} count - Number of commits to fetch (default: 10, will be filtered)
    * @returns {Promise<Array>} Array of filtered commit objects
    */
   static async getLatestCommits(owner, repo, count = 10) {
+    const cacheKey = `${owner}/${repo}/commits`;
+    const now = Date.now();
+
+    // Check cache first
+    if (this.cache.has(cacheKey)) {
+      const cached = this.cache.get(cacheKey);
+      if (now - cached.timestamp < this.CACHE_DURATION) {
+        // console.log('Returning cached GitHub commits');
+        return cached.data;
+      } else {
+        // Cache expired, remove it
+        this.cache.delete(cacheKey);
+      }
+    }
+
     try {
       const url = `https://api.github.com/repos/${owner}/${repo}/commits?per_page=${count}`;
+    //   console.log(`Fetching GitHub commits from: ${url}`);
+      
       const response = await axios.get(url, {
         headers: {
           'User-Agent': 'FloopyStream-App',
@@ -48,30 +69,41 @@ class GitHubService {
           short_sha: commit.sha.substring(0, 7)
         }));
 
+      // Cache the result
+      this.cache.set(cacheKey, {
+        data: filteredCommits,
+        timestamp: now
+      });
+
+    //   console.log(`Successfully fetched and cached ${filteredCommits.length} GitHub commits`);
       return filteredCommits;
     } catch (error) {
-      console.error('Error fetching GitHub commits:', error.message);
+    //   console.error('Error fetching GitHub commits:', error.message);
+      
+      // If we have cached data, return it even if expired (better than nothing)
+      if (this.cache.has(cacheKey)) {
+        const cached = this.cache.get(cacheKey);
+        // console.log('Returning expired cached data due to API error');
+        return cached.data;
+      }
+      
+      // Cache empty result to prevent repeated API calls on errors
+      this.cache.set(cacheKey, {
+        data: [],
+        timestamp: now
+      });
+      
       // Return empty array on error to prevent app crash
       return [];
     }
   }
 
   /**
-   * Check if there are new commits since last check
-   * @param {string} owner - Repository owner
-   * @param {string} repo - Repository name
-   * @param {string} lastSha - Last known commit SHA
-   * @returns {Promise<boolean>} True if there are new commits
+   * Clear cache (useful for testing or manual refresh)
    */
-  static async hasNewCommits(owner, repo, lastSha) {
-    try {
-      const commits = await this.getLatestCommits(owner, repo, 1);
-      if (commits.length === 0) return false;
-      return commits[0].sha !== lastSha;
-    } catch (error) {
-      console.error('Error checking for new commits:', error.message);
-      return false;
-    }
+  static clearCache() {
+    this.cache.clear();
+    // console.log('GitHub cache cleared');
   }
 }
 
