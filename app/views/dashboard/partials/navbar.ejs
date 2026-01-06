@@ -220,17 +220,33 @@
     dropdown.classList.toggle("hidden");
   }
 
-  function markAllAsRead() {
-    const badge = document.getElementById("notificationBadge");
-    badge.classList.add("hidden");
+  async function markAllAsRead() {
+    try {
+      const response = await fetch("/api/notifications/mark-all-read", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
 
-    // Update all notification items to read state
-    document
-      .querySelectorAll(".notification-item .bg-blue-500")
-      .forEach((dot) => {
+      if (!data || !data.success) {
+        throw new Error(
+          data?.message || "Failed to mark notifications as read"
+        );
+      }
+
+      const badge = document.getElementById("notificationBadge");
+      badge.classList.add("hidden");
+
+      // Update all notification items to read state (UI)
+      document.querySelectorAll("[data-notification-dot]").forEach((dot) => {
         dot.classList.remove("bg-blue-500");
         dot.classList.add("bg-transparent");
       });
+    } catch (error) {
+      console.error("Failed to mark all as read:", error);
+    }
   }
 
   function toggleProfileMenu() {
@@ -309,6 +325,10 @@
         "notification-item p-4 border-b border-gray-700 hover:bg-gray-700 cursor-pointer";
       item.onclick = () => window.open(notification.url, "_blank");
 
+      const dotClass = notification.isRead
+        ? "w-2 h-2 bg-transparent rounded-full block"
+        : "w-2 h-2 bg-blue-500 rounded-full block";
+
       item.innerHTML = `
         <div class="flex gap-3">
           <div class="flex-shrink-0">
@@ -328,7 +348,7 @@
       }</p>
           </div>
           <div class="flex-shrink-0">
-            <span class="w-2 h-2 bg-blue-500 rounded-full block"></span>
+            <span data-notification-dot class="${dotClass}"></span>
           </div>
         </div>
       `;

@@ -272,11 +272,17 @@ async function testNotificationChannel(req, res) {
 // Get notifications (GitHub commits)
 async function getNotifications(req, res) {
   try {
+    const lastReadAtMs = Number(req.session.notificationsLastReadAtMs || 0);
+
     // Get latest relevant commits from FloopyStream repo (filtered by conventional commit prefixes)
     const commits = await GitHubService.getLatestCommits('KodekaTeam', 'FloopyStream', 10);
 
     // Format notifications
-    const notifications = commits.map(commit => ({
+    const notifications = commits.map(commit => {
+      const commitDateMs = new Date(commit.date).getTime();
+      const isRead = lastReadAtMs > 0 ? commitDateMs <= lastReadAtMs : false;
+
+      return {
       id: commit.sha,
       type: 'github_commit',
       title: commit.author.name,
@@ -285,17 +291,37 @@ async function getNotifications(req, res) {
       avatar: commit.author.avatar_url,
       date: commit.date,
       url: commit.html_url,
-      timeAgo: getTimeAgo(commit.date)
-    }));
+      timeAgo: getTimeAgo(commit.date),
+      isRead
+      };
+    });
+
+    const hasNew = notifications.some(n => !n.isRead);
 
     res.json({
       success: true,
       notifications: notifications,
-      hasNew: notifications.length > 0 // Simple check, could be improved
+      hasNew,
+      lastReadAtMs: lastReadAtMs || null
     });
   } catch (error) {
     console.error('Get notifications error:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch notifications' });
+  }
+}
+
+// Mark all notifications as read (session-based)
+async function markAllNotificationsAsRead(req, res) {
+  try {
+    req.session.notificationsLastReadAtMs = Date.now();
+
+    res.json({
+      success: true,
+      lastReadAtMs: req.session.notificationsLastReadAtMs
+    });
+  } catch (error) {
+    console.error('Mark all notifications as read error:', error);
+    res.status(500).json({ success: false, message: 'Failed to mark notifications as read' });
   }
 }
 
@@ -326,5 +352,6 @@ module.exports = {
   updateNotificationChannel,
   deleteNotificationChannel,
   testNotificationChannel,
-  getNotifications
+  getNotifications,
+  markAllNotificationsAsRead
 };
