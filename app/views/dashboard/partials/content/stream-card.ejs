@@ -23,6 +23,17 @@
     </div>
     <% } %>
 
+    <!-- Live duration timer (only when active) -->
+    <% if (broadcast.broadcast_status === 'active') { %>
+    <div class="absolute top-2 left-2">
+      <span
+        class="flex items-center gap-2 bg-black/70 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-mono timer"
+        data-start="<%= broadcast.started_at || broadcast.created_at %>"
+        >00:00:00</span
+      >
+    </div>
+    <% } %>
+
     <!-- Status Badge Overlay -->
     <div class="absolute top-2 right-2">
       <% if (broadcast.broadcast_status === 'active') { %>
