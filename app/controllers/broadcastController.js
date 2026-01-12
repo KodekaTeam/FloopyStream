@@ -1270,7 +1270,11 @@ async function deleteBroadcast(req, res) {
             const deleteResult = await youtubeService.deleteBroadcast(broadcast.youtube_broadcast_id);
 
             if (deleteResult.success) {
-              console.log('✅ Successfully deleted YouTube broadcast:', broadcast.youtube_broadcast_id);
+              if (deleteResult.skipped) {
+                console.log('ℹ️ YouTube broadcast already missing (skipping):', broadcast.youtube_broadcast_id);
+              } else {
+                console.log('✅ Successfully deleted YouTube broadcast:', broadcast.youtube_broadcast_id);
+              }
             } else {
               console.log('⚠️ Failed to delete YouTube broadcast:', deleteResult.error);
             }

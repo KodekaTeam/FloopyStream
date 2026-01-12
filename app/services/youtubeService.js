@@ -854,8 +854,35 @@ class YouTubeService {
       console.log('✅ Successfully deleted YouTube broadcast:', broadcastId);
       return { success: true, message: 'Broadcast deleted successfully' };
     } catch (error) {
-      console.error('Error deleting YouTube broadcast:', error);
-      return { success: false, error: error.message };
+      // Keep logs clean: avoid dumping full Gaxios error objects/stack traces
+      const status = error?.response?.status ?? error?.code;
+      const apiMessage =
+        error?.response?.data?.error?.message ||
+        error?.errors?.[0]?.message ||
+        error?.message ||
+        'Unknown error';
+
+      const lowerMsg = String(apiMessage).toLowerCase();
+      const isNotFound = status === 404 || lowerMsg.includes('not found');
+
+      if (isNotFound) {
+        console.log(
+          'ℹ️ YouTube broadcast not found (may already be deleted):',
+          broadcastId
+        );
+        return {
+          success: true,
+          skipped: true,
+          message: 'YouTube broadcast not found (already deleted)'
+        };
+      }
+
+      console.log('⚠️ Failed to delete YouTube broadcast:', {
+        broadcastId,
+        status: status || undefined,
+        message: apiMessage
+      });
+      return { success: false, error: apiMessage, status: status || undefined };
     }
   }
 
