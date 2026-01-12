@@ -1250,7 +1250,8 @@ async function deleteBroadcast(req, res) {
     }
 
     // If this broadcast has YouTube broadcast ID, try to delete it from YouTube
-    if (broadcast.youtube_broadcast_id) {
+    const broadcastStatus = (broadcast.broadcast_status || '').toLowerCase();
+    if (broadcast.youtube_broadcast_id && broadcastStatus !== 'completed') {
       try {
         console.log('📺 Attempting to delete YouTube broadcast:', broadcast.youtube_broadcast_id);
 
@@ -1288,6 +1289,11 @@ async function deleteBroadcast(req, res) {
         console.log('⚠️ Failed to delete YouTube broadcast (continuing with local deletion):', youtubeError.message);
         // Continue with local deletion even if YouTube deletion fails
       }
+    } else if (broadcast.youtube_broadcast_id && broadcastStatus === 'completed') {
+      console.log(
+        'ℹ️ Skipping YouTube broadcast deletion because broadcast is completed:',
+        broadcast.youtube_broadcast_id
+      );
     }
 
     // Delete broadcast record
