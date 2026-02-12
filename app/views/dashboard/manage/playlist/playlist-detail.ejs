@@ -1,7 +1,7 @@
 <% layout('dashboard/layout') %>
 <div class="flex h-screen bg-gray-900 overflow-hidden">
   <%- include('../../partials/navbar') %> <%- include('../../partials/sidebar') %>
-  <div class="flex-1 overflow-auto lg:ml-20 pt-16">
+  <div class="flex-1 overflow-auto lg:ml-20 pt-[72px]">
     <div class="p-4 sm:p-6">
       <div class="bg-gray-800 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
         <div class="flex items-center gap-4 mb-4">
@@ -268,3 +268,4 @@
   const playlistId = "<%= playlist.playlist_uuid || playlist.playlist_id %>";
 </script>
 <script src="/js/playlist-detail.js"></script>
+
