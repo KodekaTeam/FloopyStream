@@ -276,8 +276,8 @@ async function handleOAuthCallback(req, res) {
         oauthUuid,
         channelUuid,
         provider,
-        OAUTH_CONFIGS.google.clientId,
-        OAUTH_CONFIGS.google.clientSecret,
+        oauthConfig.clientId,
+        oauthConfig.clientSecret,
         tokens.access_token,
         tokens.refresh_token,
         tokens.token_type,
@@ -409,10 +409,41 @@ async function refreshOAuthToken(req, res) {
         });
       }
 
+      // Resolve OAuth client credentials (older records may have null client_id/client_secret)
+      let clientId = oauthRecord.client_id || process.env.GOOGLE_CLIENT_ID;
+      let clientSecret = oauthRecord.client_secret || process.env.GOOGLE_CLIENT_SECRET;
+      let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${process.env.APP_URL || 'http://localhost:6060'}/api/oauth/google/callback`;
+
+      if ((!clientId || !clientSecret) || !oauthRecord.client_id || !oauthRecord.client_secret) {
+        const userConfig = await OAuthConfig.getByUserUuid(user.user_uuid);
+        if (userConfig?.google_client_id && userConfig?.google_client_secret) {
+          clientId = clientId || userConfig.google_client_id;
+          clientSecret = clientSecret || userConfig.google_client_secret;
+          redirectUri = userConfig.google_redirect_uri || redirectUri;
+        }
+      }
+
+      if (!clientId || !clientSecret) {
+        return res.status(400).json({
+          success: false,
+          message: 'Google OAuth credentials are missing. Please configure Settings > OAuth (Google Client ID/Secret) or set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env, then try again.'
+        });
+      }
+
+      // Persist resolved credentials back into oauth_credentials so future refreshes work.
+      if (clientId !== oauthRecord.client_id || clientSecret !== oauthRecord.client_secret) {
+        await executeQuery(
+          'UPDATE oauth_credentials SET client_id = ?, client_secret = ?, updated_at = CURRENT_TIMESTAMP WHERE oauth_uuid = ?',
+          [clientId, clientSecret, oauthUuid]
+        );
+        oauthRecord.client_id = clientId;
+        oauthRecord.client_secret = clientSecret;
+      }
+
       const oauth2Client = new google.auth.OAuth2(
-        oauthRecord.client_id,
-        oauthRecord.client_secret,
-        OAUTH_CONFIGS.google.redirectUri
+        clientId,
+        clientSecret,
+        redirectUri
       );
 
       oauth2Client.setCredentials({
@@ -469,6 +500,15 @@ async function refreshOAuthToken(req, res) {
 
   } catch (error) {
     console.error('OAuth refresh error:', error);
+
+    // Handle Google API structured errors (gaxios)
+    const apiError = error?.response?.data?.error || error?.message;
+    if (apiError === 'invalid_request') {
+      return res.status(400).json({
+        success: false,
+        message: 'Google OAuth refresh failed: invalid_request. This usually means the client credentials (Client ID/Secret) are missing or incorrect. Please verify Settings > OAuth or your .env and reconnect if needed.'
+      });
+    }
 
     // Handle specific Google OAuth errors
     if (error.message && error.message.includes('No refresh token is set')) {

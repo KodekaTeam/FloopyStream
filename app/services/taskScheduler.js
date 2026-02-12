@@ -188,13 +188,20 @@ async function checkScheduledBroadcasts() {
 async function checkExpiredOAuthTokens() {
   try {
     const { fetchAll, executeQuery } = require('../core/database');
+    const OAuthConfig = require('../models/OAuthConfig');
 
     // Get all OAuth records with expiry dates
     const oauthRecords = await fetchAll(`
-      SELECT oauth_uuid, channel_uuid, provider, expiry_date, access_token, refresh_token
-      FROM oauth_credentials
-      WHERE expiry_date IS NOT NULL AND access_token IS NOT NULL
+      SELECT oc.oauth_uuid, oc.channel_uuid, oc.provider, oc.expiry_date, oc.access_token, oc.refresh_token,
+             oc.client_id, oc.client_secret, p.user_uuid
+      FROM oauth_credentials oc
+      LEFT JOIN channels c ON c.channel_uuid = oc.channel_uuid
+      LEFT JOIN projects p ON p.project_uuid = c.project_uuid
+      WHERE oc.expiry_date IS NOT NULL AND oc.access_token IS NOT NULL
     `);
+
+    // Cache user OAuth configs (DB lookups) to avoid repeated reads.
+    const userOAuthConfigCache = new Map();
 
     const now = new Date();
     let disconnectedCount = 0;
@@ -211,12 +218,45 @@ async function checkExpiredOAuthTokens() {
         try {
           // Check if token can be refreshed (has refresh token)
           if (oauth.refresh_token && oauth.provider === 'google') {
+            // Resolve OAuth client credentials.
+            // Priority: per-channel stored values -> global env -> user-specific oauth_config.
+            let clientId = oauth.client_id || process.env.GOOGLE_CLIENT_ID;
+            let clientSecret = oauth.client_secret || process.env.GOOGLE_CLIENT_SECRET;
+            let redirectUri = process.env.GOOGLE_REDIRECT_URI || `${process.env.APP_URL || 'http://localhost:6060'}/api/oauth/google/callback`;
+
+            if ((!clientId || !clientSecret) && oauth.user_uuid) {
+              if (!userOAuthConfigCache.has(oauth.user_uuid)) {
+                userOAuthConfigCache.set(oauth.user_uuid, await OAuthConfig.getByUserUuid(oauth.user_uuid));
+              }
+              const userConfig = userOAuthConfigCache.get(oauth.user_uuid);
+              if (userConfig?.google_client_id && userConfig?.google_client_secret) {
+                clientId = clientId || userConfig.google_client_id;
+                clientSecret = clientSecret || userConfig.google_client_secret;
+                redirectUri = userConfig.google_redirect_uri || redirectUri;
+              }
+            }
+
+            if (!clientId || !clientSecret) {
+              // Misconfiguration: we can't refresh without a client id/secret.
+              // Do NOT disconnect automatically; let operator/user fix config.
+              console.warn(
+                `⚠ OAuth token for ${oauth.oauth_uuid} is expiring/expired but Google client credentials are missing. `
+                + `Set GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET or configure Settings > OAuth, then reconnect if needed.`
+              );
+              await logInfo('OAuth refresh skipped - missing Google client credentials', {
+                oauthUuid: oauth.oauth_uuid,
+                provider: oauth.provider,
+                channelUuid: oauth.channel_uuid
+              });
+              continue;
+            }
+
             // Try to refresh the token
             const { google } = require('googleapis');
             const oauth2Client = new google.auth.OAuth2(
-              process.env.GOOGLE_CLIENT_ID,
-              process.env.GOOGLE_CLIENT_SECRET,
-              process.env.GOOGLE_REDIRECT_URI || `${process.env.APP_URL || 'http://localhost:6060'}/api/oauth/google/callback`
+              clientId,
+              clientSecret,
+              redirectUri
             );
 
             oauth2Client.setCredentials({
@@ -226,9 +266,9 @@ async function checkExpiredOAuthTokens() {
             try {
               console.log(`[DEBUG] Attempting to refresh token for ${oauth.oauth_uuid}`);
               console.log(`[DEBUG] Has refresh_token: ${!!oauth.refresh_token}`);
-              console.log(`[DEBUG] CLIENT_ID exists: ${!!process.env.GOOGLE_CLIENT_ID}`);
-              console.log(`[DEBUG] CLIENT_SECRET exists: ${!!process.env.GOOGLE_CLIENT_SECRET}`);
-              console.log(`[DEBUG] REDIRECT_URI: ${process.env.GOOGLE_REDIRECT_URI || `${process.env.APP_URL || 'http://localhost:6060'}/api/oauth/google/callback`}`);
+              console.log(`[DEBUG] CLIENT_ID exists (resolved): ${!!clientId}`);
+              console.log(`[DEBUG] CLIENT_SECRET exists (resolved): ${!!clientSecret}`);
+              console.log(`[DEBUG] REDIRECT_URI (resolved): ${redirectUri}`);
               
               // Refresh token (handle different googleapis return shapes)
               let refreshResult;
@@ -291,6 +331,21 @@ async function checkExpiredOAuthTokens() {
           let disconnectionReason = 'Token expired';
           if (refreshError && refreshError.message && refreshError.message.includes('invalid_grant')) {
             disconnectionReason = 'Refresh token invalid/revoked - User needs to reconnect OAuth';
+          }
+
+          // If refresh failed for non-revocation reasons, avoid disconnecting automatically.
+          // Example: invalid_request can happen when the OAuth client is misconfigured.
+          if (refreshError && refreshError.message && refreshError.message.includes('invalid_request')) {
+            console.warn(
+              `⚠ Skipping auto-disconnect for ${oauth.oauth_uuid} because refresh failed with invalid_request. `
+              + `This usually indicates missing/incorrect Google client credentials or redirect URI mismatch.`
+            );
+            await logInfo('OAuth auto-disconnect skipped - refresh failed with invalid_request', {
+              oauthUuid: oauth.oauth_uuid,
+              provider: oauth.provider,
+              channelUuid: oauth.channel_uuid
+            });
+            continue;
           }
 
           // Disconnect the OAuth connection
