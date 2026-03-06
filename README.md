@@ -1,4 +1,7 @@
-# FLoopyStream 🎥
+# FLoopyStream 🎥 <img src="https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_Indonesia.svg" alt="Bendera Indonesia" width="24" height="18" style="vertical-align:middle;">
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/Version-1.0.5-blue.svg)](https://github.com/KodekaTeam/FloopyStream/releases)
 
 FLoopyStream is a professional live broadcasting platform that lets you stream directly to multiple platforms such as YouTube, Facebook, Twitch, and more using the RTMP protocol. The application can run on a VPS (Virtual Private Server) and supports simultaneous broadcasting to many platforms, featuring advanced scheduling and monitoring capabilities.
 
@@ -769,15 +772,12 @@ Have a feature idea?
 ### Current Limitations
 
 1. **Single-Server Only**: Currently designed for single-server deployment
-
    - _Solution_: Use load balancer for high availability
 
 2. **Local Storage Only**: Media stored locally by default
-
    - _Solution_: Enable Google Drive integration for cloud backup
 
 3. **No Built-in CDN**: Videos streamed directly from server
-
    - _Solution_: Use CDN service in front of server
 
 4. **SQLite Limitations**: SQLite has limits on concurrent writes
@@ -1415,7 +1415,6 @@ npm test
    ```
 
 4. **Use reverse proxy (Nginx)**
-
    - Rate limiting
    - SSL termination
    - Load balancing

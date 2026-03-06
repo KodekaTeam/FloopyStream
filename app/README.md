@@ -1,4 +1,7 @@
-# FLoopyStream
+# FLoopyStream <img src="https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_Indonesia.svg" alt="Bendera Indonesia" width="24" height="18" style="vertical-align:middle;">
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/Version-1.0.5-blue.svg)](https://github.com/KodekaTeam/FloopyStream/releases)
 
 Professional live broadcasting platform with media streaming capabilities built with Express.js, SQLite, and FFmpeg.
 
@@ -68,7 +71,6 @@ Professional live broadcasting platform with media streaming capabilities built 
    **Timezone Configuration:**
 
    Set your preferred timezone using IANA timezone names:
-
    - `Asia/Jakarta` - Jakarta (GMT+7)
    - `Asia/Singapore` - Singapore (GMT+8)
    - `Europe/London` - London
@@ -76,7 +78,6 @@ Professional live broadcasting platform with media streaming capabilities built 
    - `UTC` - Coordinated Universal Time (default)
 
    The timezone affects:
-
    - Broadcast start/end timestamps
    - Scheduled broadcast times
    - Activity logs
