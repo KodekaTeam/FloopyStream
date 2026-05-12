@@ -23,14 +23,14 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY app/package*.json ./
 
 # Install dependencies (production only)
 RUN npm ci --only=production && \
     npm cache clean --force
 
 # Copy application code
-COPY . .
+COPY app/. .
 
 # Create required directories with proper permissions
 RUN mkdir -p storage/database storage/uploads storage/media storage/thumbnails storage/temp storage/logs && \
