@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "migrate": "node scripts/migrate.js",
     "init-secret": "node helpers/secretGenerator.js",
     "reset-password": "node helpers/resetPassword.js"
   },
@@ -50,6 +51,6 @@
     "nodemon": "^3.0.1"
   },
   "engines": {
-    "node": ">=18.19.0 <21.0.0"
+    "node": ">=18.19.0 <22.22.0"
   }
 }

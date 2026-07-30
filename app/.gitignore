@@ -1,0 +1,70 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Storage
+storage/database/*.db
+storage/database/*.db-*
+storage/uploads/*
+storage/media/*
+storage/thumbnails/*
+storage/temp/*
+storage/logs/*.log
+
+# Keep directory structure
+!storage/database/.gitkeep
+!storage/uploads/.gitkeep
+!storage/media/.gitkeep
+!storage/thumbnails/.gitkeep
+!storage/temp/.gitkeep
+!storage/logs/.gitkeep
+
+# OS Files
+.DS_Store
+Thumbs.db
+.bat
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Production
+dist/
+build/
+
+# Enable if push to GitHub Release (https://github.com/kodekateam/floopystream)
+docs
+scripts
+
+# Keep operational scripts in version control.
+!scripts/
+!scripts/backup-db.ps1
+!scripts/ffmpeg-setup.sh
+!scripts/migrate.js
+!scripts/recover-db.js
+
+# backup files
+*.backup
+*.bak
+
+# Agents file
+AGENTS.md
+*.AGENTS.md

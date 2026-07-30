@@ -83,7 +83,18 @@ Professional live broadcasting platform with media streaming capabilities built 
    - Activity logs
    - System monitoring timestamps
 
-5. **Start the application**
+5. **Run database migrations**
+
+   ```bash
+   npm run migrate
+   ```
+
+   Run this after pulling a version with new migrations, before starting the
+   application. A default user account is not created automatically; register
+   an account after startup, and the first registered user is assigned the
+   `admin` role.
+
+6. **Start the application**
 
    Development mode:
 
@@ -97,7 +108,7 @@ Professional live broadcasting platform with media streaming capabilities built 
    npm start
    ```
 
-6. **Access the application**
+7. **Access the application**
 
    Open your browser and navigate to:
 
@@ -105,7 +116,7 @@ Professional live broadcasting platform with media streaming capabilities built 
    http://localhost:8080
    ```
 
-<!-- ## Project Structure
+## Project Structure
 
 ```
 FloopyStream/
@@ -150,7 +161,7 @@ FloopyStream/
 ├── .gitignore        # Git ignore rules
 ├── package.json      # Dependencies
 └── server.js         # Main application file
-``` -->
+```
 
 ## Usage
 
@@ -190,7 +201,7 @@ The system provides:
 - Active broadcast count
 - System logs
 
-<!-- ## API Endpoints
+## API Endpoints
 
 ### Authentication
 
@@ -208,7 +219,7 @@ The system provides:
 
 - `POST /api/broadcast/start` - Start a broadcast
 - `POST /api/broadcast/stop/:id` - Stop a broadcast
-- `GET /api/broadcast/:id` - Get broadcast details -->
+- `GET /api/broadcast/:id` - Get broadcast details
 
 ## Helper Scripts
 
@@ -225,6 +236,16 @@ node helpers/resetPassword.js
 ```
 
 Follow the prompts to reset a user's password.
+
+### Run Database Migrations
+
+```bash
+npm run migrate
+```
+
+The server verifies that all active migrations have completed and will ask you
+to run this command when the database has not been initialized. After a fresh
+migration, register the first account to create the administrator.
 
 ## Configuration
 

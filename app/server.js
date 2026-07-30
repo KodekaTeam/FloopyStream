@@ -20,8 +20,8 @@ const { formatDuration } = require('./utilities/mediaProcessor');
 const { formatFileSize } = require('./utilities/fileManager');
 const { formatTimestamp, getTimezoneInfo, parseTimestampToDate } = require('./utils/datetime');
 
-// Import database for initialization
-const { initializeSchema } = require('./core/database');
+// Import database readiness check
+const { assertDatabaseReady } = require('./core/database');
 
 // Initialize Express app
 const app = express();
@@ -198,12 +198,11 @@ app.use(routes);
 // START SERVER
 // ============================================
 
-// Async IIFE to ensure database is initialized before server starts
+// Async IIFE to verify migrations before server starts
 (async () => {
   try {
-    // Initialize database schema FIRST
-    await initializeSchema();
-    console.log('✓ Database schema initialization complete\n');
+    await assertDatabaseReady();
+    console.log('✓ Database migration state verified\n');
     
     // THEN start the server
     app.listen(port, () => {
