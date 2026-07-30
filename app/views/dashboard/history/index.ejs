@@ -4,99 +4,162 @@
   <%- include('../partials/navbar') %> <%- include('../partials/sidebar') %>
 
   <!-- Main Content -->
-  <main class="flex-1 overflow-auto lg:ml-20 pt-[72px]">
-    <div class="p-4 sm:p-6 lg:p-8">
-      <!-- Header -->
-      <div
-        class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8"
-      >
-        <div>
-          <h2 class="text-2xl sm:text-3xl font-bold text-white">
-            Broadcast History
-          </h2>
-          <p class="text-sm sm:text-base text-gray-400 mt-1">
-            View all your past broadcasts
-          </p>
-        </div>
+  <main class="flex-1 overflow-auto lg:ml-20 pt-16 custom-scrollbar">
+    <div class="p-4 sm:p-5 lg:p-6">
+      <!-- Header Section -->
+      <div class="mb-5 sm:mb-6">
+        <div
+          class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-11 h-11 flex items-center justify-center bg-blue-500/10 rounded-md border border-blue-500/20"
+            >
+              <i class="ti ti-history text-2xl text-blue-500"></i>
+            </div>
+            <div class="min-w-0">
+              <h1 class="text-2xl sm:text-3xl font-bold text-white">
+                Broadcast History
+              </h1>
+              <p class="text-gray-500 text-sm sm:text-base mt-1">
+                Archive of your previous live streaming sessions
+              </p>
+            </div>
+          </div>
 
-        <div class="flex flex-wrap gap-2 sm:gap-4 w-full sm:w-auto">
-          <button
-            onclick="exportHistory()"
-            class="flex-1 sm:flex-initial px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
-          >
-            <i class="ti ti-download"></i>
-            <span>Export</span>
-          </button>
-          <button
-            onclick="clearHistory()"
-            class="flex-1 sm:flex-initial px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
-          >
-            <i class="ti ti-trash"></i>
-            <span>Clear History</span>
-          </button>
+          <div class="flex items-center gap-3 w-full lg:w-auto">
+            <button
+              onclick="exportHistory()"
+              class="flex-1 lg:flex-none px-4 py-2 bg-gray-800/50 hover:bg-gray-800 text-gray-300 hover:text-white rounded-md border border-gray-700/50 transition-colors font-semibold flex items-center justify-center gap-2 text-sm"
+            >
+              <i class="ti ti-download text-lg"></i>
+              <span>Export Archive</span>
+            </button>
+            <button
+              onclick="clearHistory()"
+              class="flex-1 lg:flex-none px-4 py-2 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white rounded-md border border-red-500/20 transition-colors font-semibold flex items-center justify-center gap-2 text-sm"
+            >
+              <i class="ti ti-trash text-lg"></i>
+              <span>Clear History</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-gray-400 text-sm">Total Broadcasts</p>
-            <i class="ti ti-live-view text-gray-500"></i>
+      <!-- Stats Summary -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6">
+        <!-- Total Card -->
+        <div
+          class="relative group bg-gray-800/40 p-4 sm:p-5 rounded-md border border-gray-700/50 hover:border-gray-600 transition-colors"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div
+            class="w-9 h-9 rounded-md bg-blue-500/10 flex items-center justify-center text-blue-500"
+            >
+              <i class="ti ti-broadcast text-xl"></i>
+            </div>
+            <span
+              class="text-[10px] font-bold text-blue-500/50 uppercase tracking-widest leading-none"
+              >Total</span
+            >
           </div>
-          <p class="text-2xl font-bold text-white"><%= broadcasts.length %></p>
+          <p class="text-2xl sm:text-3xl font-bold text-white">
+            <%= (broadcasts || []).length %>
+          </p>
+          <p class="text-gray-500 text-xs mt-1">Registered streams</p>
         </div>
 
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-gray-400 text-sm">Completed</p>
-            <i class="ti ti-circle-check text-gray-500"></i>
+        <!-- Success Card -->
+        <div
+          class="relative group bg-gray-800/40 p-4 sm:p-5 rounded-md border border-gray-700/50 hover:border-gray-600 transition-colors"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div
+            class="w-9 h-9 rounded-md bg-green-500/10 flex items-center justify-center text-green-500"
+            >
+              <i class="ti ti-circle-check text-xl"></i>
+            </div>
+            <span
+              class="text-[10px] font-bold text-green-500/50 uppercase tracking-widest leading-none"
+              >Success</span
+            >
           </div>
-          <p class="text-2xl font-bold text-green-400">
-            <%= broadcasts.filter(b => b.broadcast_status ===
+          <p class="text-2xl sm:text-3xl font-bold text-green-400">
+            <%= (broadcasts || []).filter(b => b.broadcast_status ===
             'completed').length %>
           </p>
+          <p class="text-gray-500 text-xs mt-1">Completed successfully</p>
         </div>
 
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-gray-400 text-sm">Failed</p>
-            <i class="ti ti-alert-circle text-gray-500"></i>
+        <!-- Failed Card -->
+        <div
+          class="relative group bg-gray-800/40 p-4 sm:p-5 rounded-md border border-gray-700/50 hover:border-gray-600 transition-colors"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div
+            class="w-9 h-9 rounded-md bg-red-500/10 flex items-center justify-center text-red-500"
+            >
+              <i class="ti ti-alert-triangle text-xl"></i>
+            </div>
+            <span
+              class="text-[10px] font-bold text-red-500/50 uppercase tracking-widest leading-none"
+              >Failed</span
+            >
           </div>
-          <p class="text-2xl font-bold text-red-400">
-            <%= broadcasts.filter(b => b.broadcast_status === 'failed').length
-            %>
+          <p class="text-2xl sm:text-3xl font-bold text-red-400">
+            <%= (broadcasts || []).filter(b => b.broadcast_status ===
+            'failed').length %>
           </p>
+          <p class="text-gray-500 text-xs mt-1">Error/Interrupted</p>
         </div>
 
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-gray-400 text-sm">Total Duration</p>
-            <i class="ti ti-clock text-gray-500"></i>
+        <!-- Airtime Card -->
+        <div
+          class="relative group bg-gray-800/40 p-4 sm:p-5 rounded-md border border-gray-700/50 hover:border-gray-600 transition-colors"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div
+            class="w-9 h-9 rounded-md bg-purple-500/10 flex items-center justify-center text-purple-500"
+            >
+              <i class="ti ti-clock-play text-xl"></i>
+            </div>
+            <span
+              class="text-[10px] font-bold text-purple-500/50 uppercase tracking-widest leading-none"
+              >Airtime</span
+            >
           </div>
-          <p class="text-2xl font-bold text-white" id="totalDuration">0h 0m</p>
+          <p
+            class="text-2xl sm:text-3xl font-bold text-white"
+            id="totalDuration"
+          >
+            0h 0m
+          </p>
+          <p class="text-gray-500 text-xs mt-1">Total broadcast time</p>
         </div>
       </div>
 
-      <!-- Filters -->
-      <div class="bg-gray-800 rounded-lg p-4 border border-gray-700 mb-6">
-        <div class="flex flex-wrap gap-4">
-          <div class="flex-1 min-w-[250px]">
-            <input
-              type="text"
-              id="searchHistory"
-              placeholder="Search broadcasts..."
-              class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-            />
-          </div>
+      <!-- Controls & Filters -->
+      <div class="mb-5 sm:mb-6 flex flex-col md:flex-row gap-3 items-center">
+        <div class="relative w-full md:flex-1">
+          <i
+            class="ti ti-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg"
+          ></i>
+          <input
+            type="text"
+            id="searchHistory"
+            placeholder="Search by name, ID or destination..."
+            class="w-full bg-gray-800/40 border border-gray-700/50 rounded-md pl-11 pr-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
+          />
+        </div>
 
+        <div class="flex flex-wrap sm:flex-nowrap gap-3 w-full md:w-auto">
           <select
             id="filterStatus"
             onchange="filterHistory()"
-            class="w-full sm:w-auto px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            class="flex-1 md:w-40 bg-gray-800/40 border border-gray-700/50 rounded-md px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
+            <option value="all">Every Status</option>
+            <option value="active">Active Now</option>
             <option value="completed">Completed</option>
             <option value="scheduled">Scheduled</option>
             <option value="failed">Failed</option>
@@ -105,7 +168,7 @@
           <select
             id="filterPlatform"
             onchange="filterHistory()"
-            class="w-full sm:w-auto px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            class="flex-1 md:w-40 bg-gray-800/40 border border-gray-700/50 rounded-md px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
           >
             <option value="all">All Platforms</option>
             <option value="youtube">YouTube</option>
@@ -113,289 +176,318 @@
             <option value="twitch">Twitch</option>
             <option value="tiktok">TikTok</option>
             <option value="instagram">Instagram</option>
-            <option value="custom">Custom</option>
+            <option value="custom">Custom RTMP</option>
           </select>
 
           <input
             type="date"
             id="filterDate"
             onchange="filterHistory()"
-            class="w-full sm:w-auto px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+            class="w-full sm:w-auto bg-gray-800/40 border border-gray-700/50 rounded-md px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
           />
         </div>
       </div>
 
-      <!-- History Content -->
-      <div class="space-y-4">
-        <!-- Desktop Table View -->
+      <!-- History Content Container -->
+      <div
+        class="bg-gray-800/40 border border-gray-700/50 rounded-md overflow-hidden"
+      >
+        <% const stColors = { active: 'bg-green-500', completed: 'bg-blue-500',
+        scheduled: 'bg-orange-500', failed: 'bg-red-500' }; %>
         <div
-          class="hidden md:block bg-gray-800 rounded-lg border border-gray-700 overflow-hidden"
+          class="p-4 sm:p-5 border-b border-gray-700/50 flex items-center justify-between"
         >
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-900 border-b border-gray-700">
-                <tr>
-                  <th
-                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
-                  >
-                    Stream Info
-                  </th>
-                  <th
-                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
-                  >
-                    Platform
-                  </th>
-                  <th
-                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
-                  >
-                    Start Time
-                  </th>
-                  <th
-                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
-                  >
-                    End Time
-                  </th>
-                  <th
-                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
-                  >
-                    Duration
-                  </th>
-                  <th
-                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
-                  >
-                    Status
-                  </th>
-                  <th
-                    class="px-6 py-4 text-left text-sm font-semibold text-gray-300"
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-700" id="historyTableBody">
-                <% if (broadcasts.length === 0) { %>
-                <tr>
-                  <td colspan="7" class="px-6 py-12 text-center">
-                    <div class="flex flex-col items-center gap-3">
-                      <i class="ti ti-history text-5xl text-gray-600"></i>
-                      <p class="text-gray-400">No broadcast history found</p>
-                    </div>
-                  </td>
-                </tr>
-                <% } else { %> <% broadcasts.forEach(broadcast => { %>
-                <tr
-                  class="hover:bg-gray-700 transition-colors broadcast-row"
-                  data-status="<%= broadcast.broadcast_status %>"
-                  data-platform="<%= broadcast.platform_name.toLowerCase() %>"
-                  data-date="<%= broadcast.created_at %>"
+          <h3 class="font-bold text-white text-lg">Stream Archive</h3>
+          <span
+            class="text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >Historical Data</span
+          >
+        </div>
+
+        <!-- Desktop View -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-gray-900/50">
+                <th
+                  class="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest"
                 >
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
+                  Broadcast Details
+                </th>
+                <th
+                  class="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center"
+                >
+                  Platform
+                </th>
+                <th
+                  class="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center"
+                >
+                  Timeline
+                </th>
+                <th
+                  class="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center"
+                >
+                  Duration
+                </th>
+                <th
+                  class="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center"
+                >
+                  Status
+                </th>
+                <th
+                  class="px-6 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest text-center"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700/30" id="historyTableBody">
+              <% if ((broadcasts || []).length === 0) { %>
+              <tr>
+                <td colspan="6" class="px-6 py-32 text-center">
+                  <div class="flex flex-col items-center gap-4">
+                    <div
+                      class="w-20 h-20 bg-gray-800/50 rounded-2xl flex items-center justify-center border border-gray-700/50 mb-2"
+                    >
+                      <i class="ti ti-history-off text-4xl text-gray-600"></i>
+                    </div>
+                    <div>
+                      <p class="text-white font-bold text-lg">
+                        No history records found
+                      </p>
+                      <p class="text-gray-500 text-sm mt-1">
+                        Your past broadcasts will appear here.
+                      </p>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <% } else { %> <% broadcasts.forEach(broadcast => { %>
+              <tr
+                class="hover:bg-gray-700/30 transition-all duration-300 group broadcast-row"
+                data-status="<%= broadcast.broadcast_status %>"
+                data-platform="<%= broadcast.platform_name.toLowerCase() %>"
+                data-date="<%= broadcast.created_at %>"
+                data-uuid="<%= broadcast.broadcast_uuid %>"
+              >
+                <td class="px-6 py-5">
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="relative flex-shrink-0 group-hover:scale-105 transition-transform duration-300"
+                    >
                       <div
-                        class="w-16 h-10 bg-gray-700 rounded overflow-hidden"
+                        class="w-20 h-12 bg-gray-900 rounded-xl overflow-hidden border border-gray-700/50"
                       >
                         <% if (broadcast.thumbnail_path) { %>
                         <img
                           src="/storage/thumbnails/<%= broadcast.thumbnail_path %>"
-                          alt="Thumbnail"
                           class="w-full h-full object-cover"
                         />
                         <% } else { %>
                         <div
-                          class="w-full h-full flex items-center justify-center"
+                          class="w-full h-full flex items-center justify-center bg-gray-800"
                         >
-                          <i class="ti ti-video text-gray-500"></i>
+                          <i class="ti ti-video text-gray-600"></i>
                         </div>
                         <% } %>
                       </div>
-                      <div>
-                        <p class="text-white font-medium">
-                          <%= broadcast.broadcast_name || 'Untitled Broadcast'
-                          %>
-                        </p>
-                        <p class="text-sm text-gray-400">
-                          ID: <%= broadcast.broadcast_id %>
-                        </p>
-                      </div>
                     </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-2">
-                      <% const platformIcons = { youtube: 'brand-youtube',
-                      facebook: 'brand-facebook', twitch: 'brand-twitch',
-                      tiktok: 'brand-tiktok', instagram: 'brand-instagram' };
-                      const icon =
-                      platformIcons[broadcast.platform_name.toLowerCase()] ||
-                      'cast'; %>
-                      <i class="ti ti-<%= icon %> text-xl text-gray-400"></i>
-                      <span class="text-white capitalize"
-                        ><%= broadcast.platform_name %></span
+                    <div class="min-w-0">
+                      <p
+                        class="text-white font-bold truncate group-hover:text-blue-400 transition-colors uppercase text-[11px] tracking-wide"
                       >
+                        <%= broadcast.broadcast_name || 'Untitled Stream' %>
+                      </p>
+                      <p class="text-[10px] text-gray-500 font-mono mt-1">
+                        #<%= broadcast.broadcast_id %>
+                      </p>
                     </div>
-                  </td>
-                  <td class="px-6 py-4 text-gray-300">
-                    <%= typeof formatTimestamp === 'function' ?
-                    formatTimestamp(broadcast.created_at, 'datetime') : (new
-                    Date(broadcast.created_at).toLocaleString()) %>
-                  </td>
-                  <td class="px-6 py-4 text-gray-300">
-                    <%= broadcast.updated_at ? (typeof formatTimestamp ===
-                    'function' ? formatTimestamp(broadcast.updated_at,
-                    'datetime') : new
-                    Date(broadcast.updated_at).toLocaleString()) : '-' %>
-                  </td>
-                  <td class="px-6 py-4 text-gray-300">
-                    <%= broadcast.duration_seconds ?
-                    Math.floor(broadcast.duration_seconds / 60) + 'm' : '-' %>
-                  </td>
-                  <td class="px-6 py-4">
-                    <% const statusColors = { active: 'bg-green-600', completed:
-                    'bg-blue-600', scheduled: 'bg-yellow-600', failed:
-                    'bg-red-600' }; const color =
-                    statusColors[broadcast.broadcast_status] || 'bg-gray-600';
-                    %>
+                  </div>
+                </td>
+                <td class="px-6 py-5">
+                  <div class="flex items-center justify-center gap-2">
                     <span
-                      class="px-3 py-1 rounded-full text-xs font-medium text-white <%= color %>"
+                      class="bg-gray-800/50 px-3 py-1 rounded-lg border border-gray-700/50 text-[10px] font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2"
                     >
-                      <%= broadcast.broadcast_status.toUpperCase() %>
+                      <i class="ti ti-point-filled text-blue-500"></i>
+                      <%= broadcast.platform_name %>
                     </span>
-                  </td>
-                  <td class="px-6 py-4">
-                    <div class="flex gap-2">
-                      <button
-                        onclick="viewBroadcastDetails('<%= broadcast.broadcast_uuid %>')"
-                        class="p-2 text-blue-400 hover:bg-gray-600 rounded transition-colors"
-                        title="View Details"
+                  </div>
+                </td>
+                <td class="px-6 py-5">
+                  <div class="flex flex-col items-center gap-1">
+                    <div
+                      class="flex items-center gap-2 text-[11px] text-gray-300 font-medium"
+                    >
+                      <i class="ti ti-clock-play text-blue-400"></i>
+                      <span
+                        ><%= typeof formatTimestamp === 'function' ?
+                        formatTimestamp(broadcast.created_at, 'datetime') : (new
+                        Date(broadcast.created_at).toLocaleString()) %></span
                       >
-                        <i class="ti ti-eye"></i>
-                      </button>
-                      <button
-                        onclick="deleteBroadcast('<%= broadcast.broadcast_uuid %>')"
-                        class="p-2 text-red-400 hover:bg-gray-600 rounded transition-colors"
-                        title="Delete"
-                      >
-                        <i class="ti ti-trash"></i>
-                      </button>
                     </div>
-                  </td>
-                </tr>
-                <% }) %> <% } %>
-              </tbody>
-            </table>
-          </div>
+                    <div
+                      class="flex items-center gap-2 text-[11px] text-gray-500"
+                    >
+                      <i class="ti ti-clock-stop text-purple-400"></i>
+                      <span
+                        ><%= broadcast.updated_at ? (typeof formatTimestamp ===
+                        'function' ? formatTimestamp(broadcast.updated_at,
+                        'datetime') : new
+                        Date(broadcast.updated_at).toLocaleString()) : '-'
+                        %></span
+                      >
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-5">
+                  <div
+                    class="flex items-center justify-center gap-2 text-xs font-bold text-white"
+                  >
+                    <i class="ti ti-hourglass text-orange-400"></i>
+                    <%= broadcast.duration_seconds ?
+                    Math.floor(broadcast.duration_seconds / 60) + ' Min' : '-'
+                    %>
+                  </div>
+                </td>
+                <td class="px-6 py-5 text-center">
+                  <% const currentStatusColor =
+                  stColors[broadcast.broadcast_status] || 'bg-gray-500'; %>
+                  <span
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider <%= currentStatusColor %>/10 text-<%= currentStatusColor.split('-')[1] %>-500 border border-<%= currentStatusColor.split('-')[1] %>-500/20"
+                  >
+                    <div
+                      class="w-1.5 h-1.5 rounded-full <%= currentStatusColor %>"
+                    ></div>
+                    <%= broadcast.broadcast_status %>
+                  </span>
+                </td>
+                <td class="px-6 py-5 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <button
+                      onclick="viewBroadcastDetails('<%= broadcast.broadcast_uuid %>')"
+                      class="w-9 h-9 flex items-center justify-center bg-gray-800/50 hover:bg-blue-500/20 text-blue-400 border border-gray-700/50 rounded-xl transition-all"
+                      title="Analyze"
+                    >
+                      <i class="ti ti-file-analytics text-lg"></i>
+                    </button>
+                    <button
+                      onclick="deleteBroadcast('<%= broadcast.broadcast_uuid %>')"
+                      class="w-9 h-9 flex items-center justify-center bg-gray-800/50 hover:bg-red-500/20 text-red-400 border border-gray-700/50 rounded-xl transition-all"
+                      title="Delete"
+                    >
+                      <i class="ti ti-trash text-lg"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <% }) %> <% } %>
+            </tbody>
+          </table>
         </div>
 
-        <!-- Mobile Card View -->
-        <div class="md:hidden space-y-4">
-          <% if (broadcasts.length === 0) { %>
+        <!-- Mobile View Card Grid -->
+        <div class="md:hidden p-4 space-y-4">
+          <% if ((broadcasts || []).length === 0) { %>
           <div
-            class="bg-gray-800 rounded-lg p-8 text-center border border-gray-700"
+            class="bg-gray-800/50 rounded-xl p-10 text-center border border-gray-700/30"
           >
-            <div class="flex flex-col items-center gap-3">
-              <i class="ti ti-history text-5xl text-gray-600"></i>
-              <p class="text-gray-400">No broadcast history found</p>
-            </div>
+            <i class="ti ti-history-off text-4xl text-gray-600 mb-2 block"></i>
+            <p class="text-gray-400 font-medium">No history yet</p>
           </div>
           <% } else { %> <% broadcasts.forEach(broadcast => { %>
           <div
-            class="bg-gray-800 rounded-lg p-4 border border-gray-700 space-y-4 broadcast-row"
+            class="bg-gray-800/40 p-4 rounded-2xl border border-gray-700/50 space-y-4 broadcast-row"
             data-status="<%= broadcast.broadcast_status %>"
             data-platform="<%= broadcast.platform_name.toLowerCase() %>"
             data-date="<%= broadcast.created_at %>"
           >
-            <!-- Card Header: Thumbnail + Title + Status -->
-            <div class="flex gap-3">
-              <!-- Thumbnail -->
+            <div class="flex gap-4">
               <div
-                class="w-20 h-14 bg-gray-700 rounded overflow-hidden flex-shrink-0"
+                class="w-20 h-14 bg-gray-900 rounded-xl overflow-hidden border border-gray-700/50 flex-shrink-0"
               >
                 <% if (broadcast.thumbnail_path) { %>
                 <img
                   src="/storage/thumbnails/<%= broadcast.thumbnail_path %>"
-                  alt="Thumbnail"
                   class="w-full h-full object-cover"
                 />
                 <% } else { %>
-                <div class="w-full h-full flex items-center justify-center">
-                  <i class="ti ti-video text-gray-500"></i>
+                <div
+                  class="w-full h-full flex items-center justify-center bg-gray-800"
+                >
+                  <i class="ti ti-video text-gray-600 text-xl"></i>
                 </div>
                 <% } %>
               </div>
-              <!-- Title & ID -->
               <div class="flex-1 min-w-0">
-                <h3 class="text-white font-medium truncate">
-                  <%= broadcast.broadcast_name || 'Untitled Broadcast' %>
-                </h3>
-                <p class="text-xs text-gray-400 truncate">
-                  ID: <%= broadcast.broadcast_id %>
+                <h4
+                  class="text-white font-bold truncate text-sm uppercase tracking-wide"
+                >
+                  <%= broadcast.broadcast_name || 'Untitled Stream' %>
+                </h4>
+                <p class="text-[10px] text-gray-500 font-mono mt-0.5">
+                  #<%= broadcast.broadcast_id %>
                 </p>
-                <!-- Status Badge -->
-                <div class="mt-1">
-                  <% const statusColors = { active: 'bg-green-600', completed:
-                  'bg-blue-600', scheduled: 'bg-yellow-600', failed:
-                  'bg-red-600' }; const color =
-                  statusColors[broadcast.broadcast_status] || 'bg-gray-600'; %>
+
+                <div class="mt-2">
+                  <% const currentStatusColor =
+                  stColors[broadcast.broadcast_status] || 'bg-gray-500'; %>
                   <span
-                    class="px-2 py-0.5 rounded-full text-[10px] font-medium text-white <%= color %>"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider <%= currentStatusColor %>/10 text-<%= currentStatusColor.split('-')[1] %>-400 border border-<%= currentStatusColor.split('-')[1] %>-500/20"
                   >
-                    <%= broadcast.broadcast_status.toUpperCase() %>
+                    <div
+                      class="w-1 h-1 rounded-full <%= currentStatusColor %>"
+                    ></div>
+                    <%= broadcast.broadcast_status %>
                   </span>
                 </div>
               </div>
             </div>
 
-            <!-- Details Grid -->
-            <div class="grid grid-cols-2 gap-2 text-sm">
-              <div class="bg-gray-700/50 p-2 rounded">
-                <p class="text-gray-400 text-xs">Platform</p>
-                <div class="flex items-center gap-1 text-gray-200 mt-0.5">
-                  <% const platformIcons = { youtube: 'brand-youtube', facebook:
-                  'brand-facebook', twitch: 'brand-twitch', tiktok:
-                  'brand-tiktok', instagram: 'brand-instagram' }; const icon =
-                  platformIcons[broadcast.platform_name.toLowerCase()] ||
-                  'cast'; %>
-                  <i class="ti ti-<%= icon %>"></i>
-                  <span class="capitalize"><%= broadcast.platform_name %></span>
-                </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div
+                class="bg-gray-900/50 p-3 rounded-xl border border-gray-700/30"
+              >
+                <p
+                  class="text-[9px] text-gray-500 uppercase font-bold tracking-widest mb-1 text-center"
+                >
+                  Platform
+                </p>
+                <p
+                  class="text-white text-[11px] font-bold text-center uppercase tracking-wide truncate"
+                >
+                  <%= broadcast.platform_name %>
+                </p>
               </div>
-              <div class="bg-gray-700/50 p-2 rounded">
-                <p class="text-gray-400 text-xs">Duration</p>
-                <p class="text-gray-200 mt-0.5">
+              <div
+                class="bg-gray-900/50 p-3 rounded-xl border border-gray-700/30"
+              >
+                <p
+                  class="text-[9px] text-gray-500 uppercase font-bold tracking-widest mb-1 text-center"
+                >
+                  Duration
+                </p>
+                <p
+                  class="text-white text-[11px] font-bold text-center uppercase tracking-wide"
+                >
                   <%= broadcast.duration_seconds ?
-                  Math.floor(broadcast.duration_seconds / 60) + 'm' : '-' %>
-                </p>
-              </div>
-              <div class="bg-gray-700/50 p-2 rounded">
-                <p class="text-gray-400 text-xs">Date</p>
-                <p class="text-gray-200 mt-0.5">
-                  <%= typeof formatTimestamp === 'function' ?
-                  formatTimestamp(broadcast.created_at, 'date') : (new
-                  Date(broadcast.created_at).toLocaleDateString()) %>
-                </p>
-              </div>
-              <div class="bg-gray-700/50 p-2 rounded">
-                <p class="text-gray-400 text-xs">Time</p>
-                <p class="text-gray-200 mt-0.5">
-                  <%= typeof formatTimestamp === 'function' ?
-                  formatTimestamp(broadcast.created_at, 'time') : (new
-                  Date(broadcast.created_at).toLocaleTimeString()) %>
+                  Math.floor(broadcast.duration_seconds / 60) + ' M' : '-' %>
                 </p>
               </div>
             </div>
 
-            <!-- Actions -->
-            <div class="flex gap-2 pt-2 border-t border-gray-700">
+            <div class="flex gap-2 pt-2 border-t border-gray-700/50">
               <button
                 onclick="viewBroadcastDetails('<%= broadcast.broadcast_uuid %>')"
-                class="flex-1 py-2 bg-gray-700 hover:bg-gray-600 text-blue-400 rounded transition-colors flex items-center justify-center gap-2 text-sm"
+                class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-bold flex items-center justify-center gap-2 text-xs shadow-lg shadow-blue-600/20"
               >
-                <i class="ti ti-eye"></i> View
+                <i class="ti ti-file-analytics"></i> Analyze
               </button>
               <button
                 onclick="deleteBroadcast('<%= broadcast.broadcast_uuid %>')"
-                class="flex-1 py-2 bg-gray-700 hover:bg-gray-600 text-red-400 rounded transition-colors flex items-center justify-center gap-2 text-sm"
+                class="w-12 h-10.5 bg-gray-800 hover:bg-red-500/20 text-red-400 rounded-xl transition-all border border-gray-700/50 flex items-center justify-center"
               >
-                <i class="ti ti-trash"></i> Delete
+                <i class="ti ti-trash"></i>
               </button>
             </div>
           </div>
@@ -403,8 +495,10 @@
         </div>
       </div>
 
-      <!-- Include pagination -->
-      <%- include('./partials/pagination') %>
+      <!-- Pagination Section -->
+      <div class="mt-6 mb-8">
+        <%- include('./partials/pagination') %>
+      </div>
     </div>
   </main>
 </div>
@@ -413,16 +507,23 @@
 <script>
   // Calculate total duration on page load
   document.addEventListener("DOMContentLoaded", () => {
-    const broadcasts = JSON.parse("<%= JSON.stringify(broadcasts) %>");
-    const totalSeconds = broadcasts.reduce(
-      (sum, b) => sum + (b.duration_seconds || 0),
-      0
-    );
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    document.getElementById(
-      "totalDuration"
-    ).textContent = `${hours}h ${minutes}m`;
+    try {
+      // Safely access broadcasts from server
+      const broadcasts = <%- JSON.stringify(broadcasts || []) %>;
+      if (Array.isArray(broadcasts) && broadcasts.length > 0) {
+        const totalSeconds = broadcasts.reduce(
+          (sum, b) => sum + (b.duration_seconds || 0),
+          0
+        );
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const durationEl = document.getElementById("totalDuration");
+        if (durationEl) {
+          durationEl.textContent = `${hours}h ${minutes}m`;
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to calculate total duration", e);
+    }
   });
 </script>
-

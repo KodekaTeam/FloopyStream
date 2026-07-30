@@ -1,74 +1,78 @@
 <!-- Toolbar -->
 <div
-  class="bg-gray-800 rounded-lg p-4 mb-4 sm:mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
+  class="mb-5 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
 >
-  <div class="relative flex-1 max-w-md">
+  <!-- Search (Full width on mobile) -->
+  <div class="relative w-full sm:max-w-md">
     <input
       type="text"
       id="searchVideos"
       placeholder="Search videos..."
-      class="w-full bg-gray-700 border border-gray-600 text-white pl-9 pr-4 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm sm:text-base"
+      class="w-full bg-gray-800/40 border border-gray-700/50 text-white pl-10 pr-4 py-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-colors text-sm"
     />
     <i
-      class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+      class="ti ti-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-base"
     ></i>
   </div>
 
+  <!-- Row for Filter & Upload on Mobile -->
   <div class="flex items-center gap-3">
-    <select
-      id="sortSelect"
-      class="flex-1 sm:flex-initial bg-gray-700 border border-gray-600 text-white px-8 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
-    >
-      <option value="newest">Newest</option>
-      <option value="oldest">Oldest</option>
-      <option value="name">Name</option>
-      <option value="size">File Size</option>
-    </select>
+    <!-- Sort -->
+    <div class="relative flex-1 sm:flex-none">
+      <select
+        id="sortSelect"
+        class="w-full appearance-none bg-gray-800/40 border border-gray-700/50 text-white-300 pl-4 pr-10 py-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-colors text-sm cursor-pointer min-w-[120px]"
+      >
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+        <option value="name">Name</option>
+        <option value="size">Size</option>
+      </select>
+    </div>
 
     <!-- Upload Button with Dropdown -->
-    <div class="relative" id="uploadDropdownContainer">
+    <div class="relative flex-1 sm:flex-none" id="uploadDropdownContainer">
       <button
         onclick="toggleUploadDropdown()"
-        class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition whitespace-nowrap text-sm sm:text-base"
+        class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-md transition-colors font-semibold text-sm"
       >
-        <i class="ti ti-upload"></i>
-        <span class="hidden sm:inline">Upload Video</span>
-        <span class="sm:hidden">Upload</span>
-        <i class="ti ti-chevron-down text-xs"></i>
+        <i class="ti ti-upload text-base"></i>
+        <span>Upload</span>
+        <i class="ti ti-chevron-down text-[10px] ml-1 opacity-70"></i>
       </button>
 
       <!-- Dropdown Menu -->
       <div
         id="uploadDropdown"
-        class="hidden absolute right-0 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50"
+        class="hidden absolute right-0 mt-2 w-64 bg-gray-800 border border-gray-700/50 rounded-md shadow-lg z-50 overflow-hidden"
       >
         <button
           onclick="openUploadModal(); closeUploadDropdown();"
-          class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition text-left rounded-t-lg"
+          class="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-700/50 transition text-left group"
         >
           <div
-            class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center"
+            class="w-10 h-10 bg-blue-500/10 rounded-md flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors"
           >
-            <i class="ti ti-upload text-white"></i>
+            <i class="ti ti-upload text-xl"></i>
           </div>
-          <div class="flex-1">
-            <p class="text-white font-medium text-sm">Upload from Device</p>
-            <p class="text-gray-400 text-xs">Select files from local</p>
+          <div>
+            <p class="text-white font-bold text-sm">Local Upload</p>
+            <p class="text-gray-500 text-[11px]">Upload from your device</p>
           </div>
         </button>
 
         <button
           onclick="openImportDriveModal(); closeUploadDropdown();"
-          class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition text-left rounded-b-lg border-t border-gray-700"
+          class="w-full flex items-center gap-4 px-4 py-4 hover:bg-gray-700/50 transition text-left border-t border-gray-700/30 group"
         >
           <div
-            class="w-10 h-10 text-gray-300 bg-gray-700 rounded-lg flex items-center justify-center"
+            class="w-10 h-10 bg-gray-700/50 rounded-md flex items-center justify-center text-gray-400 group-hover:bg-blue-500 group-hover:text-white transition-colors"
           >
-            <i class="ti ti-brand-google-drive text-white"></i>
+            <i class="ti ti-brand-google-drive text-xl"></i>
           </div>
-          <div class="flex-1">
-            <p class="text-white font-medium text-sm">Import from Drive</p>
-            <p class="text-gray-400 text-xs">Import from Google Drive</p>
+          <div>
+            <p class="text-white font-bold text-sm">Google Drive</p>
+            <p class="text-gray-500 text-[11px]">Import from cloud storage</p>
           </div>
         </button>
       </div>

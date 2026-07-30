@@ -131,7 +131,7 @@
 
     <!-- Details Grid -->
     <div class="grid grid-cols-2 gap-2 text-sm">
-      <div class="bg-gray-700/50 p-2 rounded">
+      <div class="group bg-gray-800/40 hover:bg-gray-800/80 border border-gray-700/50 p-2 rounded">
         <p class="text-gray-400 text-xs">Platform</p>
         <div class="flex items-center gap-1 text-gray-200 mt-0.5 truncate">
           <i class="ti ti-cast"></i>
@@ -140,13 +140,13 @@
           >
         </div>
       </div>
-      <div class="bg-gray-700/50 p-2 rounded">
+      <div class="group bg-gray-800/40 hover:bg-gray-800/80 border border-gray-700/50 p-2 rounded">
         <p class="text-gray-400 text-xs">Channel</p>
         <p class="text-gray-200 mt-0.5 truncate">
           <%= broadcast.channel_name || 'Unknown' %>
         </p>
       </div>
-      <div class="bg-gray-700/50 p-2 rounded">
+      <div class="group bg-gray-800/40 hover:bg-gray-800/80 border border-gray-700/50 p-2 rounded">
         <p class="text-gray-400 text-xs">Resolution</p>
         <p class="text-gray-200 m">
           <% if (broadcast.resolution) { %> <%= broadcast.resolution %> • <%=
@@ -154,7 +154,7 @@
           <% } else { %> Auto-detect <% } %>
         </p>
       </div>
-      <div class="bg-gray-700/50 p-2 rounded">
+      <div class="group bg-gray-800/40 hover:bg-gray-800/80 border border-gray-700/50 p-2 rounded">
         <p class="text-gray-400 text-xs">Created</p>
         <p class="text-gray-200 mt-0.5 truncate">
           <%= broadcast.created_at ? (typeof formatTimestamp === 'function' ?

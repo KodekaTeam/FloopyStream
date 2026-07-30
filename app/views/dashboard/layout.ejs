@@ -14,7 +14,7 @@
     />
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#111827" />
+    <meta name="theme-color" content="#151c20" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
@@ -29,9 +29,9 @@
         theme: {
           extend: {
             colors: {
-              primary: "#2563eb",
-              "dark-700": "#1f2937",
-              "dark-800": "#111827",
+              primary: "#527586",
+              "dark-700": "#202a2f",
+              "dark-800": "#151c20",
             },
             screens: {
               xs: "475px",
@@ -39,6 +39,12 @@
           },
         },
       };
+    </script>
+    <script>
+      // Apply the saved theme before styles and page content are painted.
+      if (localStorage.getItem("darkMode") === "false") {
+        document.documentElement.classList.add("light");
+      }
     </script>
     <link rel="stylesheet" href="/css/style.css" />
   </head>

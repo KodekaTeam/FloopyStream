@@ -4,10 +4,10 @@
   <%- include('partials/navbar') %> <%- include('partials/sidebar') %>
 
   <!-- Main Content -->
-  <main class="flex-1 overflow-auto lg:ml-20 pt-[72px]">
-    <div class="p-4 sm:p-6 lg:p-8">
+  <main class="flex-1 overflow-auto lg:ml-20 pt-16">
+    <div class="p-4 sm:p-5 lg:p-6">
       <!-- Header -->
-      <div class="mb-6 sm:mb-8">
+      <div class="mb-5 sm:mb-6">
         <h2 class="text-2xl sm:text-3xl font-bold text-white">Dashboard</h2>
         <p class="text-gray-400 mt-1 text-sm sm:text-base">
           Manage your live streams and broadcasts
@@ -16,9 +16,9 @@
 
       <!-- Stats Cards -->
       <div
-        class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8"
+        class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6"
       >
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <div class="group bg-gray-800/40 hover:bg-gray-800/60 border border-gray-700/50 hover:border-gray-600 rounded-md p-4 sm:p-5">
           <div class="flex items-center justify-between mb-2">
             <p class="text-gray-400 text-sm">Active Streams</p>
             <i class="ti ti-broadcast text-gray-500"></i>
@@ -28,7 +28,7 @@
           </p>
         </div>
 
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <div class="group bg-gray-800/40 hover:bg-gray-800/60 border border-gray-700/50 hover:border-gray-600 rounded-md p-4 sm:p-5">
           <div class="flex items-center justify-between mb-2">
             <p class="text-gray-400 text-sm">CPU Usage</p>
             <i class="ti ti-cpu text-gray-500"></i>
@@ -45,7 +45,7 @@
           </div>
         </div>
 
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <div class="group bg-gray-800/40 hover:bg-gray-800/60 border border-gray-700/50 hover:border-gray-600 rounded-md p-4 sm:p-5">
           <div class="flex items-center justify-between mb-2">
             <p class="text-gray-400 text-sm">Memory</p>
             <i class="ti ti-device-sd-card text-gray-500"></i>
@@ -58,7 +58,7 @@
           </p>
         </div>
 
-        <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <div class="group bg-gray-800/40 hover:bg-gray-800/60 border border-gray-700/50 hover:border-gray-600 rounded-md p-4 sm:p-5">
           <div class="flex items-center justify-between mb-2">
             <p class="text-gray-400 text-sm">Internet Speed</p>
             <i class="ti ti-wifi text-gray-500"></i>
@@ -95,8 +95,8 @@
       </div>
 
       <!-- Streaming Status Section -->
-      <div class="bg-gray-800 rounded-lg border border-gray-700">
-        <div class="p-4 sm:p-6 border-b border-gray-700">
+      <div class="group bg-gray-800/40 hover:bg-gray-800/60 border border-gray-700/50 hover:border-gray-600 rounded-md">
+        <div class="p-4 sm:p-5 border-b border-gray-700">
           <div
             class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
           >
@@ -116,7 +116,7 @@
                   type="text"
                   placeholder="Search..."
                   id="searchInput"
-                  class="w-full sm:w-64 bg-gray-700 border border-gray-600 text-white pl-9 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  class="w-full sm:w-64 bg-gray-700/40 hover:bg-gray-700/80 border border-gray-600/50 hover:border-gray-500 text-white pl-9 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 />
                 <i
                   class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -125,7 +125,7 @@
 
               <!-- View Toggle (Tablet & Desktop only, auto card view on mobile) -->
               <div
-                class="hidden md:flex items-center gap-1 bg-gray-700 rounded-lg p-1"
+                class="hidden md:flex items-center gap-1 bg-gray-700/40 hover:bg-gray-700/80 border border-gray-600/50 hover:border-gray-500 rounded-md p-1"
               >
                 <button
                   id="cardViewBtn"
@@ -147,7 +147,7 @@
 
               <button
                 onclick="openNewStreamModal()"
-                class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors text-sm sm:text-base whitespace-nowrap"
+                class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors text-sm sm:text-base whitespace-nowrap"
               >
                 <i class="ti ti-plus"></i>
                 <span>New Stream</span>
@@ -156,7 +156,7 @@
           </div>
         </div>
 
-        <%- include('partials/content/stream-table') %>
+        <%- include('streams/partials/content/stream-table') %>
       </div>
 
       <!-- Table Pagination - Outside Streaming Status Section (Desktop Only) -->
@@ -200,7 +200,7 @@
       <!-- Card View - Visible on Mobile, Hidden on Desktop when Table Toggle is Active -->
       <div id="cardViewContainer" class="block md:hidden pt-6">
         <% if (broadcasts.length === 0) { %>
-        <div class="bg-gray-800 rounded-lg p-12 text-center">
+        <div class="bg-gray-800 rounded-md p-8 text-center border border-gray-700">
           <i class="ti ti-broadcast text-5xl text-gray-600 mb-4"></i>
           <p class="text-gray-400 font-medium mb-2">No streams found</p>
           <p class="text-gray-500 mb-6">
@@ -208,7 +208,7 @@
           </p>
           <button
             onclick="openNewStreamModal()"
-            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
+            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-md transition"
           >
             <i class="ti ti-plus"></i>
             <span>New Stream</span>
@@ -217,10 +217,10 @@
         <% } else { %>
         <div
           id="cardGrid"
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         >
           <% broadcasts.forEach(function(broadcast) { %> <%-
-          include('partials/content/stream-card', { broadcast: broadcast }) %>
+          include('streams/partials/content/stream-card', { broadcast: broadcast }) %>
           <% }) %>
         </div>
         <% } %>
@@ -268,4 +268,3 @@ include('streams/modals/edit-stream-modal') %> <%-
 include('streams/modals/stream-info-modal') %>
 <script src="/js/dashboard.js"></script>
 <!-- Removed: broadcast-content-selector.js - Using channel-based video selection now -->
-
