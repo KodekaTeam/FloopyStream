@@ -247,6 +247,12 @@ The server verifies that all active migrations have completed and will ask you
 to run this command when the database has not been initialized. After a fresh
 migration, register the first account to create the administrator.
 
+### Docker Deployment
+
+The Docker image runs `npm run migrate` automatically before starting the
+application. No separate migration command is required when deploying or
+restarting the container.
+
 ## Configuration
 
 ### Environment Variables
