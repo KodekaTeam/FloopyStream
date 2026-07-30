@@ -57,6 +57,7 @@ scripts
 # Keep operational scripts in version control.
 !scripts/
 !scripts/backup-db.ps1
+!scripts/docker-entrypoint.sh
 !scripts/ffmpeg-setup.sh
 !scripts/migrate.js
 !scripts/recover-db.js

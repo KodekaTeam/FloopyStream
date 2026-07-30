@@ -22,19 +22,20 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY app/package*.json ./
+# The Docker build context is the app directory.
+COPY package*.json ./
 
 # Install dependencies (production only)
 RUN npm ci --only=production && \
     npm cache clean --force
 
 # Copy application code
-COPY app/. .
+COPY . .
 
 # Create required directories with proper permissions
 RUN mkdir -p storage/database storage/uploads storage/media storage/thumbnails storage/temp storage/logs && \
-    chmod -R 777 storage
+    chmod -R 777 storage && \
+    chmod +x scripts/docker-entrypoint.sh
 
 # NOTE: Running as root in development for simplicity with bind mounts
 # For production, uncomment the line below and ensure proper volume permissions
@@ -50,6 +51,9 @@ ENV PORT=6060
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:6060 || exit 1
+
+# Run migrations before starting the application.
+ENTRYPOINT ["./scripts/docker-entrypoint.sh"]
 
 # Start application
 CMD ["npm", "start"]
