@@ -1,204 +1,235 @@
 <% layout('dashboard/layout') %>
 
 <div class="flex h-screen bg-gray-900 overflow-hidden">
-  <%- include('../../partials/navbar') %>
-  <%- include('../../partials/sidebar') %>
+  <%- include('../../partials/navbar') %> <%- include('../../partials/sidebar')
+  %>
 
   <!-- Main Content -->
   <main class="flex-1 overflow-auto lg:ml-20 pt-[72px]">
     <div class="p-4 sm:p-6 lg:p-8">
-    <!-- Header with Back Button -->
-    <div class="bg-gray-800 border-b border-gray-700 rounded-lg mb-6">
-        <div class="p-4 sm:p-6">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                <div class="flex items-center space-x-4">
-                    <a href="/projects" class="text-gray-400 hover:text-white transition-colors rounded-full p-2 bg-gray-700 hover:bg-gray-600 shadow flex-shrink-0 w-10 h-10 flex items-center justify-center">
-                        <i class="ti ti-arrow-left text-2xl"></i>
-                    </a>
-                    <div class="min-w-0 flex-1">
-                        <h1 class="text-xl sm:text-2xl font-bold text-white truncate"><%= project.project_name %></h1>
-                        <% if (project.description) { %>
-                            <p class="text-sm text-gray-400 mt-1 line-clamp-2"><%= project.description %></p>
-                        <% } %>
-                    </div>
+      <!-- Header with Back Button -->
+      <div class="mb-8">
+        <div
+          class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"
+        >
+          <div class="flex items-center gap-5">
+            <a
+              href="/projects"
+              class="w-11 h-11 flex items-center justify-center bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 text-gray-400 hover:text-white rounded-xl transition-all duration-300 shadow-sm"
+            >
+              <i class="ti ti-arrow-left text-xl"></i>
+            </a>
+            <div class="min-w-0">
+              <div class="flex items-center gap-3 mb-1">
+                <h1 class="text-2xl sm:text-3xl font-bold text-white truncate">
+                  <%= project.project_name %>
+                </h1>
+                <div
+                  class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-900/60 border border-gray-700/50 hidden"
+                >
+                  <span
+                    class="w-1.5 h-1.5 rounded-full <%= project.status === 'active' ? 'bg-green-500' : project.status === 'inactive' ? 'bg-gray-500' : 'bg-red-500' %>"
+                  ></span>
+                  <span
+                    class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+                    ><%= project.status %></span
+                  >
                 </div>
-
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
-                    <button onclick="editProject()" class="inline-flex items-center justify-center px-4 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors">
-                        <i class="ti ti-edit mr-2"></i>
-                        <span class="hidden xs:inline">Edit Project</span>
-                        <span class="xs:hidden">Edit</span>
-                    </button>
-                    <button onclick="openNewChannelModal()" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors shadow-sm">
-                        <i class="ti ti-plus mr-2"></i>
-                        <span class="hidden xs:inline">Add Channel</span>
-                        <span class="xs:hidden">Add</span>
-                    </button>
-                </div>
+              </div>
+              <% if (project.description) { %>
+              <p class="text-gray-500 text-sm max-w-2xl line-clamp-1">
+                <%= project.description %>
+              </p>
+              <% } %>
             </div>
+          </div>
 
-            <!-- Project Stats -->
-            <div class="flex flex-wrap items-center gap-3 sm:gap-6 mt-4 sm:mt-6">
-                <div class="flex items-center text-sm text-gray-300 bg-gray-800 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow">
-                    <i class="ti ti-smart-home mr-2 flex-shrink-0"></i>
-                    <span><%= channels.length %> Channel<%= channels.length !== 1 ? 's' : '' %></span>
-                </div>
-                <div class="flex items-center text-sm text-gray-300 bg-gray-800 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow">
-                    <i class="ti ti-calendar mr-2 flex-shrink-0"></i>
-                    <span class="hidden sm:inline mr-1">Created </span><%= new Date(project.created_at).toLocaleDateString() %></span>
-                </div>
-                <div class="flex items-center">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                        <%= project.status === 'active' ? 'bg-green-900/50 text-green-400 border border-green-700' :
-                            project.status === 'inactive' ? 'bg-gray-700 text-gray-300 border border-gray-600' :
-                            'bg-red-900/50 text-red-400 border border-red-700' %>">
-                        <%= project.status.charAt(0).toUpperCase() + project.status.slice(1) %>
-                    </span>
-                </div>
-            </div>
+          <div class="flex items-center gap-3">
+            <button
+              onclick="editProject()"
+              class="flex-1 sm:flex-none inline-flex items-center justify-center px-5 py-2.5 border border-gray-700/50 rounded-xl text-sm font-semibold text-gray-300 bg-gray-800/40 hover:bg-gray-800 hover:text-white transition-all duration-300"
+            >
+              <i class="ti ti-edit mr-2"></i>
+              <span>Edit Project</span>
+            </button>
+            <button
+              onclick="openNewChannelModal()"
+              class="flex-1 sm:flex-none inline-flex items-center justify-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-semibold text-white transition-all duration-300 shadow-lg shadow-blue-600/20"
+            >
+              <i class="ti ti-plus mr-2"></i>
+              <span>Add Channel</span>
+            </button>
+          </div>
         </div>
-    </div>
 
-    <!-- Channels Grid -->
-    <div class="">
+        <!-- Project Overview Stats -->
+        <div
+          class="flex flex-wrap items-center gap-6 mt-8 pt-6 border-t border-gray-800/50"
+        >
+          <div
+            class="flex items-center gap-2.5 text-sm text-gray-400 font-medium"
+          >
+            <div class="w-2 h-2 rounded-full bg-blue-500/50"></div>
+            <span
+              ><i class="ti ti-device-tv"></i> <%= channels.length %> Channel<%=
+              channels.length !== 1 ? 's' : '' %></span
+            >
+          </div>
+          <div
+            class="flex items-center gap-2.5 text-sm text-gray-400 font-medium"
+          >
+            <div class="w-2 h-2 rounded-full bg-purple-500/50"></div>
+            <span
+              ><i class="ti ti-calendar"></i> <%= new
+              Date(project.created_at).toLocaleDateString(undefined, { year:
+              'numeric', month: 'short', day: 'numeric' }) %></span
+            >
+          </div>
+          <div
+            class="flex items-center gap-2.5 text-sm text-gray-400 font-medium"
+          >
+            <div
+              class="w-2 h-2 rounded-full <%= project.status === 'active' ? 'bg-green-500' : 'bg-gray-500' %>"
+            ></div>
+            <span class="flex items-center gap-2"
+              ><i class="ti ti-info-circle opacity-70"></i>
+              <span class="uppercase tracking-wider text-[11px] font-bold"
+                ><%= project.status %></span
+              ></span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Channels Grid -->
+      <div class="">
         <% if (channels.length > 0) { %>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                <% channels.forEach(function(channel) { 
-                    const platformName = channel.platform || channel.channel_platform || 'unknown';
-                %>
-                    <div class="bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-200 overflow-hidden border border-gray-700 hover:border-blue-500 group cursor-pointer">
-                        <!-- Channel Card -->
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-4">
-                                <!-- Platform Icon -->
-                                <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br 
-                                    <%= platformName === 'youtube' ? 'from-red-500 to-red-600' : 
-                                        platformName === 'facebook' ? 'from-blue-500 to-blue-600' :
-                                        platformName === 'instagram' ? 'from-pink-500 to-pink-600' :
-                                        platformName === 'twitch' ? 'from-purple-500 to-purple-600' :
-                                        platformName === 'tiktok' ? 'from-pink-500 to-pink-600' :
-                                        'from-gray-500 to-gray-600' %> 
-                                    rounded-xl flex items-center justify-center shadow-lg">
-                                    <i class="ti 
-                                        <%= platformName === 'youtube' ? 'ti-brand-youtube' : 
-                                            platformName === 'facebook' ? 'ti-brand-facebook' :
-                                            platformName === 'instagram' ? 'ti-brand-instagram' :
-                                            platformName === 'twitch' ? 'ti-brand-twitch' :
-                                            platformName === 'tiktok' ? 'ti-brand-tiktok' :
-                                            'ti-broadcast' %> 
-                                        text-white text-3xl"></i>
-                                </div>
-                                
-                                <!-- OAuth Status Badge -->
-                                <% if (channel.oauth_connected) { %>
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-900/50 text-green-400 border border-green-700">
-                                        <i class="ti ti-check text-xs mr-1"></i>
-                                        OAuth
-                                    </span>
-                                <% } %>
-                            </div>
-
-                            <!-- Channel Name -->
-                            <h3 class="text-lg font-semibold text-white mb-2 truncate group-hover:text-blue-400 transition-colors">
-                                <%= channel.channel_name %>
-                            </h3>
-
-                            <!-- Platform Badge -->
-                            <div class="mb-4 flex justify-end hidden">
-                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full 
-                                    <%= platformName === 'youtube' ? 'bg-red-900/50 text-red-400 border border-red-700' : 
-                                        platformName === 'instagram' ? 'bg-pink-900/50 text-pink-400 border border-pink-700' :
-                                        platformName === 'twitch' ? 'bg-purple-900/50 text-purple-400 border border-purple-700' :
-                                        platformName === 'tiktok' ? 'bg-pink-900/50 text-pink-400 border border-pink-700' :
-                                        'bg-gray-700 text-gray-300 border border-gray-600' %>">
-                                    <i class="ti 
-                                        <%= platformName === 'youtube' ? 'ti-brand-youtube' : 
-                                            platformName === 'instagram' ? 'ti-brand-instagram' :
-                                            platformName === 'twitch' ? 'ti-brand-twitch' :
-                                            platformName === 'tiktok' ? 'ti-brand-tiktok' :
-                                            'ti-broadcast' %>  
-                                        text-xs mr-1.5"></i>
-                                    <%= platformName.charAt(0).toUpperCase() + platformName.slice(1) %>
-                                </span>
-                            </div>
-
-                            <!-- Channel Stats -->
-                            <div class="space-y-2 mb-4">
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-400 flex items-center">
-                                        <i class="ti ti-folder text-purple-400 mr-2"></i>
-                                        Galleries
-                                    </span>
-                                    <span class="font-semibold text-white"><%= channel.gallery_count || 0 %></span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-400 flex items-center">
-                                        <i class="ti ti-playlist text-green-400 mr-2"></i>
-                                        Playlists
-                                    </span>
-                                    <span class="font-semibold text-white"><%= channel.playlist_count || 0 %></span>
-                                </div>
-                                <div class="flex items-center justify-between text-sm">
-                                    <span class="text-gray-400 flex items-center">
-                                        <i class="ti ti-broadcast text-blue-400 mr-2"></i>
-                                        Broadcasts
-                                    </span>
-                                    <span class="font-semibold text-white"><%= channel.broadcast_count || 0 %></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Actions -->
-                        <div class="flex items-center border-t border-gray-700 bg-gray-750">
-                            <a href="/channels/<%= channel.channel_uuid %>"
-                               class="flex-1 inline-flex items-center justify-center px-3 sm:px-4 py-3 text-sm sm:text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
-                                <i class="ti ti-eye mr-1.5 sm:mr-1.5"></i>
-                                <span class="hidden xs:inline">View</span>
-                            </a>
-                            <!--
-                            <div class="w-px h-8 bg-gray-700"></div>
-                            <button onclick="event.preventDefault(); event.stopPropagation(); editChannel('<%= channel.channel_uuid %>')"
-                                    class="flex-1 inline-flex items-center justify-center px-2 sm:px-4 py-3 text-xs sm:text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
-                                <i class="ti ti-edit mr-1 sm:mr-1.5"></i>
-                                <span class="hidden xs:inline">Edit</span>
-                            </button>
-                            -->
-                            <div class="w-px h-8 bg-gray-700"></div>
-                            <button onclick="event.preventDefault(); event.stopPropagation(); deleteChannel('<%= channel.channel_uuid %>')"
-                                    class="flex-1 inline-flex items-center justify-center px-4 sm:px-4 py-3 text-sm sm:text-sm font-medium text-red-400 hover:bg-gray-700 hover:text-red-300 transition-colors">
-                                <i class="ti ti-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                <% }); %>
-            </div>
-        <% } else { %>
-            <!-- Empty State -->
-            <div class="text-center py-16 bg-gray-800 rounded-xl border border-gray-700">
-                <div class="flex justify-center mb-4">
-                    <div class="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center">
-                        <i class="ti ti-smart-home text-gray-500 text-6xl"></i>
-                    </div>
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+          <% channels.forEach(function(channel) { const platformName =
+          channel.platform || channel.channel_platform || 'unknown'; %>
+          <div
+            class="group bg-gray-800/40 hover:bg-gray-800/50 border border-gray-700/50 hover:border-blue-500/50 rounded-2xl transition-all duration-300 flex flex-col h-full shadow-sm hover:shadow-xl hover:shadow-blue-500/5"
+          >
+            <!-- Channel Card Content -->
+            <div class="p-6 flex-grow">
+              <div class="flex items-start justify-between mb-5">
+                <!-- Platform Icon -->
+                <div
+                  class="w-14 h-14 rounded-2xl bg-gray-900 border border-gray-700/50 flex items-center justify-center transition-all duration-300 group-hover:border-blue-500/30"
+                >
+                  <i
+                    class="ti <%= platformName === 'youtube' ? 'ti-brand-youtube text-red-500' : platformName === 'facebook' ? 'ti-brand-facebook text-blue-500' : platformName === 'instagram' ? 'ti-brand-instagram text-pink-500' : platformName === 'twitch' ? 'ti-brand-twitch text-purple-500' : platformName === 'tiktok' ? 'ti-brand-tiktok text-white' : 'ti-broadcast text-gray-400' %> text-3xl"
+                  ></i>
                 </div>
-                <h3 class="text-xl font-semibold text-white mb-2">No Channels Yet</h3>
-                <p class="text-gray-400 mb-6 max-w-md mx-auto">
-                    Start by adding your first channel to this project. You can connect to YouTube, Facebook, Twitch, TikTok, and more.
-                </p>
-                <button onclick="openNewChannelModal()" 
-                        class="inline-flex items-center px-4 sm:px-6 py-3 bg-blue-600 border border-transparent rounded-lg text-sm sm:text-base font-medium text-white hover:bg-blue-700 transition-colors shadow-sm">
-                    <i class="ti ti-plus mr-2"></i>
-                    <span class="hidden xs:inline">Add Your First Channel</span>
-                    <span class="xs:hidden">Add Channel</span>
-                </button>
+
+                <!-- OAuth Status Dot -->
+                <% if (channel.oauth_connected) { %>
+                <div
+                  class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-900/60 border border-gray-700/50"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                  <span
+                    class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+                    >Connected</span
+                  >
+                </div>
+                <% } else { %>
+                <div
+                  class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-900/60 border border-gray-700/50"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                  <span
+                    class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+                    >Manual</span
+                  >
+                </div>
+                <% } %>
+              </div>
+
+              <!-- Channel Name -->
+              <h3
+                class="text-lg font-bold text-white mb-4 truncate group-hover:text-blue-400 transition-colors"
+              >
+                <%= channel.channel_name %>
+              </h3>
+
+              <!-- Channel Stats (Minimalist) -->
+              <div
+                class="grid grid-cols-3 gap-2 py-4 border-y border-gray-700/30"
+              >
+                <div class="text-center">
+                  <div class="text-xs text-gray-500 mb-1">Galleries</div>
+                  <div class="text-sm font-bold text-white">
+                    <%= channel.gallery_count || 0 %>
+                  </div>
+                </div>
+                <div class="text-center border-x border-gray-700/30 px-2">
+                  <div class="text-xs text-gray-500 mb-1">Playlists</div>
+                  <div class="text-sm font-bold text-white">
+                    <%= channel.playlist_count || 0 %>
+                  </div>
+                </div>
+                <div class="text-center">
+                  <div class="text-xs text-gray-500 mb-1">Live</div>
+                  <div class="text-sm font-bold text-white">
+                    <%= channel.broadcast_count || 0 %>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            <!-- Actions (Minimalist Footer) -->
+            <div class="flex items-center border-t border-gray-700/30 mt-auto">
+              <a
+                href="/channels/<%= channel.channel_uuid %>"
+                class="flex-1 py-4 flex items-center justify-center gap-2 text-[10px] font-bold text-gray-400 hover:text-gray-500 transition-all hover:bg-gray-500/5 transition-all uppercase tracking-widest group/btn"
+              >
+                <i class="ti ti-eye text-sm"></i>
+                <span>View</span>
+              </a>
+              <div class="w-px h-4 bg-gray-700/50"></div>
+              <button
+                onclick="event.preventDefault(); event.stopPropagation(); deleteChannel('<%= channel.channel_uuid %>')"
+                class="flex-1 py-4 flex items-center justify-center text-red-500/70 hover:text-red-500 transition-all hover:bg-red-500/5"
+              >
+                <i class="ti ti-trash text-sm"></i>
+              </button>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+        <% } else { %>
+        <!-- Empty State -->
+        <div
+          class="col-span-full bg-gray-900/30 border border-dashed border-gray-800 rounded-3xl p-16 text-center"
+        >
+          <div
+            class="w-20 h-20 bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-6 border border-gray-800"
+          >
+            <i class="ti ti-smart-home text-4xl text-gray-600"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">No Channels Yet</h3>
+          <p
+            class="text-gray-500 mb-8 max-w-sm mx-auto text-sm leading-relaxed"
+          >
+            This project doesn't have any channels yet. Connect your social
+            media channels to start managing your streams.
+          </p>
+          <button
+            onclick="openNewChannelModal()"
+            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl transition-all font-semibold shadow-lg shadow-blue-600/20"
+          >
+            <i class="ti ti-plus"></i>
+            <span>Connect Channel</span>
+          </button>
+        </div>
         <% } %>
-    </div>
-</div>
-    <!-- Modals -->
-    <%- include('modals/edit-project') %>
-    <%- include('modals/add-channel') %>
+      </div>
+      <!-- Modals -->
+      <%- include('modals/edit-project') %> <%- include('modals/add-channel') %>
     </div>
   </main>
 </div>
-
 

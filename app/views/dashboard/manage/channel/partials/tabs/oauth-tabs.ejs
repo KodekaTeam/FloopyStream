@@ -1,11 +1,15 @@
 <% if (channel.channel_platform !== 'youtube') { %>
 <!-- Platform Not Supported State -->
-<div class="text-center py-12">
-  <div class="flex justify-center mb-4">
-    <i class="ti ti-alert-circle text-yellow-400 text-5xl"></i>
+<div
+  class="bg-gray-800/40 rounded-3xl p-12 border border-gray-700/50 text-center"
+>
+  <div
+    class="w-20 h-20 rounded-2xl bg-yellow-500/10 flex items-center justify-center mx-auto mb-6"
+  >
+    <i class="ti ti-alert-circle text-yellow-500 text-4xl"></i>
   </div>
-  <h3 class="text-lg font-semibold text-white mb-2">Fitur Tidak Tersedia</h3>
-  <p class="text-gray-400 mb-6">
+  <h3 class="text-xl font-bold text-white mb-2">Fitur Tidak Tersedia</h3>
+  <p class="text-gray-400 mb-0 max-w-sm mx-auto">
     Fitur OAuth ini hanya untuk YouTube. Platform yang Anda gunakan saat ini
     tidak mendukung koneksi OAuth.
   </p>
@@ -28,78 +32,103 @@
 
   <!-- OAuth Connections Grid -->
   <% if (oauth && oauth.length > 0) { %>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+  >
     <% oauth.forEach(function(connection) { %>
     <!-- OAuth Connection Card -->
     <div
-      class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow"
+      class="group bg-gray-800/40 hover:bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 transition-all duration-300"
     >
-      <div class="flex items-start justify-between mb-4">
-        <div class="flex items-center gap-3">
+      <div class="flex items-start justify-between mb-6">
+        <div class="flex items-center gap-4">
           <div
-            class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"
+            class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300"
           >
-            <i class="ti ti-plug text-white text-xl"></i>
+            <i class="ti ti-plug text-blue-500 text-2xl"></i>
           </div>
           <div>
-            <h3 class="text-lg font-semibold text-white">
+            <h3 class="text-lg font-bold text-white">
               <%= connection.provider_name %>
             </h3>
             <div class="flex items-center mt-1">
               <% if (connection.access_token) { %>
-              <span
-                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-600/20 text-green-400 border border-green-600/30"
+              <div
+                class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-900/20 border border-green-800/30"
               >
-                <i class="ti ti-circle-filled text-green-400 mr-1 text-xs"></i>
-                Connected
-              </span>
+                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                <span
+                  class="text-[10px] font-bold text-green-500 uppercase tracking-widest"
+                  >Connected</span
+                >
+              </div>
               <% } else { %>
-              <span
-                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-600/20 text-red-400 border border-red-600/30"
+              <div
+                class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-900/20 border border-red-800/30"
               >
-                <i class="ti ti-circle-filled text-red-400 mr-1 text-xs"></i>
-                Disconnected
-              </span>
+                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                <span
+                  class="text-[10px] font-bold text-red-500 uppercase tracking-widest"
+                  >Disconnected</span
+                >
+              </div>
               <% } %>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="space-y-3">
-        <div class="text-sm text-gray-400 space-y-1">
+      <div class="space-y-4">
+        <div class="space-y-3">
           <% if (connection.external_id) { %>
-          <p>
-            <span class="text-gray-300">ID:</span> <%= connection.external_id %>
-          </p>
+          <div class="flex items-center justify-between">
+            <span
+              class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+              >External ID</span
+            >
+            <span class="text-[11px] font-semibold text-gray-300 font-mono"
+              ><%= connection.external_id %></span
+            >
+          </div>
           <% } %> <% if (connection.token_expires_at) { %>
-          <p>
-            <span class="text-gray-300">Expires:</span> <%= new
-            Date(connection.token_expires_at).toLocaleDateString() %>
-          </p>
+          <div class="flex items-center justify-between">
+            <span
+              class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+              >Expires</span
+            >
+            <span class="text-[11px] font-semibold text-gray-300"
+              ><%= new
+              Date(connection.token_expires_at).toLocaleDateString(undefined, {
+              year: 'numeric', month: 'short', day: 'numeric' }) %></span
+            >
+          </div>
           <% } %>
-          <p>
-            <span class="text-gray-300">Updated:</span> <%= new
-            Date(connection.updated_at).toLocaleDateString() %>
-          </p>
+          <div class="flex items-center justify-between">
+            <span
+              class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+              >Last Sync</span
+            >
+            <span class="text-[11px] font-semibold text-gray-300"
+              ><%= new Date(connection.updated_at).toLocaleDateString(undefined,
+              { year: 'numeric', month: 'short', day: 'numeric' }) %></span
+            >
+          </div>
         </div>
 
-        <div
-          class="flex items-center justify-between pt-2 border-t border-gray-700"
-        >
+        <div class="flex items-center gap-3 pt-4 border-t border-gray-700/50">
           <button
             onclick="refreshOAuth('<%= connection.oauth_uuid %>')"
-            class="inline-flex items-center px-3 py-1.5 bg-gray-700 text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-600 hover:text-white transition-colors"
+            class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg text-xs font-bold transition-all"
           >
             <i class="ti ti-refresh mr-2"></i>
-            Refresh
+            REFRESH
           </button>
           <button
             onclick="disconnectOAuth('<%= connection.oauth_uuid %>')"
-            class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
+            class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white rounded-lg text-xs font-bold transition-all border border-red-500/20"
           >
             <i class="ti ti-unlink mr-2"></i>
-            Disconnect
+            REVOKE
           </button>
         </div>
       </div>
@@ -110,18 +139,22 @@
 
   <!-- Empty State -->
   <% if (!oauth || oauth.length === 0) { %>
-  <div class="text-center py-12">
-    <div class="flex justify-center mb-4">
-      <i class="ti ti-plug text-gray-600 text-5xl"></i>
+  <div
+    class="bg-gray-800/40 rounded-3xl p-12 border border-gray-700/50 text-center"
+  >
+    <div
+      class="w-20 h-20 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-6"
+    >
+      <i class="ti ti-plug text-blue-500 text-4xl"></i>
     </div>
-    <h3 class="text-lg font-semibold text-white mb-2">No OAuth Connections</h3>
-    <p class="text-gray-400 mb-6 max-w-md mx-auto">
-      Connect your streaming accounts to automatically sync videos and access
-      advanced features
+    <h3 class="text-xl font-bold text-white mb-2">No OAuth Connected</h3>
+    <p class="text-gray-400 mb-8 max-w-sm mx-auto">
+      Connect your accounts to start managing and syncing your content across
+      platforms.
     </p>
     <button
       onclick="connectOAuth()"
-      class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow"
+      class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-blue-600/20"
     >
       <i class="ti ti-plus mr-2"></i>
       Connect Your First Account

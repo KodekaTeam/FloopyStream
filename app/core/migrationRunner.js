@@ -135,14 +135,17 @@ async function runMigrations(dbConnection) {
 
     const results = [];
 
+    const forceMigration = (process.env.FORCE_MIGRATION || '').trim();
+
     for (const file of migrationFiles) {
       const migrationName = path.parse(file).name;
+      const isForced = forceMigration === migrationName || forceMigration === file;
       
       // Check if already executed
       const executed = await isMigrationExecuted(dbConnection, migrationName);
       
-      if (executed) {
-        console.log(`⏭️  Skipping: ${migrationName} (already executed)`);
+      if (executed && !isForced) {
+        console.log(`⏭️  Skipping: ${migrationName} (already executed)${forceMigration ? ` | set FORCE_MIGRATION=${migrationName} to re-run` : ''}`);
         results.push({
           filename: migrationName,
           status: 'skipped'
@@ -151,7 +154,7 @@ async function runMigrations(dbConnection) {
       }
 
       try {
-        console.log(`\n▶️  Running: ${migrationName}`);
+        console.log(`\n▶️  Running: ${migrationName}${isForced ? ' (forced)' : ''}`);
         
         // Load migration module
         const migrationPath = path.join(__dirname, '../migrations', file);

@@ -1,11 +1,15 @@
 <% if (channel.channel_platform !== 'youtube') { %>
 <!-- Platform Not Supported State -->
-<div class="text-center py-12">
-  <div class="flex justify-center mb-4">
-    <i class="ti ti-alert-circle text-yellow-400 text-5xl"></i>
+<div
+  class="bg-gray-800/40 rounded-3xl p-12 border border-gray-700/50 text-center"
+>
+  <div
+    class="w-20 h-20 rounded-2xl bg-yellow-500/10 flex items-center justify-center mx-auto mb-6"
+  >
+    <i class="ti ti-alert-circle text-yellow-500 text-4xl"></i>
   </div>
-  <h3 class="text-lg font-semibold text-white mb-2">Fitur Tidak Tersedia</h3>
-  <p class="text-gray-400 mb-6">
+  <h3 class="text-xl font-bold text-white mb-2">Fitur Tidak Tersedia</h3>
+  <p class="text-gray-400 mb-0 max-w-sm mx-auto">
     Fitur upload template ini hanya untuk YouTube. Platform yang Anda gunakan
     saat ini tidak mendukung template upload.
   </p>
@@ -16,7 +20,7 @@
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <h2 class="text-xl font-bold text-white flex items-center">
-        <i class="ti ti-template text-blue-500 mr-2"></i>
+        <i class="ti ti-template text-blue-500 mr-3"></i>
         Upload Templates
       </h2>
       <p class="text-gray-400 text-sm mt-1">
@@ -25,7 +29,7 @@
     </div>
     <button
       onclick="createNewTemplate()"
-      class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow"
+      class="inline-flex items-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-blue-600/20"
     >
       <i class="ti ti-plus mr-2"></i>
       Create Template
@@ -37,21 +41,27 @@
     id="templates-container"
     class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
   >
-    <!-- Templates will be loaded here -->
+    <!-- Templates will be loaded here via JS -->
   </div>
 
-  <!-- Empty State -->
-  <div id="empty-state" class="text-center py-12">
-    <div class="flex justify-center mb-4">
-      <i class="ti ti-template text-gray-600 text-5xl"></i>
+  <!-- Empty State (hidden by default if templates exist) -->
+  <div
+    id="empty-state"
+    class="bg-gray-800/40 rounded-3xl p-12 border border-gray-700/50 text-center"
+  >
+    <div
+      class="w-20 h-20 rounded-2xl bg-gray-700/30 flex items-center justify-center mx-auto mb-6"
+    >
+      <i class="ti ti-template text-gray-500 text-4xl"></i>
     </div>
-    <h3 class="text-lg font-semibold text-white mb-2">No Upload Templates</h3>
-    <p class="text-gray-400 mb-6">
-      Create your first upload template to save time on video uploads
+    <h3 class="text-xl font-bold text-white mb-2">No Upload Templates</h3>
+    <p class="text-gray-400 mb-8 max-w-sm mx-auto">
+      Create your first upload template to save time on video uploads with
+      predefined settings.
     </p>
     <button
       onclick="createNewTemplate()"
-      class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow"
+      class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-blue-600/20"
     >
       <i class="ti ti-plus mr-2"></i>
       Create Your First Template
@@ -59,10 +69,6 @@
   </div>
 </div>
 <% } %> <%- include('../../modals/template/add-template') %>
-
-<script>
-  // Template management functions will be loaded from /js/upload-templates.js
-</script>
 
 <!-- Upload Templates JavaScript -->
 <script src="/js/upload-templates.js"></script>

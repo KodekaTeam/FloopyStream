@@ -1,54 +1,59 @@
 <!-- Create User Modal -->
 <div
   id="createUserModal"
-  class="fixed inset-0 z-50 hidden"
-  style="pointer-events: none"
+  class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4 bg-gray-950/80 backdrop-blur-sm"
 >
-  <!-- Backdrop with static behavior -->
-  <div class="absolute inset-0 bg-black/70" style="pointer-events: auto"></div>
-
-  <!-- Modal Container -->
   <div
-    class="fixed inset-0 flex items-center justify-center p-4"
-    style="pointer-events: none"
+    class="bg-gray-900 border border-gray-800 rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
   >
-    <div
-      class="bg-gray-800 rounded-xl max-w-md w-full border border-gray-700 max-h-[90vh] overflow-y-auto shadow-2xl"
-      style="pointer-events: auto"
-    >
-      <div class="p-6 border-b border-gray-700">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xl font-bold text-white">Create New User</h3>
-          <button
-            onclick="closeCreateUserModal()"
-            class="text-gray-400 hover:text-white transition-colors"
-          >
-            <i class="ti ti-x text-xl"></i>
-          </button>
-        </div>
+    <div class="flex items-center justify-between p-6 border-b border-gray-800">
+      <div>
+        <h3 class="text-xl font-bold text-white">Create New User</h3>
+        <p class="text-xs text-gray-500 mt-1">
+          Add a new member to your platform directory
+        </p>
       </div>
+      <button
+        type="button"
+        onclick="closeCreateUserModal()"
+        class="w-10 h-10 flex items-center justify-center bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 text-gray-400 hover:text-white rounded-xl transition-all"
+      >
+        <i class="ti ti-x text-xl"></i>
+      </button>
+    </div>
 
-      <form id="createUserForm" class="p-6 space-y-5">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+    <form
+      id="createUserForm"
+      class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6"
+    >
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
-        <!-- Profile Picture -->
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-3"
-            >Profile Picture</label
+      <!-- Profile Picture -->
+      <div>
+        <label
+          class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3"
+          >Profile Identity</label
+        >
+        <div
+          class="flex items-center gap-5 p-4 bg-gray-800/40 rounded-2xl border border-gray-700/50"
+        >
+          <div
+            id="profilePreview"
+            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center text-white font-bold text-3xl overflow-hidden shadow-lg border-2 border-white/10"
           >
-          <div class="flex items-center gap-4">
-            <div
-              id="profilePreview"
-              class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-2xl overflow-hidden"
-            >
-              <i class="ti ti-user text-3xl"></i>
-            </div>
+            <i class="ti ti-user"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="text-sm font-bold text-white mb-1">Upload Avatar</h4>
+            <p class="text-[10px] text-gray-500 mb-3">
+              PNG, JPG or GIF up to 2MB
+            </p>
             <button
               type="button"
               onclick="document.getElementById('profilePictureInput').click()"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors font-medium"
+              class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-xs font-bold rounded-lg transition-all"
             >
-              Choose Photo
+              Choose File
             </button>
             <input
               type="file"
@@ -60,82 +65,110 @@
             />
           </div>
         </div>
+      </div>
 
-        <!-- Username -->
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2"
-            >Username</label
-          >
+      <!-- Username -->
+      <div class="space-y-2">
+        <label
+          class="block text-xs font-bold text-gray-500 uppercase tracking-widest"
+          >Username</label
+        >
+        <div class="relative group">
+          <i
+            class="ti ti-user-circle absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg group-focus-within:text-blue-500 transition-colors"
+          ></i>
           <input
             type="text"
             name="username"
             required
             minlength="3"
-            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
-            placeholder="Enter username"
+            class="w-full bg-gray-800/60 border border-gray-700/50 rounded-xl pl-11 pr-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:bg-gray-800 transition-all font-medium"
+            placeholder="e.g. john_doe"
           />
         </div>
+      </div>
 
+      <div class="grid grid-cols-2 gap-4">
         <!-- Role -->
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2"
-            >Role</label
+        <div class="space-y-2">
+          <label
+            class="block text-xs font-bold text-gray-500 uppercase tracking-widest"
+            >Access Role</label
           >
-          <select
-            name="role"
-            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
-          >
-            <option value="member">Member</option>
-            <option value="admin">Admin</option>
-          </select>
+          <div class="relative">
+            <i
+              class="ti ti-shield-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg"
+            ></i>
+            <select
+              name="role"
+              class="w-full bg-gray-800/60 border border-gray-700/50 rounded-xl pl-11 pr-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:bg-gray-800 transition-all font-medium cursor-pointer appearance-none"
+            >
+              <option value="member">Member</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
         </div>
 
         <!-- Status -->
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2"
-            >Status</label
+        <div class="space-y-2">
+          <label
+            class="block text-xs font-bold text-gray-500 uppercase tracking-widest"
+            >Account Status</label
           >
-          <select
-            name="status"
-            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+          <div class="relative">
+            <i
+              class="ti ti-activity absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg"
+            ></i>
+            <select
+              name="status"
+              class="w-full bg-gray-800/60 border border-gray-700/50 rounded-xl pl-11 pr-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:bg-gray-800 transition-all font-medium cursor-pointer appearance-none"
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
         </div>
+      </div>
 
-        <!-- Password -->
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2"
-            >Password</label
-          >
+      <!-- Password -->
+      <div class="space-y-2">
+        <label
+          class="block text-xs font-bold text-gray-500 uppercase tracking-widest"
+          >Security Credentials</label
+        >
+        <div class="relative group">
+          <i
+            class="ti ti-lock-square absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg group-focus-within:text-blue-500 transition-colors"
+          ></i>
           <input
             type="password"
             name="password"
             required
             minlength="6"
-            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition-colors"
-            placeholder="Enter password"
+            class="w-full bg-gray-800/60 border border-gray-700/50 rounded-xl pl-11 pr-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:bg-gray-800 transition-all font-medium"
+            placeholder="Assign a secure password"
           />
         </div>
+        <p class="text-[10px] text-gray-500 italic">
+          User can change their password after first login.
+        </p>
+      </div>
 
-        <!-- Buttons -->
-        <div class="flex gap-3 pt-4">
-          <button
-            type="button"
-            onclick="closeCreateUserModal()"
-            class="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg transition-colors font-medium"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-colors font-medium"
-          >
-            Create User
-          </button>
-        </div>
-      </form>
-    </div>
+      <div class="flex gap-3 mt-4">
+        <button
+          type="button"
+          onclick="closeCreateUserModal()"
+          class="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-4 py-3 rounded-xl transition-all font-bold text-sm border border-gray-700/50"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl transition-all font-bold text-sm shadow-lg shadow-blue-600/20"
+        >
+          Create Account
+        </button>
+      </div>
+    </form>
   </div>
 </div>

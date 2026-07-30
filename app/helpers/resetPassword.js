@@ -1,5 +1,5 @@
 const readline = require('readline');
-const Account = require('../models/Account');
+const Account = require('../models/User');
 
 /**
  * Password Reset Tool

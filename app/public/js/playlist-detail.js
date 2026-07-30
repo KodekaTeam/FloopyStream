@@ -8,21 +8,59 @@ function openAddVideosModal() {
 // Close add videos modal
 function closeAddVideosModal() {
   document.getElementById('addVideosModal').classList.add('hidden');
-  // Uncheck all checkboxes
-  document.querySelectorAll('.video-checkbox').forEach(cb => cb.checked = false);
+  // Uncheck all checkboxes and reset UI
+  document.querySelectorAll('.video-checkbox:not(:disabled)').forEach(cb => {
+    cb.checked = false;
+    const videoId = cb.id.replace('video-', '');
+    updateModalUI(videoId, false);
+  });
 }
 
 // Toggle video selection
 function toggleVideoSelection(videoId) {
+  // This function is kept for backward compatibility if called elsewhere,
+  // but now the label + onchange handles most cases.
   const checkbox = document.getElementById(`video-${videoId}`);
-  if (checkbox) {
+  if (checkbox && !checkbox.disabled) {
     checkbox.checked = !checkbox.checked;
+    updateModalUI(videoId, checkbox.checked);
   }
+}
+
+// Update Modal Visual UI
+function updateModalUI(videoId, isChecked) {
+  const container = document.getElementById('check-container-' + videoId);
+  const icon = document.getElementById('check-icon-' + videoId);
+  const selectedCountSpan = document.getElementById('selectedCount');
+  const addBtn = document.getElementById('addSelectedBtn');
+
+  if (container) {
+    if (isChecked) {
+      container.classList.add('bg-blue-600', 'border-blue-600');
+      container.classList.remove('border-white/20', 'bg-black/40');
+    } else {
+      container.classList.remove('bg-blue-600', 'border-blue-600');
+      container.classList.add('border-white/20', 'bg-black/40');
+    }
+  }
+
+  if (icon) {
+    if (isChecked) {
+      icon.classList.remove('hidden');
+    } else {
+      icon.classList.add('hidden');
+    }
+  }
+
+  const checkedBoxes = document.querySelectorAll('.video-checkbox:checked:not(:disabled)');
+  const count = checkedBoxes.length;
+  if (selectedCountSpan) selectedCountSpan.innerText = count;
+  if (addBtn) addBtn.disabled = count === 0;
 }
 
 // Add selected videos to playlist
 async function addSelectedVideos() {
-  const selectedVideos = Array.from(document.querySelectorAll('.video-checkbox:checked'))
+  const selectedVideos = Array.from(document.querySelectorAll('.video-checkbox:checked:not(:disabled)'))
     .map(cb => cb.id.replace('video-', ''));
   if (selectedVideos.length === 0) {
     showNotification('Please select at least one video', 'error');
@@ -95,6 +133,8 @@ async function moveVideo(videoUuid, direction) {
 async function removeFromPlaylist(videoId) {
   if (typeof Swal !== 'undefined') {
     Swal.fire({
+      toast: true,
+      position: 'top',
       title: 'Remove Video?',
       text: 'Remove this video from playlist?',
       icon: 'warning',
@@ -121,9 +161,9 @@ async function removeFromPlaylistProcess(videoId) {
     const response = await fetch(`/api/playlists/${playlistId}/videos/${videoId}`, {
       method: 'DELETE'
     });
-    
+
     const result = await response.json();
-    
+
     if (result.success) {
       if (typeof Swal !== 'undefined') {
         Swal.fire({
@@ -189,9 +229,9 @@ function showNotification(message, type = 'info') {
     type === 'info' ? 'bg-blue-600' : 'bg-gray-600'
   } text-white`;
   notification.textContent = message;
-  
+
   document.body.appendChild(notification);
-  
+
   setTimeout(() => {
     notification.style.transform = 'translateX(400px)';
     notification.style.opacity = '0';

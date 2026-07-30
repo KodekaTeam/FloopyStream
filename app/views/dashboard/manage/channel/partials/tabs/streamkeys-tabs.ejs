@@ -1,14 +1,18 @@
 <!-- Stream Keys Management -->
 <% if (channel.channel_platform !== 'youtube') { %>
 <!-- Platform Not Supported State -->
-<div class="text-center py-12">
-  <div class="flex justify-center mb-4">
-    <i class="ti ti-alert-circle text-yellow-400 text-5xl"></i>
+<div
+  class="bg-gray-800/40 rounded-3xl p-12 border border-gray-700/50 text-center"
+>
+  <div
+    class="w-20 h-20 rounded-2xl bg-yellow-500/10 flex items-center justify-center mx-auto mb-6"
+  >
+    <i class="ti ti-alert-circle text-yellow-500 text-4xl"></i>
   </div>
-  <h3 class="text-lg font-semibold text-white mb-2">Fitur Tidak Tersedia</h3>
-  <p class="text-gray-400 mb-6">
-    Fitur upload template ini hanya untuk YouTube. Platform yang Anda gunakan
-    saat ini tidak mendukung template upload.
+  <h3 class="text-xl font-bold text-white mb-2">Fitur Tidak Tersedia</h3>
+  <p class="text-gray-400 mb-0 max-w-sm mx-auto">
+    Fitur ini hanya untuk YouTube. Platform yang Anda gunakan saat ini tidak
+    mendukung pengelolaan stream key.
   </p>
 </div>
 <% } else { %>
@@ -17,52 +21,55 @@
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <h2 class="text-xl font-bold text-white flex items-center">
-        <i class="ti ti-key mr-2 text-red-400"></i>
+        <i class="ti ti-key text-red-500 mr-3"></i>
         Stream Keys
       </h2>
       <p class="text-gray-400 text-sm mt-1">
         Manage your streaming keys for live broadcasting
       </p>
     </div>
+
     <!-- Dropdown Menu -->
     <div class="relative w-full sm:w-auto">
       <button
         id="streamKeyDropdownBtn"
         onclick="toggleStreamKeyDropdown()"
-        class="w-full sm:w-auto inline-flex items-center justify-between px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow"
+        class="w-full sm:w-auto inline-flex items-center justify-between px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-red-600/20"
       >
         <div class="flex items-center">
-          <span class="hidden sm:inline mr-2"
-            ><i class="ti ti-plus text-sm"></i> Add Stream Key</span
-          >
-          <span class="sm:hidden mr-2"
-            ><i class="ti ti-plus text-sm"></i> Add Stream Key</span
-          >
+          <i class="ti ti-plus mr-2"></i>
+          <span>ADD STREAM KEY</span>
         </div>
-        <i class="ti ti-chevron-down text-xs ml-2"></i>
+        <i class="ti ti-chevron-down text-xs ml-3"></i>
       </button>
 
-      <!-- Dropdown Menu -->
+      <!-- Dropdown Content -->
       <div
         id="streamKeyDropdown"
-        class="absolute right-0 mt-2 w-full sm:w-56 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10 hidden"
+        class="absolute right-0 mt-3 w-full sm:w-64 bg-[#1a1c22] border border-gray-700/50 rounded-2xl shadow-2xl z-50 hidden overflow-hidden backdrop-blur-xl"
       >
-        <div class="py-1">
+        <div class="p-2 space-y-1">
           <button
             onclick="createNewStreamKey()"
-            class="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center"
+            class="w-full text-left px-4 py-3 text-sm font-bold text-gray-300 hover:bg-red-600 hover:text-white rounded-xl transition-all flex items-center group"
           >
-            <i class="ti ti-plus mr-3 text-red-400"></i>
-            <span class="hidden sm:inline">Create New Stream Key</span>
-            <span class="sm:hidden">Create New</span>
+            <div
+              class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center mr-3 group-hover:bg-red-500/20"
+            >
+              <i class="ti ti-plus text-red-500 group-hover:text-white"></i>
+            </div>
+            Create New Stream Key
           </button>
           <button
             onclick="syncFromYouTubeStudio()"
-            class="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors flex items-center"
+            class="w-full text-left px-4 py-3 text-sm font-bold text-gray-300 hover:bg-blue-600 hover:text-white rounded-xl transition-all flex items-center group"
           >
-            <i class="ti ti-refresh mr-3 text-blue-400"></i>
-            <span class="hidden sm:inline">Sync from YouTube Studio</span>
-            <span class="sm:hidden">Sync from YT</span>
+            <div
+              class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center mr-3 group-hover:bg-blue-500/20"
+            >
+              <i class="ti ti-refresh text-blue-500 group-hover:text-white"></i>
+            </div>
+            Sync from YouTube Studio
           </button>
         </div>
       </div>
@@ -78,17 +85,23 @@
   </div>
 
   <!-- Empty State -->
-  <div id="empty-state-streamkeys" class="text-center py-12">
-    <div class="flex justify-center mb-4">
-      <i class="ti ti-key-off text-gray-600 text-5xl"></i>
+  <div
+    id="empty-state-streamkeys"
+    class="bg-gray-800/40 rounded-3xl p-12 border border-gray-700/50 text-center"
+  >
+    <div
+      class="w-20 h-20 rounded-2xl bg-gray-700/30 flex items-center justify-center mx-auto mb-6"
+    >
+      <i class="ti ti-key-off text-gray-500 text-4xl"></i>
     </div>
-    <h3 class="text-lg font-semibold text-white mb-2">No Stream Keys</h3>
-    <p class="text-gray-400 mb-6">
-      Create your first stream key to start broadcasting
+    <h3 class="text-xl font-bold text-white mb-2">No Stream Keys</h3>
+    <p class="text-gray-400 mb-8 max-w-sm mx-auto">
+      You haven't added any stream keys yet. Create your first stream key to
+      start broadcasting.
     </p>
     <button
       onclick="createNewStreamKey()"
-      class="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow"
+      class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-red-600/20"
     >
       <i class="ti ti-plus mr-2"></i>
       Create Your First Stream Key

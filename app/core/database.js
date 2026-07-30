@@ -71,6 +71,35 @@ async function initializeSchema() {
 }
 
 /**
+ * Refuse to start the web server until all tracked migrations have succeeded.
+ */
+async function assertDatabaseReady() {
+  const migrationsTable = await fetchOne(
+    "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'migrations'"
+  );
+
+  if (!migrationsTable) {
+    throw new Error("Database is not initialized. Run `npm run migrate` first.");
+  }
+
+  const { getMigrationFiles } = require("./migrationRunner");
+  const migrationFiles = await getMigrationFiles();
+  const executed = await fetchAll(
+    "SELECT name, status FROM migrations WHERE status = 'success'"
+  );
+  const successful = new Set(executed.map((migration) => migration.name));
+  const pending = migrationFiles
+    .map((file) => path.parse(file).name)
+    .filter((name) => !successful.has(name));
+
+  if (pending.length > 0) {
+    throw new Error(
+      `Database migration required. Run \`npm run migrate\`. Pending: ${pending.join(", ")}`
+    );
+  }
+}
+
+/**
  * Check if any accounts exist in database
  * Updated to support both old (accounts) and new (users) table names
  */
@@ -161,6 +190,7 @@ function closeConnection() {
 module.exports = {
   dbConnection,
   initializeSchema,
+  assertDatabaseReady,
   verifyAccountsExist,
   executeQuery,
   fetchOne,

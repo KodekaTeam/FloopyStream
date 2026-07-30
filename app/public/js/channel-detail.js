@@ -24,7 +24,7 @@ function escapeHtml(text) {
 function editChannel() {
   const channelUuid = getChannelUuidFromUrl();
   if (!channelUuid) return;
-  
+
   // Fetch channel data
   fetch(`/api/channels/${channelUuid}`)
     .then(res => res.json())
@@ -58,9 +58,9 @@ function showEditChannelModal(channel) {
             <label for="edit_channel_name" class="block text-sm font-medium text-gray-300 mb-2">
               Channel Name <span class="text-red-500">*</span>
             </label>
-            <input type="text" 
-                   id="edit_channel_name" 
-                   name="channel_name" 
+            <input type="text"
+                   id="edit_channel_name"
+                   name="channel_name"
                    value="${channel.channel_name}"
                    required
                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -70,8 +70,8 @@ function showEditChannelModal(channel) {
             <label for="edit_platform" class="block text-sm font-medium text-gray-300 mb-2">
               Platform <span class="text-red-500">*</span>
             </label>
-            <select id="edit_platform" 
-                    name="platform" 
+            <select id="edit_platform"
+                    name="platform"
                     required
                     class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="youtube" ${channel.channel_platform === 'youtube' ? 'selected' : ''}>YouTube</option>
@@ -80,8 +80,6 @@ function showEditChannelModal(channel) {
               <option value="tiktok" ${channel.channel_platform === 'tiktok' ? 'selected' : ''}>TikTok</option>
               <option value="instagram" ${channel.channel_platform === 'instagram' ? 'selected' : ''}>Instagram</option>
               <option value="twitter" ${channel.channel_platform === 'twitter' ? 'selected' : ''}>Twitter/X</option>
-              <option value="linkedin" ${channel.channel_platform === 'linkedin' ? 'selected' : ''}>LinkedIn</option>
-              <option value="other" ${channel.channel_platform === 'other' ? 'selected' : ''}>Other</option>
             </select>
           </div>
 
@@ -89,8 +87,8 @@ function showEditChannelModal(channel) {
             <label for="edit_external_id" class="block text-sm font-medium text-gray-300 mb-2">
               External ID (Optional)
             </label>
-            <input type="text" 
-                   id="edit_external_id" 
+            <input type="text"
+                   id="edit_external_id"
                    name="external_id"
                    value="${channel.external_id || ''}"
                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -99,12 +97,12 @@ function showEditChannelModal(channel) {
           </div>
 
           <div class="flex items-center space-x-3 pt-4">
-            <button type="button" 
+            <button type="button"
                     onclick="closeEditChannelModal()"
                     class="flex-1 px-4 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors">
               Cancel
             </button>
-            <button type="submit" 
+            <button type="submit"
                     class="flex-1 px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors">
               Save Changes
             </button>
@@ -113,14 +111,14 @@ function showEditChannelModal(channel) {
       </div>
     </div>
   `;
-  
+
   // Add to body
   document.body.insertAdjacentHTML('beforeend', modalHtml);
-  
+
   // Add form submit handler
   document.getElementById('editChannelForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    
+
     const formData = {
       channel_name: document.getElementById('edit_channel_name').value,
       channel_platform: document.getElementById('edit_platform').value,
@@ -163,16 +161,98 @@ function closeEditChannelModal() {
 // ============================================
 
 function openNewGalleryModal() {
-  // Clear form fields
-  document.getElementById('gallery_title').value = '';
-  document.getElementById('gallery_description').value = '';
+  const channelUuid = getChannelUuidFromUrl();
+  if (!channelUuid) return;
 
-  // Show modal
-  document.getElementById('newGalleryModal').classList.remove('hidden');
+  const modalHtml = `
+    <div id="newGalleryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-lg bg-gray-800 border-gray-700">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-white">Create New Gallery</h3>
+          <button onclick="closeNewGalleryModal()" class="text-gray-400 hover:text-white transition-colors">
+            <i class="ti ti-x text-2xl"></i>
+          </button>
+        </div>
+
+        <form id="newGalleryForm" class="space-y-4">
+          <div>
+            <label for="gallery_title" class="block text-sm font-medium text-gray-300 mb-2">
+              Gallery Title <span class="text-red-500">*</span>
+            </label>
+            <input type="text"
+                   id="gallery_title"
+                   name="gallery_title"
+                   required
+                   class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="e.g., Gaming Highlights">
+          </div>
+
+          <div>
+            <label for="gallery_description" class="block text-sm font-medium text-gray-300 mb-2">
+              Description (Optional)
+            </label>
+            <textarea
+                   id="gallery_description"
+                   name="gallery_description"
+                   rows="3"
+                   class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="Describe this gallery..."></textarea>
+          </div>
+
+          <div class="flex items-center space-x-3 pt-4">
+            <button type="button"
+                    onclick="closeNewGalleryModal()"
+                    class="flex-1 px-4 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors">
+              Cancel
+            </button>
+            <button type="submit"
+                    class="flex-1 px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+              Create Gallery
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  document.getElementById('newGalleryForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = {
+      channelUuid: channelUuid,
+      galleryTitle: document.getElementById('gallery_title').value,
+      galleryDescription: document.getElementById('gallery_description').value || ''
+    };
+
+    try {
+      const response = await fetch('/api/galleries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showNotification("Gallery created successfully!", "success");
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        showNotification('Error: ' + (result.message || 'Failed to create gallery'), 'error');
+      }
+    } catch (error) {
+      console.error('Error creating gallery:', error);
+      showNotification('An error occurred while creating the gallery', 'error');
+    }
+  });
 }
 
 function closeNewGalleryModal() {
-  document.getElementById('newGalleryModal').classList.add('hidden');
+  const modal = document.getElementById('newGalleryModal');
+  if (modal) modal.remove();
 }
 
 function editGallery(galleryUuid) {
@@ -181,8 +261,6 @@ function editGallery(galleryUuid) {
     .then(res => res.json())
     .then(result => {
       if (result.success && result.data) {
-        // Store UUID in form dataset
-        document.getElementById('editGalleryForm').dataset.galleryUuid = galleryUuid;
         showEditGalleryModal(result.data);
       } else {
         showNotification('Failed to load gallery data', 'error');
@@ -195,16 +273,92 @@ function editGallery(galleryUuid) {
 }
 
 function showEditGalleryModal(gallery) {
-  // Populate form fields with gallery data
-  document.getElementById('edit_gallery_title').value = gallery.gallery_title;
-  document.getElementById('edit_gallery_description').value = gallery.gallery_description || '';
+  // Similar to create gallery modal but with pre-filled data
+  const modalHtml = `
+    <div id="editGalleryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-lg bg-gray-800 border-gray-700">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-white">Edit Gallery</h3>
+          <button onclick="closeEditGalleryModal()" class="text-gray-400 hover:text-white transition-colors">
+            <i class="ti ti-x text-2xl"></i>
+          </button>
+        </div>
 
-  // Show modal
-  document.getElementById('editGalleryModal').classList.remove('hidden');
+        <form id="editGalleryForm" class="space-y-4">
+          <div>
+            <label for="edit_gallery_title" class="block text-sm font-medium text-gray-300 mb-2">
+              Gallery Title <span class="text-red-500">*</span>
+            </label>
+            <input type="text"
+                   id="edit_gallery_title"
+                   value="${gallery.gallery_title}"
+                   required
+                   class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+
+          <div>
+            <label for="edit_gallery_description" class="block text-sm font-medium text-gray-300 mb-2">
+              Description
+            </label>
+            <textarea
+                   id="edit_gallery_description"
+                   rows="3"
+                   class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">${gallery.gallery_description || ''}</textarea>
+          </div>
+
+          <div class="flex items-center space-x-3 pt-4">
+            <button type="button"
+                    onclick="closeEditGalleryModal()"
+                    class="flex-1 px-4 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors">
+              Cancel
+            </button>
+            <button type="submit"
+                    class="flex-1 px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  document.getElementById('editGalleryForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = {
+      gallery_title: document.getElementById('edit_gallery_title').value,
+      gallery_description: document.getElementById('edit_gallery_description').value || ''
+    };
+
+    try {
+      const response = await fetch(`/api/galleries/${gallery.gallery_uuid}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showNotification("Gallery updated successfully!", "success");
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        showNotification('Error: ' + (result.message || 'Failed to update gallery'), 'error');
+      }
+    } catch (error) {
+      console.error('Error updating gallery:', error);
+      showNotification('An error occurred while updating the gallery', 'error');
+    }
+  });
 }
 
 function closeEditGalleryModal() {
-  document.getElementById('editGalleryModal').classList.add('hidden');
+  const modal = document.getElementById('editGalleryModal');
+  if (modal) modal.remove();
 }
 
 function deleteGallery(galleryUuid) {
@@ -295,17 +449,112 @@ function deleteGalleryProcess(galleryUuid) {
 // ============================================
 
 function openNewPlaylistModal() {
-  // Clear form fields
-  document.getElementById('playlist_name').value = '';
-  document.getElementById('playlist_description').value = '';
-  document.getElementById('playback_mode').value = 'sequential';
+  const channelUuid = getChannelUuidFromUrl();
+  if (!channelUuid) return;
 
-  // Show modal
-  document.getElementById('newPlaylistModal').classList.remove('hidden');
+  const modalHtml = `
+    <div id="newPlaylistModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-lg bg-gray-800 border-gray-700">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-white">Create New Playlist</h3>
+          <button onclick="closeNewPlaylistModal()" class="text-gray-400 hover:text-white transition-colors">
+            <i class="ti ti-x text-2xl"></i>
+          </button>
+        </div>
+
+        <form id="newPlaylistForm" class="space-y-4">
+          <div>
+            <label for="playlist_name" class="block text-sm font-medium text-gray-300 mb-2">
+              Playlist Name <span class="text-red-500">*</span>
+            </label>
+            <input type="text"
+                   id="playlist_name"
+                   name="playlist_name"
+                   required
+                   class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="e.g., 24/7 Lofi Mix">
+          </div>
+
+          <div>
+            <label for="playlist_description" class="block text-sm font-medium text-gray-300 mb-2">
+              Description (Optional)
+            </label>
+            <textarea
+                   id="playlist_description"
+                   name="playlist_description"
+                   rows="3"
+                   class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="Describe this playlist..."></textarea>
+          </div>
+
+          <div>
+            <label for="playback_mode" class="block text-sm font-medium text-gray-300 mb-2">
+              Playback Mode
+            </label>
+            <select id="playback_mode"
+                    name="playback_mode"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="sequential">Sequential (in order)</option>
+              <option value="shuffle">Shuffle (random)</option>
+              <option value="random">Random (truly random)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center space-x-3 pt-4">
+            <button type="button"
+                    onclick="closeNewPlaylistModal()"
+                    class="flex-1 px-4 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors">
+              Cancel
+            </button>
+            <button type="submit"
+                    class="flex-1 px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+              Create Playlist
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  document.getElementById('newPlaylistForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = {
+      channelUuid: channelUuid,
+      playlistName: document.getElementById('playlist_name').value,
+      description: document.getElementById('playlist_description').value || '',
+      playbackMode: document.getElementById('playback_mode').value
+    };
+
+    try {
+      const response = await fetch('/api/playlists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        showNotification("Playlist created successfully!", "success");
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        showNotification('Error: ' + (result.message || 'Failed to create playlist'), 'error');
+      }
+    } catch (error) {
+      console.error('Error creating playlist:', error);
+      showNotification('An error occurred while creating the playlist', 'error');
+    }
+  });
 }
 
 function closeNewPlaylistModal() {
-  document.getElementById('newPlaylistModal').classList.add('hidden');
+  const modal = document.getElementById('newPlaylistModal');
+  if (modal) modal.remove();
 }
 
 function editPlaylist(playlistUuid) {
@@ -314,8 +563,6 @@ function editPlaylist(playlistUuid) {
     .then(res => res.json())
     .then(result => {
       if (result.success && result.data) {
-        // Store UUID in form dataset
-        document.getElementById('editPlaylistForm').dataset.playlistUuid = playlistUuid;
         showEditPlaylistModal(result.data);
       } else {
         showNotification('Failed to load playlist data', 'error');
@@ -328,17 +575,99 @@ function editPlaylist(playlistUuid) {
 }
 
 function showEditPlaylistModal(playlist) {
-  // Populate form fields with playlist data
-  document.getElementById('edit_playlist_name').value = playlist.playlist_name;
-  document.getElementById('edit_playlist_description').value = playlist.description || '';
-  document.getElementById('edit_playback_mode').value = playlist.playback_mode;
+  const modalHtml = `
+    <div id="editPlaylistModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-lg bg-gray-800 border-gray-700">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-white">Edit Playlist</h3>
+          <button onclick="closeEditPlaylistModal()" class="text-gray-400 hover:text-white transition-colors">
+            <i class="ti ti-x text-2xl"></i>
+          </button>
+        </div>
 
-  // Show modal
-  document.getElementById('editPlaylistModal').classList.remove('hidden');
+        <form id="editPlaylistForm" class="space-y-4">
+          <div>
+            <label for="edit_playlist_name" class="block text-sm font-medium text-gray-300 mb-2">
+              Playlist Name <span class="text-red-500">*</span>
+            </label>
+            <input type="text"
+                   id="edit_playlist_name"
+                   value="${playlist.playlist_name}"
+                   required
+                   class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+
+          <div>
+            <label for="edit_playlist_description" class="block text-sm font-medium text-gray-300 mb-2">
+              Description (Optional)
+            </label>
+            <textarea
+                   id="edit_playlist_description"
+                   rows="3"
+                   class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">${playlist.description || ''}</textarea>
+          </div>
+
+          <div>
+            <label for="edit_playback_mode" class="block text-sm font-medium text-gray-300 mb-2">
+              Playback Mode
+            </label>
+            <select id="edit_playback_mode"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="sequential" ${playlist.playback_mode === 'sequential' ? 'selected' : ''}>Sequential (in order)</option>
+              <option value="shuffle" ${playlist.playback_mode === 'shuffle' ? 'selected' : ''}>Shuffle (random)</option>
+              <option value="random" ${playlist.playback_mode === 'random' ? 'selected' : ''}>Random (truly random)</option>
+            </select>
+          </div>
+
+          <div class="flex items-center space-x-3 pt-4">
+            <button type="button"
+                    onclick="closeEditPlaylistModal()"
+                    class="flex-1 px-4 py-2 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors">
+              Cancel
+            </button>
+            <button type="submit"
+                    class="flex-1 px-4 py-2 bg-blue-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  document.getElementById('editPlaylistForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = {
+      playlistName: document.getElementById('edit_playlist_name').value,
+      description: document.getElementById('edit_playlist_description').value || '',
+      playbackMode: document.getElementById('edit_playback_mode').value
+    };
+    try {
+      const response = await fetch(`/api/playlists/${playlist.playlist_uuid}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+      const result = await response.json();
+      if (response.ok) {
+        showNotification('Playlist updated successfully!', 'success');
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        showNotification('Error: ' + (result.message || 'Failed to update playlist'), 'error');
+      }
+    } catch (error) {
+      console.error('Error updating playlist:', error);
+      showNotification('An error occurred while updating the playlist', 'error');
+    }
+  });
 }
 
 function closeEditPlaylistModal() {
-  document.getElementById('editPlaylistModal').classList.add('hidden');
+  const modal = document.getElementById('editPlaylistModal');
+  if (modal) modal.remove();
 }
 
 function deletePlaylist(playlistUuid) {
@@ -565,7 +894,7 @@ function disconnectOAuthProcess(oauthUuid) {
       } else {
         showNotification('Error: ' + (result.message || 'Failed to disconnect OAuth'), 'error');
       }
-      
+
       // Reset button state
       if (disconnectBtn) {
         disconnectBtn.disabled = false;
@@ -946,19 +1275,19 @@ function switchTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(tab => {
     tab.classList.add('hidden');
   });
-  
+
   // Remove active state from all tab buttons
   document.querySelectorAll('.tab-button').forEach(btn => {
     btn.classList.remove('border-blue-500', 'text-blue-600');
     btn.classList.add('border-gray-300', 'text-gray-600');
   });
-  
+
   // Show selected tab content
   const selectedTab = document.getElementById(`content-${tabName}`);
   if (selectedTab) {
     selectedTab.classList.remove('hidden');
   }
-  
+
   // Add active state to selected tab button
   const selectedBtn = document.getElementById(`tab-${tabName}`);
   if (selectedBtn) {
@@ -1402,166 +1731,6 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
   // Set first tab as active
   switchTab('channel');
-
-  // Add form submit handler for new gallery
-  const newGalleryForm = document.getElementById('newGalleryForm');
-  if (newGalleryForm) {
-    newGalleryForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      const channelUuid = getChannelUuidFromUrl();
-      if (!channelUuid) return;
-
-      const formData = {
-        channelUuid: channelUuid,
-        galleryTitle: document.getElementById('gallery_title').value,
-        galleryDescription: document.getElementById('gallery_description').value || ''
-      };
-
-      try {
-        const response = await fetch('/api/galleries', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          showNotification("Gallery created successfully!", "success");
-          closeNewGalleryModal();
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          showNotification('Error: ' + (result.message || 'Failed to create gallery'), 'error');
-        }
-      } catch (error) {
-        console.error('Error creating gallery:', error);
-        showNotification('An error occurred while creating the gallery', 'error');
-      }
-    });
-  }
-
-  // Add form submit handler for edit gallery
-  const editGalleryForm = document.getElementById('editGalleryForm');
-  if (editGalleryForm) {
-    editGalleryForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      const galleryUuid = editGalleryForm.dataset.galleryUuid;
-      if (!galleryUuid) return;
-
-      const formData = {
-        gallery_title: document.getElementById('edit_gallery_title').value,
-        gallery_description: document.getElementById('edit_gallery_description').value || ''
-      };
-
-      try {
-        const response = await fetch(`/api/galleries/${galleryUuid}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          showNotification("Gallery updated successfully!", "success");
-          closeEditGalleryModal();
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          showNotification('Error: ' + (result.message || 'Failed to update gallery'), 'error');
-        }
-      } catch (error) {
-        console.error('Error updating gallery:', error);
-        showNotification('An error occurred while updating the gallery', 'error');
-      }
-    });
-  }
-
-  // Add form submit handler for new playlist
-  const newPlaylistForm = document.getElementById('newPlaylistForm');
-  if (newPlaylistForm) {
-    newPlaylistForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      const channelUuid = getChannelUuidFromUrl();
-      if (!channelUuid) return;
-
-      const formData = {
-        channelUuid: channelUuid,
-        playlistName: document.getElementById('playlist_name').value,
-        description: document.getElementById('playlist_description').value || '',
-        playbackMode: document.getElementById('playback_mode').value
-      };
-
-      try {
-        const response = await fetch('/api/playlists', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          showNotification("Playlist created successfully!", "success");
-          closeNewPlaylistModal();
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          showNotification('Error: ' + (result.message || 'Failed to create playlist'), 'error');
-        }
-      } catch (error) {
-        console.error('Error creating playlist:', error);
-        showNotification('An error occurred while creating the playlist', 'error');
-      }
-    });
-  }
-
-  // Add form submit handler for edit playlist
-  const editPlaylistForm = document.getElementById('editPlaylistForm');
-  if (editPlaylistForm) {
-    editPlaylistForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      const playlistUuid = editPlaylistForm.dataset.playlistUuid;
-      if (!playlistUuid) return;
-
-      const formData = {
-        playlistName: document.getElementById('edit_playlist_name').value,
-        description: document.getElementById('edit_playlist_description').value || '',
-        playbackMode: document.getElementById('edit_playback_mode').value
-      };
-
-      try {
-        const response = await fetch(`/api/playlists/${playlistUuid}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          showNotification('Playlist updated successfully!', 'success');
-          closeEditPlaylistModal();
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          showNotification('Error: ' + (result.message || 'Failed to update playlist'), 'error');
-        }
-      } catch (error) {
-        console.error('Error updating playlist:', error);
-        showNotification('An error occurred while updating the playlist', 'error');
-      }
-    });
-  }
 
   // Load stream keys when stream keys tab is active
   const streamKeysTab = document.getElementById('tab-streamkeys');

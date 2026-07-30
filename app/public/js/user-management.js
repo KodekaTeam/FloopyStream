@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function previewProfilePicture(event) {
   const file = event.target.files[0];
   const preview = document.getElementById('profilePreview');
-  
+
   if (file) {
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -84,7 +84,7 @@ function filterUsers() {
 
   filteredUsers = allUsers.filter(user => {
     // Search filter
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       user.username.toLowerCase().includes(searchTerm) ||
       user.email.toLowerCase().includes(searchTerm) ||
       (user.account_uuid && user.account_uuid.toLowerCase().includes(searchTerm));
@@ -93,7 +93,7 @@ function filterUsers() {
     const matchesRole = roleFilter === 'all' || user.account_role === roleFilter;
 
     // Status filter
-    const matchesStatus = statusFilter === 'all' || 
+    const matchesStatus = statusFilter === 'all' ||
       (statusFilter === 'active' && user.is_active === 1) ||
       (statusFilter === 'inactive' && user.is_active === 0);
 
@@ -109,13 +109,17 @@ function filterUsers() {
  */
 function renderUsersTable(users) {
   const tbody = document.getElementById('usersTableBody');
-  
+
   if (users.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="px-4 py-8 text-center text-gray-400">
-          <i class="ti ti-users-off text-3xl"></i>
-          <p class="mt-2">No users found</p>
+        <td colspan="6" class="px-6 py-20 text-center">
+          <div class="flex flex-col items-center gap-3">
+            <div class="w-16 h-16 bg-gray-800/50 rounded-2xl flex items-center justify-center border border-gray-700/50 mb-2">
+              <i class="ti ti-users-off text-3xl text-gray-600"></i>
+            </div>
+            <p class="text-gray-500 font-medium">No users found matching your filters</p>
+          </div>
         </td>
       </tr>
     `;
@@ -133,81 +137,82 @@ function renderUsersTable(users) {
     const isActive = user.is_active === 1;
     const isAdmin = user.account_role === 'admin';
     const createdDate = new Date(user.created_at).toLocaleDateString('en-GB');
-    
+
     // Video stats
     const videoCount = user.video_count || 0;
     const videoSize = user.total_video_size || 0;
-    const videoSizeMB = videoSize > 0 ? (videoSize / (1024 * 1024)).toFixed(2) : '0';
-    
+    const videoSizeMB = videoSize > 0 ? (videoSize / (1024 * 1024)).toFixed(1) : '0';
+
     // Broadcast/Stream stats
     const streamCount = user.broadcast_count || 0;
     const onlineStreams = user.online_streams || 0;
 
     return `
-      <tr class="hover:bg-gray-750 transition-colors">
-        <td class="px-4 py-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-              ${user.username.charAt(0).toUpperCase()}
+      <tr class="hover:bg-gray-700/30 transition-all duration-300 group">
+        <td class="px-6 py-5">
+          <div class="flex items-center gap-4">
+            <div class="w-11 h-11 bg-gradient-to-br ${isAdmin ? 'from-purple-600 to-pink-700' : 'from-blue-600 to-indigo-700'} rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg border-2 border-white/10 overflow-hidden">
+               ${user.profile_picture ? `<img src="${user.profile_picture}" class="w-full h-full object-cover">` : user.username.charAt(0).toUpperCase()}
             </div>
             <div class="min-w-0">
-              <p class="text-white font-medium truncate">${escapeHtml(user.username)}</p>
-              <p class="text-gray-400 text-xs truncate">ID: ${escapeHtml(user.account_uuid || user.account_id)}</p>
+              <p class="text-white font-bold truncate group-hover:text-blue-400 transition-colors">${escapeHtml(user.username)}</p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] text-gray-500 font-mono">ID: ${escapeHtml((user.account_uuid || user.account_id).toString().substring(0, 8))}...</span>
+              </div>
             </div>
           </div>
         </td>
-        <td class="px-4 py-4">
-          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${isAdmin ? 'bg-pink-500/20 text-pink-400' : 'bg-pink-500/20 text-pink-400'}">
-            ${isAdmin ? 'admin' : 'admin'}
+        <td class="px-6 py-5">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${isAdmin ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}">
+            <i class="ti ${isAdmin ? 'ti-shield' : 'ti-user'} text-xs"></i>
+            ${isAdmin ? 'Administrator' : 'Member'}
           </span>
         </td>
-        <td class="px-4 py-4">
+        <td class="px-6 py-5">
           <button
             onclick="toggleUserStatus(${user.account_id}, ${isActive})"
-            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${isActive ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'}"
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-300 ${isActive ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20 border border-green-500/20' : 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20'}"
           >
-            ${isActive ? 'active' : 'inactive'}
+            <div class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}"></div>
+            ${isActive ? 'Active' : 'Deactivated'}
           </button>
         </td>
-        <td class="px-4 py-4 hidden md:table-cell">
-          <div class="text-sm">
-            <div class="flex items-center gap-1 text-gray-300">
-              <i class="ti ti-video text-xs"></i>
-              <span>${videoCount} video</span>
+        <td class="px-6 py-5 hidden md:table-cell">
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-300">
+              <i class="ti ti-video text-blue-400"></i>
+              <span>${videoCount} Files <span class="text-gray-500 font-normal">(${videoSizeMB}MB)</span></span>
             </div>
-            ${videoCount > 0 ? `<div class="text-gray-500 text-xs mt-0.5">${videoSizeMB} MB</div>` : ''}
+            <div class="flex items-center gap-2 text-xs font-semibold text-gray-300">
+              <i class="ti ti-broadcast text-purple-400"></i>
+              <span>${streamCount} Broadcasts ${onlineStreams > 0 ? `<span class="bg-green-500/20 text-green-500 px-1 rounded text-[9px]">${onlineStreams} Live</span>` : ''}</span>
+            </div>
           </div>
         </td>
-        <td class="px-4 py-4 hidden md:table-cell">
-          <div class="text-sm">
-            <div class="flex items-center gap-1 text-gray-300">
-              <i class="ti ti-broadcast text-xs"></i>
-              <span>${streamCount} stream</span>
-            </div>
-            ${streamCount > 0 ? `<div class="text-green-400 text-xs mt-0.5">${onlineStreams} online</div>` : ''}
+        <td class="px-6 py-5 text-gray-400 text-xs font-medium hidden lg:table-cell">
+          <div class="flex items-center gap-2">
+            <i class="ti ti-calendar text-gray-600"></i>
+            ${createdDate}
           </div>
         </td>
-        <td class="px-4 py-4 text-gray-400 text-sm hidden lg:table-cell">
-          ${createdDate}
-        </td>
-        <td class="px-4 py-4">
+        <td class="px-6 py-5 text-right">
           <div class="flex items-center justify-end gap-2">
             <button
               onclick="openEditUserModal(${user.account_id})"
-              class="p-1.5 text-blue-400 hover:bg-blue-500/20 rounded transition-colors"
-              title="Edit user"
+              class="w-9 h-9 flex items-center justify-center bg-gray-800/50 hover:bg-blue-500/20 text-blue-400 border border-gray-700/50 rounded-xl transition-all"
+              title="Edit Permissions"
             >
-              <i class="ti ti-edit text-lg"></i>
+              <i class="ti ti-settings text-lg"></i>
             </button>
-            ${!isAdmin || user.account_id !== 1 ? `
+            ${(!isAdmin || user.account_id !== 1) ? `
             <button
               onclick="openDeleteUserModal(${user.account_id})"
-              class="p-1.5 text-red-400 hover:bg-red-500/20 rounded transition-colors"
-              title="Delete user"
+              class="w-9 h-9 flex items-center justify-center bg-gray-800/50 hover:bg-red-500/20 text-red-400 border border-gray-700/50 rounded-xl transition-all"
+              title="Delete Account"
             >
               <i class="ti ti-trash text-lg"></i>
             </button>
-            ` : ''}
+            ` : '<div class="w-9"></div>'}
           </div>
         </td>
       </tr>
@@ -224,7 +229,7 @@ function renderUsersTable(users) {
 function renderPagination(totalItems, totalPages) {
   const paginationButtons = document.getElementById('paginationButtons');
   const paginationInfo = document.getElementById('paginationInfo');
-  
+
   if (totalItems === 0) {
     hidePagination();
     return;
@@ -232,66 +237,58 @@ function renderPagination(totalItems, totalPages) {
 
   // Generate page range
   const pageRange = getPageRange(currentPage, totalPages);
-  
+
   let html = '';
-  
+
   // Previous button
   html += `
-    <a
-      href="#"
-      onclick="goToPage(${Math.max(1, currentPage - 1)}); return false;"
-      class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition ${currentPage === 1 ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}"
-      ${currentPage === 1 ? 'onclick="event.preventDefault()"' : ''}
+    <button
+      onclick="goToPage(${Math.max(1, currentPage - 1)})"
+      class="w-10 h-10 flex items-center justify-center bg-gray-800/50 hover:bg-gray-700 text-gray-400 hover:text-white rounded-xl border border-gray-700/50 transition-all ${currentPage === 1 ? 'opacity-30 cursor-not-allowed' : ''}"
+      ${currentPage === 1 ? 'disabled' : ''}
     >
       <i class="ti ti-chevron-left"></i>
-    </a>
+    </button>
   `;
 
   // Page numbers
   pageRange.forEach(page => {
     if (page === '...') {
-      html += `<span class="w-8 h-8 flex items-center justify-center text-gray-500">...</span>`;
-    } else if (page === currentPage) {
+      html += `<span class="w-10 h-10 flex items-center justify-center text-gray-600">...</span>`;
+    } else {
+      const isCurrent = page === currentPage;
       html += `
         <button
-          class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded font-semibold"
-          disabled
+          onclick="goToPage(${page})"
+          class="w-10 h-10 flex items-center justify-center rounded-xl border font-bold text-sm transition-all ${isCurrent
+            ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/20'
+            : 'bg-gray-800/50 border-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-700'}"
+          ${isCurrent ? 'disabled' : ''}
         >
           ${page}
         </button>
-      `;
-    } else {
-      html += `
-        <a
-          href="#"
-          onclick="goToPage(${page}); return false;"
-          class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded transition"
-        >
-          ${page}
-        </a>
       `;
     }
   });
 
   // Next button
   html += `
-    <a
-      href="#"
-      onclick="goToPage(${Math.min(totalPages, currentPage + 1)}); return false;"
-      class="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-700 rounded transition ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}"
-      ${currentPage === totalPages ? 'onclick="event.preventDefault()"' : ''}
+    <button
+      onclick="goToPage(${Math.min(totalPages, currentPage + 1)})"
+      class="w-10 h-10 flex items-center justify-center bg-gray-800/50 hover:bg-gray-700 text-gray-400 hover:text-white rounded-xl border border-gray-700/50 transition-all ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed' : ''}"
+      ${currentPage === totalPages ? 'disabled' : ''}
     >
       <i class="ti ti-chevron-right"></i>
-    </a>
+    </button>
   `;
 
   paginationButtons.innerHTML = html;
 
   // Update info text
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  paginationInfo.innerHTML = `Showing ${startIndex + 1}-${endIndex} of ${totalItems} users | Page ${currentPage} of ${totalPages}`;
-  
+  const startIdx = (currentPage - 1) * itemsPerPage + 1;
+  const endIdx = Math.min(currentPage * itemsPerPage, totalItems);
+  paginationInfo.innerHTML = `Showing <span class="text-white font-bold">${startIdx}-${endIdx}</span> of <span class="text-white font-bold">${totalItems}</span> members`;
+
   // Show pagination
   document.getElementById('paginationContainer').classList.remove('hidden');
 }
@@ -310,21 +307,21 @@ function getPageRange(current, total, range = 2) {
   const pages = [];
   const start = Math.max(1, current - range);
   const end = Math.min(total, current + range);
-  
+
   if (start > 1) {
     pages.push(1);
     if (start > 2) pages.push('...');
   }
-  
+
   for (let i = start; i <= end; i++) {
     pages.push(i);
   }
-  
+
   if (end < total) {
     if (end < total - 1) pages.push('...');
     pages.push(total);
   }
-  
+
   return pages;
 }
 
@@ -361,7 +358,7 @@ document.getElementById('createUserForm').addEventListener('submit', async funct
   e.preventDefault();
 
   const formData = new FormData(this);
-  
+
   // Create JSON data (profile picture akan di-handle terpisah di future update)
   const data = {
     username: formData.get('username'),
@@ -586,7 +583,7 @@ function escapeHtml(text) {
   // Handle null, undefined, and non-string values
   if (text == null) return '';
   if (typeof text !== 'string') text = String(text);
-  
+
   const map = {
     '&': '&amp;',
     '<': '&lt;',

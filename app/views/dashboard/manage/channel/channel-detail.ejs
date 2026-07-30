@@ -8,81 +8,69 @@
   <main class="flex-1 overflow-auto lg:ml-20 pt-[72px]">
     <div class="p-4 sm:p-6 lg:p-8">
     <!-- Header with Back Button -->
-    <div class="bg-gradient-to-br from-gray-800 to-gray-900 border-b border-gray-700 rounded-2xl shadow-lg mb-8">
-        <div class="p-4 sm:p-8">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full">
-                    <a href="/projects/detail/<%= channel.project_uuid %>" class="text-gray-400 hover:text-white transition-colors rounded-full p-2 bg-gray-700 hover:bg-gray-600 shadow flex-shrink-0 w-10 h-10 flex items-center justify-center">
-                        <i class="ti ti-arrow-left text-2xl"></i>
-                    </a>
-                    <div class="flex items-center gap-3 w-full">
-                        <!-- Platform Icon -->
-                        <div class="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br 
-                            <%= channel.channel_platform === 'youtube' ? 'from-red-500 to-red-600' : 
-                                channel.channel_platform === 'facebook' ? 'from-blue-500 to-blue-600' :
-                                channel.channel_platform === 'instagram' ? 'from-pink-500 to-pink-600' :
-                                channel.channel_platform === 'twitch' ? 'from-purple-500 to-purple-600' :
-                                channel.channel_platform === 'tiktok' ? 'from-pink-500 to-pink-600' :
-                                'from-gray-500 to-gray-600' %> 
-                            rounded-xl flex items-center justify-center shadow-lg border-2 border-white/10">
-                            <i class="ti 
-                                <%= channel.channel_platform === 'youtube' ? 'ti-brand-youtube' : 
-                                    channel.channel_platform === 'facebook' ? 'ti-brand-facebook' :
-                                    channel.channel_platform === 'instagram' ? 'ti-brand-instagram' :
-                                    channel.channel_platform === 'twitch' ? 'ti-brand-twitch' :
-                                    channel.channel_platform === 'tiktok' ? 'ti-brand-tiktok' :
-                                    'ti-broadcast' %> 
-                                text-white text-2xl sm:text-3xl"></i>
+    <div class="mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div class="flex items-center gap-5">
+                <a href="/projects/detail/<%= channel.project_uuid %>" class="w-11 h-11 flex items-center justify-center bg-gray-800/50 hover:bg-gray-800 border border-gray-700/50 text-gray-400 hover:text-white rounded-xl transition-all duration-300 shadow-sm">
+                    <i class="ti ti-arrow-left text-xl"></i>
+                </a>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-3 mb-1">
+                        <!-- Platform Icon (Minimalist) -->
+                        <div class="w-10 h-10 rounded-xl bg-gray-900 border border-gray-700/50 flex items-center justify-center flex-shrink-0">
+                            <i class="ti
+                                <%= channel.channel_platform === 'youtube' ? 'ti-brand-youtube text-red-500' :
+                                    channel.channel_platform === 'facebook' ? 'ti-brand-facebook text-blue-500' :
+                                    channel.channel_platform === 'instagram' ? 'ti-brand-instagram text-pink-500' :
+                                    channel.channel_platform === 'twitch' ? 'ti-brand-twitch text-purple-500' :
+                                    channel.channel_platform === 'tiktok' ? 'ti-brand-tiktok text-white' :
+                                    'ti-broadcast text-gray-400' %>
+                                text-xl"></i>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <h1 class="text-lg sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2 truncate">
-                                <span class="truncate"><%= channel.channel_name %></span>
-                                <% if (channel.is_verified) { %>
-                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-600 text-white shadow">
-                                        <i class="ti ti-check mr-1"></i> Verified
-                                    </span>
-                                <% } %>
-                            </h1>
-                            <span class="inline-block mt-2 px-3 py-1 text-xs font-semibold rounded-full shadow
-                                <% const platformName = channel.channel_platform || 'unknown'; %>
-                                <%= platformName === 'youtube' ? 'bg-red-900/60 text-red-300 border border-red-700' : 
-                                    platformName === 'facebook' ? 'bg-blue-900/60 text-blue-300 border border-blue-700' :
-                                    platformName === 'twitch' ? 'bg-purple-900/60 text-purple-300 border border-purple-700' :
-                                    platformName === 'tiktok' ? 'bg-pink-900/60 text-pink-300 border border-pink-700' :
-                                    'bg-gray-700 text-gray-300 border border-gray-600' %>">
-                                <%= platformName.charAt(0).toUpperCase() + platformName.slice(1) %>
-                            </span>
-                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white truncate leading-tight"><%= channel.channel_name %></h1>
+
+                        <% if (channel.is_verified) { %>
+                            <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-900/60 border border-gray-700/50">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Verified</span>
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Platform:</span>
+                        <span class="text-sm font-semibold text-gray-400 capitalize"><%= channel.channel_platform %></span>
                     </div>
                 </div>
-                <div class="flex items-center mt-3 sm:mt-0 sm:ml-4 w-full sm:w-auto">
-                    <button onclick="editChannel()" class="inline-flex justify-center items-center px-4 py-2 border border-gray-600 rounded-lg text-sm font-semibold text-gray-100 bg-gradient-to-br from-gray-700 to-gray-800 hover:bg-gray-600 hover:text-blue-400 transition-colors shadow w-full sm:w-40">
-                        <i class="ti ti-edit mr-2"></i>
-                        Edit Channel
-                    </button>
-                </div>
             </div>
-            <!-- Channel Stats -->
-            <div class="flex flex-wrap items-center gap-3 sm:gap-6 mt-4 sm:mt-6">
-                <div class="flex items-center text-sm text-gray-300 bg-gray-800 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow">
-                    <i class="ti ti-folder mr-2 text-blue-400"></i>
-                    <span><%= galleries.length %> Gallery<%= galleries.length !== 1 ? 'ies' : '' %></span>
-                </div>
-                <div class="flex items-center text-sm text-gray-300 bg-gray-800 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow">
-                    <i class="ti ti-playlist mr-2 text-green-400"></i>
-                    <span><%= playlists.length %> Playlist<%= playlists.length !== 1 ? 's' : '' %></span>
-                </div>
-                <div class="flex items-center text-sm text-gray-300 bg-gray-800 rounded-lg px-3 py-1 sm:px-4 sm:py-2 shadow">
-                    <i class="ti ti-calendar mr-2 text-yellow-400"></i>
-                    <span>Created <%= new Date(channel.created_at).toLocaleDateString() %></span>
-                </div>
-                <% if (oauth && oauth.length > 0) { %>
-                    <div class="flex items-center bg-green-100 px-3 py-1 sm:px-4 sm:py-2 rounded-lg text-xs font-semibold text-green-800 shadow">
-                        <i class="ti ti-check mr-1"></i>
-                        OAuth Connected
-                    </div>
-                <% } %>
+
+            <div class="flex items-center gap-3">
+                <button onclick="editChannel()" class="flex-1 sm:flex-none inline-flex items-center justify-center px-5 py-2.5 border border-gray-700/50 rounded-xl text-sm font-semibold text-gray-300 bg-gray-800/40 hover:bg-gray-800 hover:text-white transition-all duration-300">
+                    <i class="ti ti-edit mr-2"></i>
+                    <span>Edit Channel</span>
+                </button>
             </div>
+        </div>
+
+        <!-- Channel Overview Stats -->
+        <div class="flex flex-wrap items-center gap-6 mt-8 pt-6 border-t border-gray-800/50">
+            <div class="flex items-center gap-2.5 text-sm text-gray-400 font-medium">
+                <div class="w-2 h-2 rounded-full bg-blue-500/50"></div>
+                <span><%= galleries.length %> Gallery<%= galleries.length !== 1 ? 'ies' : '' %></span>
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-gray-400 font-medium">
+                <div class="w-2 h-2 rounded-full bg-green-500/50"></div>
+                <span><%= playlists.length %> Playlist<%= playlists.length !== 1 ? 's' : '' %></span>
+            </div>
+            <div class="flex items-center gap-2.5 text-sm text-gray-400 font-medium">
+                <div class="w-2 h-2 rounded-full bg-purple-500/50"></div>
+                <span>Connected on <%= new Date(channel.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
+            </div>
+            <% if (oauth && oauth.length > 0) { %>
+                <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-900/20 border border-green-800/30">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    <span class="text-[10px] font-bold text-green-500/80 uppercase tracking-widest">OAuth Active</span>
+                </div>
+            <% } %>
         </div>
     </div>
 
@@ -213,53 +201,47 @@
     <% } %>
 
     <!-- Tabs -->
-    <div class="w-full px-0 sm:px-0 lg:px-0 mt-6">
-        <div class="border-b border-gray-700">
-            <nav class="-mb-px flex space-x-6 overflow-x-auto scrollbar-hide pb-1" style="scroll-behavior: smooth;">
+    <div class="w-full mt-10">
+        <div class="border-b border-gray-800/50">
+            <nav class="-mb-px flex space-x-8 overflow-x-auto scrollbar-hide" style="scroll-behavior: smooth;">
                 <% if (channel.channel_platform == 'youtube') { %>
                 <button onclick="switchTab('channel')"
                         id="tab-channel"
-                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-blue-500 text-blue-400 hover:text-blue-300">
-                    <i class="ti ti-chart-bar mr-1 sm:mr-2 text-sm sm:text-base"></i>
-                    <span class="hidden sm:inline">Channel</span>
-                    <span class="sm:hidden">Channel</span>
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-bold text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2 text-gray-500 hover:text-gray-400">
+                    <i class="ti ti-chart-bar text-base"></i>
+                    <span>Channel</span>
                 </button>
                 <% } %>
                 <button onclick="switchTab('galleries')"
                         id="tab-galleries"
-                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-600">
-                    <i class="ti ti-folder mr-1 sm:mr-2 text-sm sm:text-base"></i>
-                    <span class="hidden sm:inline">Galleries</span>
-                    <span class="sm:hidden">Gallery</span>
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-bold text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2 text-gray-500 hover:text-gray-400">
+                    <i class="ti ti-folder text-base"></i>
+                    <span>Galleries</span>
                 </button>
                 <button onclick="switchTab('playlists')"
                         id="tab-playlists"
-                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-600">
-                    <i class="ti ti-playlist mr-1 sm:mr-2 text-sm sm:text-base"></i>
-                    <span class="hidden sm:inline">Playlists</span>
-                    <span class="sm:hidden">Playists</span>
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-bold text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2 text-gray-500 hover:text-gray-400">
+                    <i class="ti ti-playlist text-base"></i>
+                    <span>Playlists</span>
                 </button>
                 <% if (channel.channel_platform == 'youtube') { %>
                 <button onclick="switchTab('streamkeys')"
                         id="tab-streamkeys"
-                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-600">
-                    <i class="ti ti-key mr-1 sm:mr-2 text-sm sm:text-base"></i>
-                    <span class="hidden sm:inline">Stream Keys</span>
-                    <span class="sm:hidden">StreamKeys</span>
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-bold text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2 text-gray-500 hover:text-gray-400">
+                    <i class="ti ti-key text-base"></i>
+                    <span>Stream Keys</span>
                 </button>
                 <button onclick="switchTab('upload-templates')"
                         id="tab-upload-templates"
-                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-600">
-                    <i class="ti ti-template mr-1 sm:mr-2 text-sm sm:text-base"></i>
-                    <span class="hidden sm:inline">Upload Templates</span>
-                    <span class="sm:hidden">Templates</span>
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-bold text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2 text-gray-500 hover:text-gray-400">
+                    <i class="ti ti-template text-base"></i>
+                    <span>Templates</span>
                 </button>
                 <button onclick="switchTab('oauth')"
                         id="tab-oauth"
-                        class="tab-button whitespace-nowrap py-3 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-sm transition-all duration-200 flex-shrink-0 border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-600">
-                    <i class="ti ti-plug mr-1 sm:mr-2 text-sm sm:text-base"></i>
-                    <span class="hidden sm:inline">OAuth Settings</span>
-                    <span class="sm:hidden">OAuth</span>
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-bold text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2 text-gray-500 hover:text-gray-400">
+                    <i class="ti ti-plug text-base"></i>
+                    <span>OAuth</span>
                 </button>
                 <% } %>
             </nav>
@@ -273,7 +255,7 @@
                 <!--  Youtube Analytics  -->
                 <%- include('partials/tabs/channel-tab') %>
             </div>
-            
+
             <!-- Galleries Tab -->
             <div id="content-galleries" class="tab-content">
                 <!-- Galleries Content -->
@@ -317,20 +299,23 @@ function switchTab(tabName) {
 
     // Remove active state from all tabs
     document.querySelectorAll('.tab-button').forEach(button => {
-        button.classList.remove('border-blue-500', 'text-blue-400', 'hover:text-blue-300');
-        button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-400', 'hover:border-gray-600');
+        button.classList.remove('border-blue-500', 'text-blue-400');
+        button.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-400');
     });
 
     // Show selected tab content
-    document.getElementById('content-' + tabName).classList.remove('hidden');
+    const content = document.getElementById('content-' + tabName);
+    if (content) content.classList.remove('hidden');
 
     // Add active state to selected tab
     const activeTab = document.getElementById('tab-' + tabName);
-    activeTab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-400', 'hover:border-gray-600');
-    activeTab.classList.add('border-blue-500', 'text-blue-400', 'hover:text-blue-300');
+    if (activeTab) {
+        activeTab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-400');
+        activeTab.classList.add('border-blue-500', 'text-blue-400');
+    }
 
     // Auto-scroll active tab into view on mobile
-    if (window.innerWidth < 768) {
+    if (window.innerWidth < 768 && activeTab) {
         activeTab.scrollIntoView({
             behavior: 'smooth',
             block: 'nearest',
@@ -344,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set default active tab (channel)
     // switchTab('channel');
     const platform = '<%= channel.channel_platform %>';
-    
+
     // Use setTimeout to ensure all elements are fully rendered
     setTimeout(() => {
         if (platform === 'youtube') {
@@ -389,14 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Channel Detail Functions -->
 <script src="/js/channel-detail.js"></script>
 
-<%- include('modals/edit-channel', {channel: channel}) %>
-<%- include('modals/add-gallery') %>
-<%- include('modals/edit-gallery') %>
-<%- include('modals/add-playlist') %>
-<%- include('modals/edit-playlist') %>
-
     </div>
   </main>
 </div>
-
 

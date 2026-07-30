@@ -27,7 +27,7 @@
     </div>
     <button
       onclick="refreshYouTubeData()"
-      class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow"
+      class="inline-flex items-center px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg shadow-red-600/20"
     >
       <i class="ti ti-refresh mr-2"></i>
       Refresh Data
@@ -37,59 +37,49 @@
   <% if (youtubeData) { %>
   <!-- Channel Header Card -->
   <div
-    class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-4 sm:p-6 border border-gray-700 shadow-lg"
+    class="bg-gray-800/40 rounded-2xl p-6 border border-gray-700/50 flex flex-col sm:flex-row sm:items-center gap-6"
   >
-    <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
-      <img
-        src="<%= youtubeData.thumbnailUrl %>"
-        alt="Channel Thumbnail"
-        class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-red-500 shadow-lg mx-auto sm:mx-0"
-      />
-      <div class="flex-1 min-w-0 text-center sm:text-left">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
-          <span
-            class="text-xl sm:text-2xl font-bold text-white flex items-center justify-center sm:justify-start gap-2"
+    <img
+      src="<%= youtubeData.thumbnailUrl %>"
+      alt="Channel Thumbnail"
+      class="w-20 h-20 rounded-2xl border-2 border-gray-700/50 shadow-sm mx-auto sm:mx-0 object-cover"
+    />
+    <div class="flex-1 min-w-0 text-center sm:text-left">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+        <h3 class="text-xl sm:text-2xl font-bold text-white truncate">
+          <a
+            href="https://www.youtube.com/channel/<%= youtubeData.channelId %>"
+            target="_blank"
+            class="hover:text-red-400 transition-colors"
           >
-            <a
-              href="https://www.youtube.com/channel/<%= youtubeData.channelId %>"
-              target="_blank"
-              class="hover:text-red-400 transition-colors truncate"
-            >
-              <%= youtubeData.title %>
-              <i
-                class="ti ti-external-link text-sm sm:text-base text-gray-400"
-              ></i>
-            </a>
-          </span>
-          <% if (youtubeData.isVerified) { %>
-          <span
-            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-900/50 text-blue-300 border border-blue-700 whitespace-nowrap"
-            title="Verified Channel"
-          >
-            <i class="ti ti-badge-check-filled mr-1"></i>Verified
-          </span>
-          <% } %>
-        </div>
+            <%= youtubeData.title %>
+            <i class="ti ti-external-link text-sm text-gray-500 ml-1"></i>
+          </a>
+        </h3>
+        <% if (youtubeData.isVerified) { %>
         <div
-          class="flex flex-wrap justify-center sm:justify-start items-center gap-2 sm:gap-4"
+          class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-900/20 border border-blue-800/30 self-center sm:self-auto"
         >
+          <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
           <span
-            class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-red-900/50 text-red-300 border border-red-700"
+            class="text-[10px] font-bold text-blue-400 uppercase tracking-widest"
+            >Verified</span
           >
-            <i class="ti ti-user mr-1 sm:mr-2 hidden sm:inline"></i>
-            <%= youtubeData.subscriberCount %> Subs
-          </span>
+        </div>
+        <% } %>
+      </div>
+      <div
+        class="flex flex-wrap justify-center sm:justify-start items-center gap-4"
+      >
+        <div class="flex items-center gap-2 text-sm text-gray-400 font-medium">
+          <i class="ti ti-users text-red-500/70"></i>
+          <span><%= youtubeData.subscriberCount %> Subscribers</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-gray-400 font-medium">
+          <i class="ti ti-coin text-green-500/70"></i>
           <span
-            class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-gray-800 text-gray-300 border border-gray-700 hidden"
+            class="<%= youtubeData.monetizationStatus === 'MONETIZATION_STATUS_ENABLED' ? 'text-green-400' : 'text-yellow-400' %>"
           >
-            <i class="ti ti-calendar mr-1 sm:mr-2"></i>
-            <%= new Date(youtubeData.publishedAt).toLocaleDateString() %>
-          </span>
-          <span
-            class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium <%= youtubeData.monetizationStatus === 'MONETIZATION_STATUS_ENABLED' ? 'bg-green-900/50 text-green-300 border border-green-700' : 'bg-yellow-900/50 text-yellow-300 border border-yellow-700' %>"
-            title="<%= youtubeData.monetizationStatus %>"
-          >
-            <i class="ti ti-coin mr-1 sm:mr-2"></i>
             <%= youtubeData.monetizationStatus === 'MONETIZATION_STATUS_ENABLED'
             ? 'Monetized' : 'Not Monetized' %>
           </span>
@@ -99,91 +89,93 @@
   </div>
 
   <!-- Stats Grid -->
-  <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
     <!-- Subscribers Card -->
     <div
-      class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow"
+      class="group bg-gray-800/40 hover:bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 transition-all duration-300"
     >
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-400 uppercase tracking-wide">
-            Subscribers
-          </p>
-          <p class="text-2xl font-bold text-white mt-1">
-            <%= youtubeData.subscriberCount %>
-          </p>
-        </div>
-        <div
-          class="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center hidden sm:flex"
+      <div class="flex flex-col gap-1">
+        <span
+          class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+          >Subscribers</span
         >
-          <i class="ti ti-user text-red-400 text-xl"></i>
+        <div class="flex items-center justify-between mt-1">
+          <span class="text-2xl font-bold text-white"
+            ><%= youtubeData.subscriberCount %></span
+          >
+          <div
+            class="w-10 h-10 rounded-xl bg-gray-900 border border-gray-700/50 flex items-center justify-center text-red-500 transition-all group-hover:border-red-500/30"
+          >
+            <i class="ti ti-users text-xl"></i>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Videos Card -->
     <div
-      class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow"
+      class="group bg-gray-800/40 hover:bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 transition-all duration-300"
     >
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-400 uppercase tracking-wide">
-            Total Videos
-          </p>
-          <p class="text-2xl font-bold text-white mt-1">
-            <%= youtubeData.videoCount %>
-          </p>
-        </div>
-        <div
-          class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center hidden sm:flex"
+      <div class="flex flex-col gap-1">
+        <span
+          class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+          >Videos</span
         >
-          <i class="ti ti-video text-blue-400 text-xl"></i>
+        <div class="flex items-center justify-between mt-1">
+          <span class="text-2xl font-bold text-white"
+            ><%= youtubeData.videoCount %></span
+          >
+          <div
+            class="w-10 h-10 rounded-xl bg-gray-900 border border-gray-700/50 flex items-center justify-center text-blue-500 transition-all group-hover:border-blue-500/30"
+          >
+            <i class="ti ti-video text-xl"></i>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Views Card -->
     <div
-      class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow"
+      class="group bg-gray-800/40 hover:bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 transition-all duration-300"
     >
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-400 uppercase tracking-wide">
-            Total Views
-          </p>
-          <p class="text-2xl font-bold text-white mt-1">
-            <span class="text-gray-100"
-              ><%= youtubeData.viewCount.toLocaleString('id-ID') %></span
-            >
-          </p>
-        </div>
-        <div
-          class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center hidden sm:flex"
+      <div class="flex flex-col gap-1">
+        <span
+          class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+          >Total Views</span
         >
-          <i class="ti ti-eye text-green-400 text-xl"></i>
+        <div class="flex items-center justify-between mt-1">
+          <span class="text-2xl font-bold text-white"
+            ><%= youtubeData.viewCount.toLocaleString('id-ID') %></span
+          >
+          <div
+            class="w-10 h-10 rounded-xl bg-gray-900 border border-gray-700/50 flex items-center justify-center text-green-500 transition-all group-hover:border-green-500/30"
+          >
+            <i class="ti ti-eye text-xl"></i>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Channel Age Card -->
     <div
-      class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 shadow-lg hover:shadow-xl transition-shadow"
+      class="group bg-gray-800/40 hover:bg-gray-800/60 border border-gray-700/50 rounded-2xl p-6 transition-all duration-300"
     >
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-gray-400 uppercase tracking-wide">
-            Channel Age
-          </p>
-          <p class="text-lg font-bold text-white mt-1">
-            <% const channelAge = Math.floor((new Date() - new
-            Date(youtubeData.publishedAt)) / (1000 * 60 * 60 * 24)); %> <%=
-            Math.floor(channelAge / 365) %> years
-          </p>
-        </div>
-        <div
-          class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center hidden sm:flex"
+      <div class="flex flex-col gap-1">
+        <span
+          class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+          >Channel Age</span
         >
-          <i class="ti ti-calendar text-purple-400 text-xl"></i>
+        <div class="flex items-center justify-between mt-1">
+          <% const channelAge = Math.floor((new Date() - new
+          Date(youtubeData.publishedAt)) / (1000 * 60 * 60 * 24)); %>
+          <span class="text-2xl font-bold text-white"
+            ><%= Math.floor(channelAge / 365) %>y</span
+          >
+          <div
+            class="w-10 h-10 rounded-xl bg-gray-900 border border-gray-700/50 flex items-center justify-center text-purple-500 transition-all group-hover:border-purple-500/30"
+          >
+            <i class="ti ti-calendar text-xl"></i>
+          </div>
         </div>
       </div>
     </div>
@@ -192,105 +184,122 @@
   <!-- Channel Details Grid -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Channel Information -->
-    <div
-      class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 shadow-lg"
-    >
-      <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
-        <i class="ti ti-info-circle mr-2 text-blue-400"></i>
+    <div class="bg-gray-800/40 rounded-2xl p-6 border border-gray-700/50">
+      <h3
+        class="text-sm font-bold text-white mb-6 uppercase tracking-widest flex items-center gap-3"
+      >
+        <div
+          class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center"
+        >
+          <i class="ti ti-info-circle text-blue-500"></i>
+        </div>
         Channel Information
       </h3>
       <div class="space-y-4">
         <div
-          class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-700"
+          class="flex items-center justify-between pb-4 border-b border-gray-700/30"
         >
-          <span class="text-gray-400 text-sm sm:text-base">Channel Name</span>
-          <span class="text-white font-medium mt-1 sm:mt-0"
+          <span
+            class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+            >Channel Name</span
+          >
+          <span class="text-sm font-semibold text-gray-200 text-right"
             ><%= youtubeData.title %></span
           >
         </div>
         <div
-          class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-700"
+          class="flex items-center justify-between pb-4 border-b border-gray-700/30"
         >
-          <span class="text-gray-400 text-sm sm:text-base">Channel ID</span>
-          <span class="text-white font-medium font-mono text-sm mt-1 sm:mt-0"
+          <span
+            class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+            >Channel ID</span
+          >
+          <span class="text-sm font-semibold text-gray-200 font-mono text-right"
             ><%= youtubeData.channelId %></span
           >
         </div>
         <div
-          class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-700"
+          class="flex items-center justify-between pb-4 border-b border-gray-700/30"
         >
-          <span class="text-gray-400 text-sm sm:text-base">Published Date</span>
-          <span class="text-white font-medium mt-1 sm:mt-0"
-            ><%= new Date(youtubeData.publishedAt).toLocaleDateString() %></span
+          <span
+            class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+            >Published</span
+          >
+          <span class="text-sm font-semibold text-gray-200 text-right"
+            ><%= new Date(youtubeData.publishedAt).toLocaleDateString(undefined,
+            { year: 'numeric', month: 'short', day: 'numeric' }) %></span
           >
         </div>
         <% if (youtubeData.country) { %>
         <div
-          class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-700"
+          class="flex items-center justify-between pb-4 border-b border-gray-700/30"
         >
-          <span class="text-gray-400 text-sm sm:text-base">Country</span>
-          <span class="text-white font-medium mt-1 sm:mt-0"
+          <span
+            class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+            >Country</span
+          >
+          <span class="text-sm font-semibold text-gray-200 text-right"
             ><%= youtubeData.country %></span
           >
         </div>
-        <% } %> <% if (youtubeData.customUrl) { %>
-        <div
-          class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-700"
-        >
-          <span class="text-gray-400 text-sm sm:text-base">Custom URL</span>
-          <a
-            href="https://www.youtube.com/<%= youtubeData.customUrl %>"
-            target="_blank"
-            class="text-blue-400 hover:text-blue-300 font-medium mt-1 sm:mt-0"
-          >
-            <%= youtubeData.customUrl %>
-            <i class="ti ti-external-link ml-1"></i>
-          </a>
-        </div>
         <% } %>
         <div
-          class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-700"
+          class="flex items-center justify-between pb-4 border-b border-gray-700/30"
         >
-          <span class="text-gray-400 text-sm sm:text-base"
-            >Verification Status</span
+          <span
+            class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+            >Verified Status</span
           >
-          <span class="mt-1 sm:mt-0">
-            <% if (youtubeData.isVerified) { %>
+          <% if (youtubeData.isVerified) { %>
+          <div
+            class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-900/20 border border-blue-800/30"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
             <span
-              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-900/50 text-blue-300 border border-blue-700"
+              class="text-[10px] font-bold text-blue-400 uppercase tracking-widest"
+              >Verified</span
             >
-              <i class="ti ti-badge-check-filled mr-1"></i>Verified
-            </span>
-            <% } else { %>
+          </div>
+          <% } else { %>
+          <div
+            class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-900/60 border border-gray-700/50"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
             <span
-              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-700/50 text-gray-300 border border-gray-600"
+              class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+              >Not Verified</span
             >
-              <i class="ti ti-x mr-1"></i>Not Verified
-            </span>
-            <% } %>
-          </span>
+          </div>
+          <% } %>
         </div>
         <% if (youtubeData.monetizationStatus) { %>
-        <div
-          class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2"
-        >
-          <span class="text-gray-400 text-sm sm:text-base">Monetization</span>
-          <span class="mt-1 sm:mt-0">
-            <% if (youtubeData.monetizationStatus ===
-            'MONETIZATION_STATUS_ENABLED') { %>
+        <div class="flex items-center justify-between">
+          <span
+            class="text-[10px] font-bold text-gray-500 uppercase tracking-widest"
+            >Monetization</span
+          >
+          <% if (youtubeData.monetizationStatus ===
+          'MONETIZATION_STATUS_ENABLED') { %>
+          <div
+            class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-900/20 border border-green-800/30"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
             <span
-              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-900/50 text-green-300 border border-green-700"
+              class="text-[10px] font-bold text-green-500 uppercase tracking-widest"
+              >Enabled</span
             >
-              <i class="ti ti-coin mr-1"></i>Enabled
-            </span>
-            <% } else { %>
+          </div>
+          <% } else { %>
+          <div
+            class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-900/20 border border-yellow-800/30"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
             <span
-              class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-900/50 text-yellow-300 border border-yellow-700"
+              class="text-[10px] font-bold text-yellow-500 uppercase tracking-widest"
+              >Disabled</span
             >
-              <i class="ti ti-alert-circle mr-1"></i>Not Enabled
-            </span>
-            <% } %>
-          </span>
+          </div>
+          <% } %>
         </div>
         <% } %>
       </div>
@@ -298,15 +307,19 @@
 
     <!-- Channel Description -->
     <% if (youtubeData.description) { %>
-    <div
-      class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 shadow-lg"
-    >
-      <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
-        <i class="ti ti-file-description mr-2 text-green-400"></i>
+    <div class="bg-gray-800/40 rounded-2xl p-6 border border-gray-700/50">
+      <h3
+        class="text-sm font-bold text-white mb-6 uppercase tracking-widest flex items-center gap-3"
+      >
+        <div
+          class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center"
+        >
+          <i class="ti ti-file-description text-green-500"></i>
+        </div>
         Channel Description
       </h3>
       <div
-        class="text-gray-300 text-sm leading-relaxed min-h-70 max-h-80 overflow-y-auto whitespace-pre-line break-words"
+        class="text-gray-400 text-sm leading-relaxed max-h-[300px] overflow-y-auto whitespace-pre-line break-words custom-scrollbar pr-2"
       >
         <%- youtubeData.description.replace(/\n/g, '<br />') %>
       </div>
@@ -316,19 +329,21 @@
 
   <% } else { %>
   <!-- No Data State -->
-  <div class="text-center py-12">
-    <div class="flex justify-center mb-4">
-      <i class="ti ti-brand-youtube text-red-400 text-5xl"></i>
+  <div
+    class="bg-gray-800/40 rounded-3xl p-12 border border-gray-700/50 text-center"
+  >
+    <div
+      class="w-20 h-20 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-6"
+    >
+      <i class="ti ti-brand-youtube text-red-500 text-4xl"></i>
     </div>
-    <h3 class="text-lg font-semibold text-white mb-2">
-      No YouTube Data Available
-    </h3>
-    <p class="text-gray-400 mb-6">
+    <h3 class="text-xl font-bold text-white mb-2">No YouTube Data Available</h3>
+    <p class="text-gray-400 mb-8 max-w-sm mx-auto">
       Unable to fetch channel analytics. Please check your OAuth connection.
     </p>
     <button
       onclick="refreshYouTubeData()"
-      class="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow"
+      class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-red-600/20"
     >
       <i class="ti ti-refresh mr-2"></i>
       Refresh Data
@@ -339,17 +354,21 @@
 
 <% } else { %>
 <!-- OAuth Not Connected State -->
-<div class="text-center py-12">
-  <div class="flex justify-center mb-4">
-    <i class="ti ti-plug text-gray-400 text-5xl"></i>
+<div
+  class="bg-gray-800/40 rounded-3xl p-12 border border-gray-700/50 text-center"
+>
+  <div
+    class="w-20 h-20 rounded-2xl bg-gray-700/30 flex items-center justify-center mx-auto mb-6"
+  >
+    <i class="ti ti-plug text-gray-500 text-4xl"></i>
   </div>
-  <h3 class="text-lg font-semibold text-white mb-2">OAuth Not Connected</h3>
-  <p class="text-gray-400 mb-6">
+  <h3 class="text-xl font-bold text-white mb-2">OAuth Not Connected</h3>
+  <p class="text-gray-400 mb-8 max-w-sm mx-auto">
     Connect your YouTube account to view channel analytics and manage content.
   </p>
   <button
     onclick="switchTab('oauth')"
-    class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow"
+    class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-blue-600/20"
   >
     <i class="ti ti-settings mr-2"></i>
     Go to OAuth Settings
